@@ -20,12 +20,12 @@
   ``` bash
   npm i -g @nestjs/cli
   ```
-- Create a .env
-- Enter data from .env.example
-- Modify the values
-- Create your database using postgres
-- Inside `.env` in the variable `DATABASE_URL` change the environments for your database
-- Run to startup the husky for pre commits and pre pushs
+- Crie um arquivo .env
+- Insira os dados do .env.example
+- Modifique os valores
+- Crie seu banco de dados usando o postgres
+- Dentro do arquivo .env, na variável DATABASE_URL, altere os ambientes para o seu banco de dados
+- Execute para iniciar o husky para pré commits e pré pushs
   ```
   npx husky install
   ```
@@ -33,27 +33,27 @@
 <hr>
 
 
-### How to run the project
+### Como executar o projeto
 
-- Install dependencies:
+- Instale as dependências:
 
 ```bash
 npm install
 ```
 
-- Run database migrations
+- Execute as migrações do banco de dados
 
 ```bash
 npx prisma migrate dev
 ```
 
-- Run database seeds
+- Execute os seeds do banco de dados
 
 ```bash
 npx prisma db seed
 ```
 
-- Start the application
+- Inicie a aplicação
 
 ```bash
 npm run start:dev
@@ -67,61 +67,59 @@ npm start
 
 <hr>
 
-#### Seed base account
+#### Seed da conta base de administrador
 
-Account created by prisma seed
+Conta criada pelo seed do prisma
 
-<b>Email:</b> admin@gmail.com
+<b>E-mail:</b> admin@gmail.com
 
-<b>Password:</b> admin
+<b>Senha:</b> admin
 
 <hr>
 
 ### Swagger
 
-There are all documentation of the end points
+Aqui está toda a documentação dos endpoints
 
     localhost:PORT/api/docs/#
 
-### Environment Variables
+### Variaveis de ambiente
 
-JWT Configuration
+Configuração JWT
 
-- AT_SECRET: Secret used to generate and verify access tokens.
+- AT_SECRET: Segredo usado para gerar e verificar tokens de acesso.
 
-- RT_SECRET: Secret used to generate and verify refresh tokens.
+-RT_SECRET: Segredo usado para gerar e verificar tokens de atualização.
+ 
+- TK_EMAIL_SECRET: Segredo usado para gerar e verificar tokens de email.
 
-- TK_EMAIL_SECRET: Secret used to generate and verify email tokens.
+- TK_EMAIL_LIFETIME: Tempo de vida dos tokens de email.
 
-- TK_EMAIL_LIFETIME: Lifetime of email tokens.
+expresso em segundos ou uma string descrevendo um intervalo de tempo zeit/ms. Ex: 60, "2 dias", "10h", "7d"
 
-  expressed in seconds or a string describing a time span zeit/ms. Eg: 60, "2 days", "10h", "7d"
+- JWT_ACCESS_LIFETIME: Tempo de vida dos tokens de acesso JWT.
 
-- JWT_ACCESS_LIFETIME: Lifetime of JWT access tokens. 
+expresso em segundos ou uma string descrevendo um intervalo de tempo zeit/ms. Ex: 60, "2 dias", "10h", "7d"
 
-  expressed in seconds or a string describing a time span zeit/ms. Eg: 60, "2 days", "10h", "7d"
+- JWT_REFRESH_LIFETIME: Tempo de vida dos tokens de atualização JWT.
 
-- JWT_REFRESH_LIFETIME: Lifetime of JWT refresh tokens.
+expresso em segundos ou uma string descrevendo um intervalo de tempo zeit/ms. Ex: 60, "2 dias", "10h", "7d"
 
-  expressed in seconds or a string describing a time span zeit/ms. Eg: 60, "2 days", "10h", "7d"
+Aplicação
 
-Application
+- ENV: Ambiente de execução da aplicação ("DEV" para desenvolvimento ou "TEST" para teste).
 
-- ENV: Application execution environment ("DEV" for development or "TEST" for testing).
+- APP_PORT: Porta na qual a aplicação será executada (base 3333).
 
-- APP_PORT: Port on which the application will run ( base 3333 ).
+- FRONTEND_RECOVER_PASSWORD_URL: URL do frontend para recuperação de senha.
 
-- FRONTEND_RECOVER_PASSWORD_URL: Frontend URL for password recovery.
+- FRONT_END_URL: URL de acesso ao frontend.
 
-- FRONT_END_URL: FrontEnd URL access.
+Banco de dados
 
-Databases
+- DATABASE_URL: Esta variável contém a URL para conectar ao banco de dados PostgreSQL. Ela especifica o nome de usuário, senha, host, porta e nome do banco de dados que a aplicação deve usar para se conectar ao banco de dados.
+  
+Enviar E-mail
 
-- DATABASE_URL: This variable contains the URL to connect to the PostgreSQL database. It specifies the username, password, host, port, and database name that the application should use to connect to the database.
-
-Used to send emails
-
-- SENDGRID_API_KEY: SendGrid API key for sending emails.
-- EMAIL_OPTIONS_FROM: Email address that will be used as the sender for sending emails.
-
-<hr>
+- SENDGRID_API_KEY: Chave da API do SendGrid para enviar emails.
+- EMAIL_OPTIONS_FROM: Endereço de email que será usado como remetente para enviar emails.
