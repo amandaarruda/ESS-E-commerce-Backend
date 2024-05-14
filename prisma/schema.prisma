@@ -1,0 +1,147 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RoleEnum {
+  CUSTOMER
+  ADMIN
+}
+
+enum StatusEnum {
+  ACTIVE
+  INACTIVE
+}
+
+enum OrderStatus {
+  PROCESSING
+  CONCLUDED
+  CANCELED
+}
+
+model User {
+  id                    Int        @id @default(autoincrement())
+  name                  String     @db.VarChar(255)
+  email                 String     @unique
+  telephone             String     @db.VarChar(255)
+  password              String     @db.VarChar(255)
+  refreshToken          String?    @db.VarChar(255)
+  recoveryPasswordToken String?    @db.VarChar(255)
+  deletedAt             DateTime?  @db.Timestamptz(3)
+  createdAt             DateTime   @default(now()) @db.Timestamptz(3)
+  updatedAt             DateTime   @updatedAt @db.Timestamptz(3)
+  status                StatusEnum @default(ACTIVE)
+  version               Int        @default(1)
+  roleId                Int        @db.Integer
+  mediaId               Int?       @db.Integer
+  addressId             Int?       @db.Integer
+  Role                  Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  Media                 Media?     @relation(fields: [mediaId], references: [id], onDelete: SetNull)
+  Address               Address?   @relation(fields: [addressId], references: [id], onDelete: SetNull)
+  orders                Order[]
+
+  @@map("TB_USER")
+}
+
+model Address {
+  id           Int     @id @default(autoincrement())
+  uf           String  @db.VarChar(255)
+  neighborhood String  @db.VarChar(255)
+  city         String  @db.VarChar(255)
+  street       String  @db.VarChar(255)
+  cep          String  @db.VarChar(255)
+  number       String  @db.VarChar(255)
+  complement   String? @db.VarChar(255)
+  users        User[]
+
+  @@map("TB_ADDRESS")
+}
+
+model Order {
+  id                Int            @id @default(autoincrement())
+  code              String         @unique @db.VarChar(50)
+  price             Float          @db.DoublePrecision
+  userId            Int            @db.Integer
+  estimatedDelivery DateTime       @db.Timestamptz(3)
+  status            OrderStatus    @default(PROCESSING)
+  createdAt         DateTime       @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime       @updatedAt @db.Timestamptz(3)
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orderProducts     OrderProduct[]
+
+  @@map("TB_ORDER")
+}
+
+model OrderProduct {
+  id        Int     @id @default(autoincrement())
+  orderId   Int     @db.Integer
+  productId Int     @db.Integer
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("TB_ORDER_PRODUCT")
+}
+
+model Product {
+  id            Int            @id @default(autoincrement())
+  name          String         @db.VarChar(255)
+  price         Float          @db.DoublePrecision
+  stock         Int            @default(0)
+  createdAt     DateTime       @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime       @updatedAt @db.Timestamptz(3)
+  deletedAt     DateTime?      @db.Timestamptz(3)
+  categoryId    Int            @db.Integer
+  category      Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  orderProducts OrderProduct[]
+  productMedia  ProductMedia[]
+
+  @@map("TB_PRODUCT")
+}
+
+model Category {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  mediaId   Int?      @db.Integer
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+  deletedAt DateTime? @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @db.Timestamptz(3)
+  Products  Product[]
+  Media     Media?    @relation(fields: [mediaId], references: [id], onDelete: SetNull)
+
+  @@map("TB_CATEGORY")
+}
+
+model ProductMedia {
+  id        Int     @id @default(autoincrement())
+  productId Int     @db.Integer
+  mediaId   Int     @db.Integer
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  media     Media   @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@map("TB_PRODUCT_MEDIA")
+}
+
+model Media {
+  id           Int            @id @default(autoincrement())
+  url          String         @db.VarChar(255)
+  users        User[]
+  categories   Category[]
+  productMedia ProductMedia[]
+
+  @@map("TB_MEDIA")
+}
+
+model Role {
+  id        Int        @id @default(autoincrement())
+  createdAt DateTime   @default(now()) @db.Timestamptz(3)
+  deletedAt DateTime?  @db.Timestamptz(3)
+  name      RoleEnum   @unique
+  status    StatusEnum @default(ACTIVE)
+  User      User[]
+
+  @@map("TB_ROLE")
+}
