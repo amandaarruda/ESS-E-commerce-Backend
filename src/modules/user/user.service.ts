@@ -8,7 +8,7 @@ import {
   ConflictException,
   ForbiddenException,
 } from '@nestjs/common';
-import { Prisma, StatusEnum } from '@prisma/client';
+import { Prisma, RoleEnum, StatusEnum } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { isNumber } from 'class-validator';
 import { UserPayload } from 'src/auth/models/UserPayload';
@@ -101,8 +101,16 @@ export class UserService {
       const userBeingEdited = await this.userRepository.findByIdAsync(id);
 
       if (!userBeingEdited) {
+        this.logger.debug('User being edited is inactive')
         throw new ForbiddenException(
           setMessage(getMessage(MessagesHelperKey.USER_INACTIVE), id),
+        );
+      }
+
+      if(userBeingEdited.Role.name == RoleEnum.CUSTOMER) {
+        this.logger.debug('You cannot update an customer user');
+        throw new ForbiddenException(
+          getMessage(MessagesHelperKey.ACCESS_DENIED)
         );
       }
 
@@ -145,34 +153,6 @@ export class UserService {
             },
             update: {
               url: data.image,
-            },
-          },
-        };
-      }
-
-      if (data.address) {
-        userUpdateInput.Address = {
-          upsert: {
-            where: {
-              id: userBeingEdited?.addressId || undefined,
-            },
-            create: {
-              cep: data?.address?.cep,
-              city: data?.address?.city,
-              neighborhood: data?.address?.neighborhood,
-              number: data?.address?.number,
-              street: data?.address?.street,
-              uf: data?.address?.uf,
-              complement: data?.address?.complement,
-            },
-            update: {
-              cep: data?.address?.cep,
-              city: data?.address?.city,
-              neighborhood: data?.address?.neighborhood,
-              number: data?.address?.number,
-              street: data?.address?.street,
-              uf: data?.address?.uf,
-              complement: data?.address?.complement,
             },
           },
         };

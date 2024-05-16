@@ -1,8 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Address, StatusEnum, User } from '@prisma/client';
+import { StatusEnum, User } from '@prisma/client';
 import { RoleEntity } from 'src/modules/user/entity/role.entity';
 
-import { AddressEntity } from './address.entity';
 import { MediaEntity } from './media.entity';
 
 export class UserEntity implements User {
@@ -109,13 +108,4 @@ export class UserEntity implements User {
   })
   roleId: number | null;
 
-  @ApiPropertyOptional({ type: AddressEntity })
-  Address: Address | null;
-
-  @ApiPropertyOptional({
-    type: Number,
-    description: 'The unique identifier for the address',
-    example: 123,
-  })
-  addressId: number | null;
 }

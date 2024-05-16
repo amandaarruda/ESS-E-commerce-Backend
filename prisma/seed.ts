@@ -79,17 +79,6 @@ const seedUser = async (
         email: ADMIN_EMAIL,
         name: 'Admin User',
         telephone: '(00) 90000-0000',
-        Address: {
-          create: {
-            cep: '00000-000',
-            city: 'City',
-            neighborhood: 'Neighborhood',
-            number: '0',
-            street: 'Street',
-            uf: 'UF',
-            complement: 'Complement',
-          },
-        },
         Media: {
           create: {
             url: 'https://example.com/image.jpg',

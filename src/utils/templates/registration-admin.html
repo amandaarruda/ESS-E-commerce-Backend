@@ -15,9 +15,6 @@
     <div class="main">
         <header>
             <h2 class="title uppercase text-shadow">Cadastro Realizado</h2>
-            <div class="image-container">
-                <img class="image" src="{{EMAIL_IMAGE}}" alt="Imagem"/>
-            </div>
         </header>
 
         <section class="text-grey-color" aria-labelledby="registration-confirmation">
@@ -26,7 +23,9 @@
                 <p>Seu cadastro foi realizado no nosso e-commerce.</p>
             </div>
 
-            {{PASSWORD_ADMIN}}
+            <div class="your-password">
+                <h4 class="full-width">{{PASSWORD_ADMIN}}</h4>
+            </div>
             
             <div>
                 <a target="_blank" href="{{link}}" class="access-button">
