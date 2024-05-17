@@ -10,7 +10,6 @@ import {
   MinLength,
 } from 'class-validator';
 
-
 export class UserCreateDto {
   @ApiProperty({
     example: 'emailusuario@gmail.com',
@@ -62,13 +61,13 @@ export class UserCreateDto {
     ({ value }: TransformFnParams) =>
       typeof value === 'string' && value?.trim(),
   )
-  password: string;
+  password?: string;
 
   @ApiProperty({
     example: '(81) 98888-8888',
     description: 'Telefone do usuário',
   })
-  @IsNotEmpty({ message: 'O campo de telephone deve ser preenchido' })
+  @IsOptional({ message: 'O campo de telephone deve ser preenchido' })
   @IsString({ message: 'O campo de telephone deve ser uma string' })
   @MaxLength(20, {
     message: 'O campo de telephone deve ter no máximo de 20 caracteres',
@@ -77,7 +76,7 @@ export class UserCreateDto {
     ({ value }: TransformFnParams) =>
       typeof value === 'string' && value?.trim(),
   )
-  telephone: string;
+  telephone?: string;
 
   @ApiPropertyOptional({
     example: 'Imagem do usuário',

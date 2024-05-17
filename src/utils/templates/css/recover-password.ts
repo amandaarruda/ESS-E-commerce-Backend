@@ -20,7 +20,6 @@ body {
 .title {
     font-size: 24px;
     font-weight: bolder;
-    text-align: center;
 }
 
 .image { }

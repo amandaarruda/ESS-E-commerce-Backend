@@ -101,16 +101,16 @@ export class UserService {
       const userBeingEdited = await this.userRepository.findByIdAsync(id);
 
       if (!userBeingEdited) {
-        this.logger.debug('User being edited is inactive')
+        this.logger.debug('User being edited is inactive');
         throw new ForbiddenException(
           setMessage(getMessage(MessagesHelperKey.USER_INACTIVE), id),
         );
       }
 
-      if(userBeingEdited.Role.name == RoleEnum.CUSTOMER) {
+      if (userBeingEdited.Role.name == RoleEnum.CUSTOMER) {
         this.logger.debug('You cannot update an customer user');
         throw new ForbiddenException(
-          getMessage(MessagesHelperKey.ACCESS_DENIED)
+          getMessage(MessagesHelperKey.ACCESS_DENIED),
         );
       }
 
@@ -478,6 +478,8 @@ export class UserService {
       };
 
       if (body.name) userUpdateInput.name = body.name;
+
+      if (body.telephone) userUpdateInput.telephone = body.telephone;
 
       if (body.image) {
         this.logger.debug(`Has image`);
