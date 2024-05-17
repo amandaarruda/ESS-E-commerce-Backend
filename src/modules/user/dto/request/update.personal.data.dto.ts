@@ -43,4 +43,19 @@ export class UpdateUserPersonalData {
       typeof value === 'string' && value?.trim(),
   )
   image?: string;
+
+  @ApiProperty({
+    example: '(81) 98888-8888',
+    description: 'Telefone do usuário',
+  })
+  @IsOptional({ message: 'O campo de telephone deve ser preenchido' })
+  @IsString({ message: 'O campo de telephone deve ser uma string' })
+  @MaxLength(20, {
+    message: 'O campo de telephone deve ter no máximo de 20 caracteres',
+  })
+  @Transform(
+    ({ value }: TransformFnParams) =>
+      typeof value === 'string' && value?.trim(),
+  )
+  telephone?: string;
 }

@@ -19,7 +19,9 @@ import {
 } from '@nestjs/swagger';
 import { RoleEnum } from '@prisma/client';
 import { Response } from 'express';
+import { UserCreateDto } from 'src/modules/user/dto/request/user.create.dto';
 import { generatePassword } from 'src/utils/generate-password';
+import { ApiExceptionResponse } from 'src/utils/swagger-schemas/SwaggerSchema';
 
 import { AuthService } from './auth.service';
 import { AuthenticatedUser } from './decorators/current-user.decorator';
@@ -28,7 +30,7 @@ import { Roles } from './decorators/roles.decorator';
 import { ChangePasswordByRecovery } from './dto/request/change-password-by-recovery.dto';
 import { EmailDto } from './dto/request/email.dto';
 import { LoginDto } from './dto/request/login.dto';
-import { UserToken } from './dto/response/UserToken';
+import { UserRegisteredResponse, UserToken } from './dto/response/UserToken';
 import { AtGuard, LocalAuthGuard, RtGuard } from './guards';
 import { UserPayload } from './models/UserPayload';
 
@@ -36,6 +38,25 @@ import { UserPayload } from './models/UserPayload';
 @ApiTags('Auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+
+  @ApiOperation({ summary: 'Create customer user' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    type: UserRegisteredResponse,
+  })
+  @ApiBody({ type: UserCreateDto })
+  @ApiExceptionResponse()
+  @Post('register')
+  @IsPublic()
+  protected async createAsync(
+    @AuthenticatedUser() currentUser: UserPayload,
+    @Res() response: Response,
+    @Body() dto: UserCreateDto,
+  ) {
+    const data = await this.authService.register(dto, currentUser);
+
+    return response.status(HttpStatus.CREATED).json(data.id);
+  }
 
   @ApiOperation({ summary: 'Forgot Password' })
   @Post('forgot/password')

@@ -29,6 +29,7 @@ import {
   setMessage,
 } from 'src/utils/messages.helper';
 import { recoverTemplateDataBind } from 'src/utils/templates/processors/recover-password-processor';
+import { registrationAdminTemplateDataBind } from 'src/utils/templates/processors/registration-admin-processor';
 import { registrationTemplateDataBind } from 'src/utils/templates/processors/registration-processor';
 import { handleError } from 'src/utils/treat.exceptions';
 
@@ -38,7 +39,6 @@ import { EmailDto } from './dto/request/email.dto';
 import { LoginDto } from './dto/request/login.dto';
 import { UserToken } from './dto/response/UserToken';
 import { UserPayload } from './models/UserPayload';
-import { registrationAdminTemplateDataBind } from 'src/utils/templates/processors/registration-admin-processor';
 
 @Injectable()
 export class AuthService {
@@ -51,7 +51,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService,
-  ) { }
+  ) {}
 
   async validateUser(email: string, userPassword: string) {
     this.logger.debug(`Validate User`);
@@ -99,15 +99,17 @@ export class AuthService {
     this.logger.log('POST IN Auth Service - register');
 
     try {
-
       const roleToBeCreated: RoleEnum =
         currentUser?.role === RoleEnum.ADMIN
           ? RoleEnum.ADMIN
           : RoleEnum.CUSTOMER;
 
-      if(registerDto.password == null && roleToBeCreated == RoleEnum.CUSTOMER){
+      if (
+        registerDto.password == null &&
+        roleToBeCreated == RoleEnum.CUSTOMER
+      ) {
         this.logger.debug('Password is required in creating customer account');
-        throw new BadRequestException('Senha é obrigatória')
+        throw new BadRequestException('Senha é obrigatória');
       }
 
       this.logger.debug(
@@ -129,7 +131,7 @@ export class AuthService {
 
       let password = registerDto?.password;
 
-      if(roleToBeCreated == RoleEnum.ADMIN) {
+      if (roleToBeCreated == RoleEnum.ADMIN) {
         password = generatePassword();
       }
 
@@ -138,13 +140,13 @@ export class AuthService {
       this.logger.debug(
         `Password from user ${registerDto.email} hashed successfully`,
       );
-      
+
       // Se o usuário logado for um ADMIN, ele pode criar um usuário ADMIN,
       // senão é uma criação pública de usuário no sistema ( CUSTOMER )
       const createUserData: UserTypeMap[CrudType.CREATE] = {
         name: registerDto.name,
         email: registerDto.email,
-        telephone: registerDto.telephone,
+        telephone: registerDto?.telephone,
         password: hash,
         version: 1,
         status: StatusEnum.ACTIVE,
@@ -178,7 +180,8 @@ export class AuthService {
           userEmail: newUser.email,
         },
         {
-          generatedPassword: roleToBeCreated == RoleEnum.ADMIN ? password : null,
+          generatedPassword:
+            roleToBeCreated == RoleEnum.ADMIN ? password : null,
           resend: false,
         },
       );
@@ -485,7 +488,8 @@ export class AuthService {
 
     try {
       this.logger.log(
-        `${optionals?.resend ? 'Resending' : 'Sending'
+        `${
+          optionals?.resend ? 'Resending' : 'Sending'
         } registration password email to: ${userEmail} `,
       );
 
@@ -510,7 +514,7 @@ export class AuthService {
       const rootDir = process.cwd();
       let templateRole = `src/utils/templates/`;
 
-      let isCreatingAnAdmin: boolean = false;
+      let isCreatingAnAdmin = false;
 
       if (generatedPassword) {
         isCreatingAnAdmin = true;
@@ -520,11 +524,11 @@ export class AuthService {
 
         // Generated password is only create if its creating an admin user
 
-        templateRole += 'registration-admin.html'
+        templateRole += 'registration-admin.html';
       } else {
         // Creating an customer
 
-        templateRole += 'registration.html'
+        templateRole += 'registration.html';
       }
 
       templatePath = join(rootDir, templateRole);
@@ -541,14 +545,14 @@ export class AuthService {
 
       const link = process.env.FRONT_END_URL;
 
-      if(isCreatingAnAdmin) {
+      if (isCreatingAnAdmin) {
         templateBody = registrationAdminTemplateDataBind(templateHtml, {
           name: userInDb.name,
           link,
-          generatedPassword
-        })
+          generatedPassword,
+        });
       } else {
-        templateBody =  registrationTemplateDataBind(templateHtml, {
+        templateBody = registrationTemplateDataBind(templateHtml, {
           name: userInDb.name,
           link,
         });
@@ -559,12 +563,14 @@ export class AuthService {
       await this.emailService.sendEmail(templateBody, subject, userEmail);
 
       this.logger.debug(
-        `${optionals?.resend ? 'Resend' : 'Registration'
+        `${
+          optionals?.resend ? 'Resend' : 'Registration'
         } password email was sent`,
       );
     } catch (error) {
       this.logger.debug(
-        `${optionals?.resend ? 'Resend' : 'Registration'
+        `${
+          optionals?.resend ? 'Resend' : 'Registration'
         } password email was not sent ${error}`,
       );
 

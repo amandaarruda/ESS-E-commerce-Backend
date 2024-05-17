@@ -9,7 +9,6 @@ import {
   MaxLength,
 } from 'class-validator';
 
-
 export class UserUpdateDto {
   @ApiProperty({
     description: 'Versão do usuário',
@@ -53,7 +52,7 @@ export class UserUpdateDto {
     example: '(81) 98888-8888',
     description: 'Telefone do usuário',
   })
-  @IsNotEmpty({ message: 'O campo de telephone deve ser preenchido' })
+  @IsOptional({ message: 'O campo de telephone deve ser preenchido' })
   @IsString({ message: 'O campo de telephone deve ser uma string' })
   @MaxLength(20, {
     message: 'O campo de telephone deve ter no máximo de 20 caracteres',
