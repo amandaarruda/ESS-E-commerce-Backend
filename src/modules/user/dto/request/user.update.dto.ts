@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Transform, TransformFnParams, Type } from 'class-transformer';
+import { Transform, TransformFnParams } from 'class-transformer';
 import {
   IsEmail,
   IsNotEmpty,
@@ -7,10 +7,8 @@ import {
   IsOptional,
   IsString,
   MaxLength,
-  ValidateNested,
 } from 'class-validator';
 
-import { AddressDto } from '../address.dto';
 
 export class UserUpdateDto {
   @ApiProperty({
@@ -65,12 +63,6 @@ export class UserUpdateDto {
       typeof value === 'string' && value?.trim(),
   )
   telephone?: string;
-
-  @ApiProperty({ type: AddressDto })
-  @Type(() => AddressDto)
-  @ValidateNested({ each: true })
-  @IsOptional()
-  address?: AddressDto;
 
   @ApiPropertyOptional({
     example: 'Imagem do usuário',

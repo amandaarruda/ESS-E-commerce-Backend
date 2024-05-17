@@ -89,9 +89,9 @@ export class AuthController {
     await this.authService.sendRegistrationEmail(
       {
         userEmail: dto.email,
-        generatedPassword: generatePassword(),
       },
       {
+        generatedPassword: generatePassword(),
         resend: true,
       },
     );

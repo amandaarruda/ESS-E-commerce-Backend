@@ -38,6 +38,7 @@ import { EmailDto } from './dto/request/email.dto';
 import { LoginDto } from './dto/request/login.dto';
 import { UserToken } from './dto/response/UserToken';
 import { UserPayload } from './models/UserPayload';
+import { registrationAdminTemplateDataBind } from 'src/utils/templates/processors/registration-admin-processor';
 
 @Injectable()
 export class AuthService {
@@ -50,7 +51,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService,
-  ) {}
+  ) { }
 
   async validateUser(email: string, userPassword: string) {
     this.logger.debug(`Validate User`);
@@ -98,6 +99,17 @@ export class AuthService {
     this.logger.log('POST IN Auth Service - register');
 
     try {
+
+      const roleToBeCreated: RoleEnum =
+        currentUser?.role === RoleEnum.ADMIN
+          ? RoleEnum.ADMIN
+          : RoleEnum.CUSTOMER;
+
+      if(registerDto.password == null && roleToBeCreated == RoleEnum.CUSTOMER){
+        this.logger.debug('Password is required in creating customer account');
+        throw new BadRequestException('Senha é obrigatória')
+      }
+
       this.logger.debug(
         `Verifying if the user with the email ${registerDto.email} already exists in the database`,
       );
@@ -115,20 +127,20 @@ export class AuthService {
         );
       }
 
-      const generatedPassword: string = generatePassword();
-      const hash = await hashData(generatedPassword);
+      let password = registerDto?.password;
+
+      if(roleToBeCreated == RoleEnum.ADMIN) {
+        password = generatePassword();
+      }
+
+      const hash = await hashData(password);
 
       this.logger.debug(
         `Password from user ${registerDto.email} hashed successfully`,
       );
-
+      
       // Se o usuário logado for um ADMIN, ele pode criar um usuário ADMIN,
       // senão é uma criação pública de usuário no sistema ( CUSTOMER )
-      const roleToBeCreated: RoleEnum =
-        currentUser?.role === RoleEnum.ADMIN
-          ? RoleEnum.ADMIN
-          : RoleEnum.CUSTOMER;
-
       const createUserData: UserTypeMap[CrudType.CREATE] = {
         name: registerDto.name,
         email: registerDto.email,
@@ -136,17 +148,6 @@ export class AuthService {
         password: hash,
         version: 1,
         status: StatusEnum.ACTIVE,
-        Address: {
-          create: {
-            cep: registerDto.address.cep,
-            city: registerDto.address.city,
-            neighborhood: registerDto.address.neighborhood,
-            number: registerDto.address.number,
-            street: registerDto.address.street,
-            uf: registerDto.address.uf,
-            complement: registerDto?.address.complement,
-          },
-        },
         ...(registerDto.image && {
           Media: {
             create: {
@@ -175,9 +176,9 @@ export class AuthService {
       await this.sendRegistrationEmail(
         {
           userEmail: newUser.email,
-          generatedPassword,
         },
         {
+          generatedPassword: roleToBeCreated == RoleEnum.ADMIN ? password : null,
           resend: false,
         },
       );
@@ -473,26 +474,22 @@ export class AuthService {
   async sendRegistrationEmail(
     data: {
       userEmail: string;
-      generatedPassword: string;
     },
     optionals?: {
+      generatedPassword?: string;
       resend?: boolean;
     },
   ) {
-    const { userEmail, generatedPassword } = data;
+    const { userEmail } = data;
+    const { generatedPassword } = optionals;
 
     try {
       this.logger.log(
-        `${
-          optionals?.resend ? 'Resending' : 'Sending'
+        `${optionals?.resend ? 'Resending' : 'Sending'
         } registration password email to: ${userEmail} `,
       );
 
       await this.guardResendEmail(optionals?.resend, userEmail);
-
-      if (isDevelopmentEnviroment()) {
-        this.logger.debug(`[DEV] Password: ${generatedPassword}`);
-      }
 
       const userInDb = await this.userService.findByEmail(userEmail);
 
@@ -511,7 +508,26 @@ export class AuthService {
       let templatePath = '';
 
       const rootDir = process.cwd();
-      templatePath = join(rootDir, 'src/utils/templates/registration.html');
+      let templateRole = `src/utils/templates/`;
+
+      let isCreatingAnAdmin: boolean = false;
+
+      if (generatedPassword) {
+        isCreatingAnAdmin = true;
+        if (isDevelopmentEnviroment() && generatedPassword) {
+          this.logger.debug(`[DEV] Password: ${generatedPassword}`);
+        }
+
+        // Generated password is only create if its creating an admin user
+
+        templateRole += 'registration-admin.html'
+      } else {
+        // Creating an customer
+
+        templateRole += 'registration.html'
+      }
+
+      templatePath = join(rootDir, templateRole);
       const templateHtml = readFileSync(templatePath).toString();
 
       if (!templateHtml || templateHtml == '') {
@@ -521,20 +537,18 @@ export class AuthService {
         );
       }
 
+      let templateBody = '';
+
       const link = process.env.FRONT_END_URL;
 
-      const isRegistrationForAdmin = optionals?.resend;
-
-      let templateBody;
-
-      if (isRegistrationForAdmin) {
-        templateBody = registrationTemplateDataBind(templateHtml, {
+      if(isCreatingAnAdmin) {
+        templateBody = registrationAdminTemplateDataBind(templateHtml, {
           name: userInDb.name,
           link,
-          generatedPassword,
-        });
+          generatedPassword
+        })
       } else {
-        templateBody = registrationTemplateDataBind(templateHtml, {
+        templateBody =  registrationTemplateDataBind(templateHtml, {
           name: userInDb.name,
           link,
         });
@@ -545,14 +559,12 @@ export class AuthService {
       await this.emailService.sendEmail(templateBody, subject, userEmail);
 
       this.logger.debug(
-        `${
-          optionals?.resend ? 'Resend' : 'Registration'
+        `${optionals?.resend ? 'Resend' : 'Registration'
         } password email was sent`,
       );
     } catch (error) {
       this.logger.debug(
-        `${
-          optionals?.resend ? 'Resend' : 'Registration'
+        `${optionals?.resend ? 'Resend' : 'Registration'
         } password email was not sent ${error}`,
       );
 

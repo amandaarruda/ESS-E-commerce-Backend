@@ -131,7 +131,6 @@ export class UserRepository {
       include: {
         Role: true,
         Media: true,
-        Address: true,
       },
     });
   }
@@ -163,7 +162,6 @@ export class UserRepository {
       include: {
         Role: true,
         Media: true,
-        Address: true,
       },
     });
   }
@@ -194,7 +192,6 @@ export class UserRepository {
       include: {
         Role: true,
         Media: true,
-        Address: true,
       },
     });
 

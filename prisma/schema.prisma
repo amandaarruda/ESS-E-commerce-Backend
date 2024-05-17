@@ -38,10 +38,8 @@ model User {
   version               Int        @default(1)
   roleId                Int        @db.Integer
   mediaId               Int?       @db.Integer
-  addressId             Int?       @db.Integer
   Role                  Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
   Media                 Media?     @relation(fields: [mediaId], references: [id], onDelete: SetNull)
-  Address               Address?   @relation(fields: [addressId], references: [id], onDelete: SetNull)
   orders                Order[]
 
   @@map("TB_USER")
@@ -56,7 +54,7 @@ model Address {
   cep          String  @db.VarChar(255)
   number       String  @db.VarChar(255)
   complement   String? @db.VarChar(255)
-  users        User[]
+  Order        Order[]
 
   @@map("TB_ADDRESS")
 }
@@ -68,6 +66,8 @@ model Order {
   userId            Int            @db.Integer
   estimatedDelivery DateTime       @db.Timestamptz(3)
   status            OrderStatus    @default(PROCESSING)
+  develiryAddressId Int?           @db.Integer
+  DeliveryAddress   Address?       @relation(fields: [develiryAddressId], references: [id], onDelete: SetNull)
   createdAt         DateTime       @default(now()) @db.Timestamptz(3)
   updatedAt         DateTime       @updatedAt @db.Timestamptz(3)
   user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
