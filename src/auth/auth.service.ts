@@ -99,19 +99,6 @@ export class AuthService {
     this.logger.log('POST IN Auth Service - register');
 
     try {
-      const roleToBeCreated: RoleEnum =
-        currentUser?.role === RoleEnum.ADMIN
-          ? RoleEnum.ADMIN
-          : RoleEnum.CUSTOMER;
-
-      if (
-        registerDto.password == null &&
-        roleToBeCreated == RoleEnum.CUSTOMER
-      ) {
-        this.logger.debug('Password is required in creating customer account');
-        throw new BadRequestException('Senha é obrigatória');
-      }
-
       this.logger.debug(
         `Verifying if the user with the email ${registerDto.email} already exists in the database`,
       );
@@ -129,20 +116,12 @@ export class AuthService {
         );
       }
 
-      let password = registerDto?.password;
-
-      if (roleToBeCreated == RoleEnum.ADMIN) {
-        password = generatePassword();
-      }
-
-      const hash = await hashData(password);
+      const hash = await hashData(registerDto.password);
 
       this.logger.debug(
         `Password from user ${registerDto.email} hashed successfully`,
       );
 
-      // Se o usuário logado for um ADMIN, ele pode criar um usuário ADMIN,
-      // senão é uma criação pública de usuário no sistema ( CUSTOMER )
       const createUserData: UserTypeMap[CrudType.CREATE] = {
         name: registerDto.name,
         email: registerDto.email,
@@ -159,7 +138,7 @@ export class AuthService {
         }),
         Role: {
           connect: {
-            name: roleToBeCreated,
+            name: RoleEnum.CUSTOMER,
           },
         },
       };
@@ -175,16 +154,7 @@ export class AuthService {
 
       await this.updateRt(newUser.id, tokens.refreshToken);
 
-      await this.sendRegistrationEmail(
-        {
-          userEmail: newUser.email,
-        },
-        {
-          generatedPassword:
-            roleToBeCreated == RoleEnum.ADMIN ? password : null,
-          resend: false,
-        },
-      );
+      await this.sendRegistrationEmail(newUser.email);
 
       return {
         id: newUser.id,
@@ -474,64 +444,14 @@ export class AuthService {
     return decodedToken;
   }
 
-  async sendRegistrationEmail(
-    data: {
-      userEmail: string;
-    },
-    optionals?: {
-      generatedPassword?: string;
-      resend?: boolean;
-    },
-  ) {
-    const { userEmail } = data;
-    const { generatedPassword } = optionals;
-
+  async sendRegistrationEmail(userEmail: string) {
     try {
-      this.logger.log(
-        `${
-          optionals?.resend ? 'Resending' : 'Sending'
-        } registration password email to: ${userEmail} `,
-      );
-
-      await this.guardResendEmail(optionals?.resend, userEmail);
-
       const userInDb = await this.userService.findByEmail(userEmail);
 
-      guardUser(
-        {
-          deletedAt: userInDb?.deletedAt,
-          email: userInDb?.email,
-          status: userInDb?.status,
-        },
-        this.logger,
-        {
-          requestUserEmail: userEmail,
-        },
-      );
-
-      let templatePath = '';
-
       const rootDir = process.cwd();
-      let templateRole = `src/utils/templates/`;
+      const template = `src/utils/templates/registration.html`;
 
-      let isCreatingAnAdmin = false;
-
-      if (generatedPassword) {
-        isCreatingAnAdmin = true;
-        if (isDevelopmentEnviroment() && generatedPassword) {
-          this.logger.debug(`[DEV] Password: ${generatedPassword}`);
-        }
-
-        // Generated password is only create if its creating an admin user
-
-        templateRole += 'registration-admin.html';
-      } else {
-        // Creating an customer
-
-        templateRole += 'registration.html';
-      }
-
-      templatePath = join(rootDir, templateRole);
+      const templatePath = join(rootDir, template);
       const templateHtml = readFileSync(templatePath).toString();
 
       if (!templateHtml || templateHtml == '') {
@@ -541,66 +461,24 @@ export class AuthService {
         );
       }
 
-      let templateBody = '';
-
       const link = process.env.FRONT_END_URL;
 
-      if (isCreatingAnAdmin) {
-        templateBody = registrationAdminTemplateDataBind(templateHtml, {
-          name: userInDb.name,
-          link,
-          generatedPassword,
-        });
-      } else {
-        templateBody = registrationTemplateDataBind(templateHtml, {
-          name: userInDb.name,
-          link,
-        });
-      }
+      const templateBody = registrationTemplateDataBind(templateHtml, {
+        name: userInDb.name,
+        link,
+      });
 
       const subject = 'Email de confirmação de registro';
 
       await this.emailService.sendEmail(templateBody, subject, userEmail);
 
-      this.logger.debug(
-        `${
-          optionals?.resend ? 'Resend' : 'Registration'
-        } password email was sent`,
-      );
+      this.logger.debug(`Registration email was sent`);
     } catch (error) {
-      this.logger.debug(
-        `${
-          optionals?.resend ? 'Resend' : 'Registration'
-        } password email was not sent ${error}`,
-      );
+      this.logger.debug(`Registration email email was not sent ${error}`);
 
       handleError(error, {
         message: getMessage(MessagesHelperKey.FAIL_SENDING_EMAIL),
       });
-    }
-  }
-
-  async guardResendEmail(resend: boolean, userEmail: string) {
-    const user: UserEntity = await this.userService.findByEmail(userEmail);
-
-    guardUser(
-      {
-        deletedAt: user?.deletedAt,
-        email: user?.email,
-        status: user?.status,
-      },
-      this.logger,
-      {
-        requestUserEmail: userEmail,
-      },
-    );
-
-    if (resend && user.status === StatusEnum.ACTIVE) {
-      this.logger.debug(`User already activated. Resend email not allowed`);
-
-      throw new BadRequestException(
-        getMessage(MessagesHelperKey.USER_ALREADY_ACTIVED),
-      );
     }
   }
 

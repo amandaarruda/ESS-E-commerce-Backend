@@ -45,7 +45,7 @@ export class UserCreateDto {
     description: 'senha do usuário',
     example: '123@1Bre88',
   })
-  @IsOptional()
+  @IsNotEmpty({ message: 'O campo de senha é obrigatório' })
   @IsString({ message: 'O campo de senha deve ser uma string' })
   @MaxLength(255, {
     message: 'O campo password deve ter menos de 255 caracteres',
@@ -61,7 +61,7 @@ export class UserCreateDto {
     ({ value }: TransformFnParams) =>
       typeof value === 'string' && value?.trim(),
   )
-  password?: string;
+  password: string;
 
   @ApiProperty({
     example: '(81) 98888-8888',
