@@ -107,13 +107,6 @@ export class UserService {
         );
       }
 
-      if (userBeingEdited.Role.name == RoleEnum.CUSTOMER) {
-        this.logger.debug('You cannot update an customer user');
-        throw new ForbiddenException(
-          getMessage(MessagesHelperKey.ACCESS_DENIED),
-        );
-      }
-
       const userUpdateInput: Prisma.UserUpdateInput = {
         version: data.version,
         Role: {

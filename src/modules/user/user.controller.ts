@@ -94,25 +94,6 @@ export class UserController {
     return response.status(HttpStatus.OK).json(userById);
   }
 
-  @ApiOperation({ summary: 'Create admin user' })
-  @ApiResponse({
-    status: HttpStatus.CREATED,
-    type: UserRegisteredResponse,
-  })
-  @ApiBody({ type: UserCreateDto })
-  @ApiExceptionResponse()
-  @Post()
-  @Roles(RoleEnum.ADMIN)
-  protected async createAsync(
-    @AuthenticatedUser() currentUser: UserPayload,
-    @Res() response: Response,
-    @Body() dto: UserCreateDto,
-  ) {
-    const data = await this.authService.register(dto, currentUser);
-
-    return response.status(HttpStatus.CREATED).json(data.id);
-  }
-
   @ApiOperation({ summary: 'Update user' })
   @ApiResponse({
     status: HttpStatus.OK,

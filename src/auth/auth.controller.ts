@@ -48,7 +48,7 @@ export class AuthController {
   @ApiExceptionResponse()
   @Post('register')
   @IsPublic()
-  protected async createAsync(
+  protected async registerAsync(
     @AuthenticatedUser() currentUser: UserPayload,
     @Res() response: Response,
     @Body() dto: UserCreateDto,
@@ -94,30 +94,6 @@ export class AuthController {
     return response.status(HttpStatus.OK).json({
       available: checkEmail,
     });
-  }
-
-  @ApiOperation({ summary: 'Resend registration email for admin registers' })
-  @Post('resend')
-  @UseGuards(AtGuard)
-  @Roles(RoleEnum.ADMIN)
-  @ApiBearerAuth()
-  @HttpCode(HttpStatus.OK)
-  async resendActivationEmail(
-    @Body() dto: EmailDto,
-    @AuthenticatedUser() currentUser: UserPayload,
-    @Res() response: Response,
-  ) {
-    await this.authService.sendRegistrationEmail(
-      {
-        userEmail: dto.email,
-      },
-      {
-        generatedPassword: generatePassword(),
-        resend: true,
-      },
-    );
-
-    return response.status(HttpStatus.OK).send();
   }
 
   @ApiOperation({ summary: 'Login' })
