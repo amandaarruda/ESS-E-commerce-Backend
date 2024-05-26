@@ -1,0 +1,28 @@
+Feature: Cadastro e manutenção de usuários
+
+User Story:
+Como cliente do sistema eu quero me cadastrar e alterar minhas informações.
+
+Cenário: Registrar um usuário cliente
+Should register an customer user
+
+Given que o cliente está na tela de registro,
+And o usuário preenche o campo nome com o valor "cliente cadatro"
+And o usuário preenche o campo email com o valor "cliente@gmail.com"
+And o usuário preenche o campo senha com o valor "Senha@1238"
+And não existe outro usuário com o mesmo email cadastrado no sistema
+When clica no botão "Registrar",
+Then o sistema deve registrar um novo usuário cliente,
+And o cliente deve receber uma mensagem de confirmação "Usuário registrado com sucesso".
+
+Cenário: Registrar um usuário cliente com o email inválido
+Should throw bad request exception when the user try to register itself with invalid data
+
+Given que o cliente está na tela de registro,
+And existe um usuário cadastrado no sistema com o email "cliente123@gmail.com"
+And o usuário insere o email dele "cliente123@gmail.com"
+And o usuário insere o nome dele "cliente abc"
+And o usuário insere a senha dele "ClienteAbc@123"
+And clica no botão "Registrar",
+Then o sistema não deve cadastrar o usuário
+And o cliente deve receber uma mensagem de erro "Email já utilizado por outro usuário".
