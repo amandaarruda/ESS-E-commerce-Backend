@@ -1,0 +1,1 @@
+Features relacionadas ao funcionamento do carrinho na plataforma, e suas interações com produtos e criação de pedidos.
