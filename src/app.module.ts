@@ -14,9 +14,7 @@ import { AtGuard } from './auth/guards';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { PrismaModule } from './database/prisma/prisma.module';
 import { AllExceptionsFilter } from './middlewares/exception.filter';
-import { HTTPLoggerMiddleware } from './middlewares/logger.middleware';
 import { EmailModule } from './modules/email/email.module';
-import { HealthCheckModule } from './modules/healthCheck/healthCheck.module';
 import { UserModule } from './modules/user/user.module';
 
 @Module({
@@ -42,14 +40,11 @@ import { UserModule } from './modules/user/user.module';
       secret: process.env.JWT_SECRET,
     }),
     AuthModule,
-    HealthCheckModule,
     PrismaModule,
     UserModule,
     EmailModule,
   ],
 })
 export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer): void {
-    consumer.apply(HTTPLoggerMiddleware).forRoutes('*');
-  }
+  configure(consumer: MiddlewareConsumer) {}
 }

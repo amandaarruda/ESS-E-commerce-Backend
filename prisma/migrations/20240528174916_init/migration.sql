@@ -12,7 +12,6 @@ CREATE TABLE "TB_USER" (
     "id" SERIAL NOT NULL,
     "name" VARCHAR(255) NOT NULL,
     "email" TEXT NOT NULL,
-    "telephone" VARCHAR(255) NOT NULL,
     "password" VARCHAR(255) NOT NULL,
     "refreshToken" VARCHAR(255),
     "recoveryPasswordToken" VARCHAR(255),
@@ -20,7 +19,6 @@ CREATE TABLE "TB_USER" (
     "createdAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMPTZ(3) NOT NULL,
     "status" "StatusEnum" NOT NULL DEFAULT 'ACTIVE',
-    "version" INTEGER NOT NULL DEFAULT 1,
     "roleId" INTEGER NOT NULL,
     "mediaId" INTEGER,
 

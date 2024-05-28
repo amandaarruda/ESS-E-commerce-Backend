@@ -28,13 +28,6 @@ export class UserEntity implements User {
 
   @ApiProperty({
     type: String,
-    description: 'The telephone of the user',
-    example: '81999999999',
-  })
-  telephone: string;
-
-  @ApiProperty({
-    type: String,
     description: 'The password of the user',
     example: '123456',
   })
@@ -81,13 +74,6 @@ export class UserEntity implements User {
   })
   status: StatusEnum;
 
-  @ApiProperty({
-    type: Number,
-    description: 'The version of the user',
-    example: 1,
-  })
-  version: number;
-
   @ApiPropertyOptional({ type: MediaEntity })
   Media: MediaEntity | null;
 
@@ -107,5 +93,4 @@ export class UserEntity implements User {
     example: 123,
   })
   roleId: number | null;
-
 }

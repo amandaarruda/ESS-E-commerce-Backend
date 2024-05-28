@@ -27,7 +27,6 @@ model User {
   id                    Int        @id @default(autoincrement())
   name                  String     @db.VarChar(255)
   email                 String     @unique
-  telephone             String     @db.VarChar(255)
   password              String     @db.VarChar(255)
   refreshToken          String?    @db.VarChar(255)
   recoveryPasswordToken String?    @db.VarChar(255)
@@ -35,7 +34,6 @@ model User {
   createdAt             DateTime   @default(now()) @db.Timestamptz(3)
   updatedAt             DateTime   @updatedAt @db.Timestamptz(3)
   status                StatusEnum @default(ACTIVE)
-  version               Int        @default(1)
   roleId                Int        @db.Integer
   mediaId               Int?       @db.Integer
   Role                  Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)

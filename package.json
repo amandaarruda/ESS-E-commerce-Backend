@@ -43,7 +43,7 @@
     "@nestjs/schedule": "^3.0.4",
     "@nestjs/swagger": "^7.1.13",
     "@nestjs/testing": "^9.4.3",
-    "@prisma/client": "^5.4.2",
+    "@prisma/client": "^5.14.0",
     "@sendgrid/mail": "^8.1.0",
     "@types/qrcode": "^1.5.2",
     "bcrypt": "^5.1.1",
