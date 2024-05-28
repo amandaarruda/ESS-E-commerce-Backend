@@ -1,11 +1,6 @@
-import {
-  Injectable,
-  BadRequestException,
-  ConflictException,
-} from '@nestjs/common';
-import { Prisma, RoleEnum, StatusEnum } from '@prisma/client';
+import { Injectable } from '@nestjs/common';
+import { RoleEnum, StatusEnum } from '@prisma/client';
 import { User } from '@prisma/client';
-import { UserPayload } from 'src/auth/models/UserPayload';
 import { PrismaService } from 'src/database/prisma/prisma.service';
 import { DefaultFilter } from 'src/filters/DefaultFilter';
 import { CrudType } from 'src/utils/base/ICrudTypeMap';
@@ -22,7 +17,6 @@ export class UserRepository {
 
   async findFilteredAsync(
     filter: DefaultFilter<UserTypeMap>,
-    user?: UserPayload,
   ): Promise<Paginated<TUserPagination>> {
     const AND: Record<string, any>[] = [
       {
@@ -30,44 +24,35 @@ export class UserRepository {
           not: StatusEnum.INACTIVE,
         },
         deletedAt: null,
+        Role: {
+          name: RoleEnum.CUSTOMER,
+        },
       },
     ];
 
     if (filter.search) {
       filter.search = filter.search.trim();
 
-      if (RoleEnum[filter?.search?.toUpperCase()] != null) {
-        AND.push({
-          Role: {
+      AND.push({
+        OR: [
+          {
             name: {
-              equals: filter.search,
+              contains: filter.search,
               mode: 'insensitive',
             },
           },
-        });
-      } else {
-        AND.push({
-          OR: [
-            {
-              name: {
-                contains: filter.search,
-                mode: 'insensitive',
-              },
+          {
+            email: {
+              contains: filter.search,
+              mode: 'insensitive',
             },
-            {
-              email: {
-                contains: filter.search,
-                mode: 'insensitive',
-              },
-            },
-          ],
-        });
-      }
+          },
+        ],
+      });
     }
 
     const prismaSelect: UserTypeMap[CrudType.SELECT] = {
       id: true,
-      version: true,
       createdAt: true,
       updatedAt: true,
       status: true,
@@ -91,18 +76,12 @@ export class UserRepository {
     id: number,
     data: UserTypeMap[CrudType.UPDATE],
   ): Promise<User> {
-    await this.validateVersion(id, Number(data?.version));
-
     return await this.prisma.user.update({
       where: {
         id,
-        version: Number(data.version),
       },
       data: {
         ...data,
-        version: {
-          increment: 1,
-        },
       },
     });
   }
@@ -135,9 +114,7 @@ export class UserRepository {
     });
   }
 
-  async deleteAsync(id: number, version: number): Promise<void> {
-    await this.validateVersion(id, Number(version));
-
+  async deleteAsync(id: number): Promise<void> {
     await this.prisma.user.update({
       where: {
         id,
@@ -145,9 +122,6 @@ export class UserRepository {
       data: {
         status: StatusEnum.INACTIVE,
         deletedAt: new Date(),
-        version: {
-          increment: 1,
-        },
       },
     });
   }
@@ -157,24 +131,11 @@ export class UserRepository {
       data: {
         ...data,
         status: StatusEnum.ACTIVE,
-        version: 1,
       },
       include: {
         Role: true,
         Media: true,
       },
-    });
-  }
-
-  async findAllBy(
-    where: UserTypeMap[CrudType.WHERE],
-    select: UserTypeMap[CrudType.SELECT],
-    orderBy?: UserTypeMap[CrudType.ORDER_BY],
-  ) {
-    return await this.prisma.user.findMany({
-      where,
-      select,
-      orderBy,
     });
   }
 
@@ -206,25 +167,7 @@ export class UserRepository {
       data: {
         password,
         recoveryPasswordToken: null,
-        version: {
-          increment: 1,
-        },
       },
     });
-  }
-
-  async validateVersion(id: number, version: number) {
-    if (version === undefined) {
-      throw new BadRequestException('Version is required');
-    }
-
-    const existentUserWithVersion = await this.exists({
-      id,
-      version: Number(version),
-    });
-
-    if (!existentUserWithVersion) {
-      throw new ConflictException('Não existe uma entidade com essa versão');
-    }
   }
 }

@@ -78,7 +78,6 @@ const seedUser = async (
       data: {
         email: ADMIN_EMAIL,
         name: 'Admin User',
-        telephone: '(00) 90000-0000',
         Media: {
           create: {
             url: 'https://example.com/image.jpg',
@@ -89,7 +88,6 @@ const seedUser = async (
         recoveryPasswordToken: null,
         refreshToken: null,
         deletedAt: null,
-        version: 1,
         Role: {
           connect: {
             id: roleAdminId,

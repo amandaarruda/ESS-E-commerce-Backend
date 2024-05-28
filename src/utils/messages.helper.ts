@@ -7,7 +7,6 @@ export const MessagesHelper = {
   FAIL_SENDING_EMAIL: 'Não foi possível enviar o email',
   USER_INACTIVE_TRYING_ACCESS:
     'Usuário inativo, procure o administrador do sistema',
-  TOKEN_INVALID: 'Token inválido',
   RECOVERY_PASSWORD_TOKEN_USED: 'Token de recuperação de senha já utilizado',
   INVALID_TOKEN: 'Token inválido',
   USER_ALREADY_ACTIVED: 'Usuário já está ativo',
@@ -15,9 +14,9 @@ export const MessagesHelper = {
   PASSWORD_ARE_EQUALS: 'Nova senha deve ser diferente da atual',
   DATA_PAGINATION_ERROR: 'Erro ao paginar os dados',
   ID_REQUIRED: 'Id é obrigatório',
-  VERSION_REQUIRED: 'Versão é obrigatória',
   EMAIL_ALREADY_EXISTS: 'Email já cadastrado no sistema',
   ACCESS_DENIED: 'Acesso negado',
+  USER_ADMIN_DELETE: 'Usuário administrador não pode ser deletado',
 };
 
 export enum MessagesHelperKey {
@@ -27,7 +26,6 @@ export enum MessagesHelperKey {
   USER_ALREADY_REGISTERED = 'USER_ALREADY_REGISTERED',
   FAIL_SENDING_EMAIL = 'FAIL_SENDING_EMAIL',
   USER_INACTIVE_TRYING_ACCESS = 'USER_INACTIVE_TRYING_ACCESS',
-  TOKEN_INVALID = 'TOKEN_INVALID',
   RECOVERY_PASSWORD_TOKEN_USED = 'RECOVERY_PASSWORD_TOKEN_USED',
   INVALID_TOKEN = 'INVALID_TOKEN',
   USER_ALREADY_ACTIVED = 'USER_ALREADY_ACTIVED',
@@ -39,6 +37,7 @@ export enum MessagesHelperKey {
   EMAIL_ALREADY_EXISTS = 'EMAIL_ALREADY_EXISTS',
   USER_UPDATE_YOURSELF = 'USER_UPDATE_YOURSELF',
   USER_INACTIVE = 'USER_INACTIVE',
+  USER_ADMIN_DELETE = 'USER_ADMIN_DELETE',
   USER_DELETE_YOURSELF = 'USER_DELETE_YOURSELF',
   USERS_NOT_FOUND = 'USERS_NOT_FOUND',
   ACCESS_DENIED = 'ACCESS_DENIED',

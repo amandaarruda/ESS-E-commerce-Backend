@@ -4,7 +4,6 @@ import {
   Injectable,
   Logger,
   UnauthorizedException,
-  BadRequestException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { RoleEnum, StatusEnum } from '@prisma/client';
@@ -19,8 +18,6 @@ import { UserTypeMap } from 'src/modules/user/entity/user.type.map';
 import { UserRepository } from 'src/modules/user/user.repository';
 import { UserService } from 'src/modules/user/user.service';
 import { CrudType } from 'src/utils/base/ICrudTypeMap';
-import { isDevelopmentEnviroment } from 'src/utils/environment';
-import { generatePassword } from 'src/utils/generate-password';
 import { guardUser } from 'src/utils/guards/guard-user';
 import { hashData } from 'src/utils/hash';
 import {
@@ -29,7 +26,6 @@ import {
   setMessage,
 } from 'src/utils/messages.helper';
 import { recoverTemplateDataBind } from 'src/utils/templates/processors/recover-password-processor';
-import { registrationAdminTemplateDataBind } from 'src/utils/templates/processors/registration-admin-processor';
 import { registrationTemplateDataBind } from 'src/utils/templates/processors/registration-processor';
 import { handleError } from 'src/utils/treat.exceptions';
 
@@ -125,9 +121,7 @@ export class AuthService {
       const createUserData: UserTypeMap[CrudType.CREATE] = {
         name: registerDto.name,
         email: registerDto.email,
-        telephone: registerDto?.telephone,
         password: hash,
-        version: 1,
         status: StatusEnum.ACTIVE,
         ...(registerDto.image && {
           Media: {
@@ -145,7 +139,6 @@ export class AuthService {
 
       const newUser = (await this.userService.createAsync(
         createUserData,
-        currentUser,
       )) as UserEntity;
 
       this.logger.debug(`User ${newUser.email} created`);
@@ -316,7 +309,6 @@ export class AuthService {
 
       await this.userRepository.updateAsync(userDb.id, {
         recoveryPasswordToken: tokenEncrypted,
-        version: userDb.version,
       });
 
       this.logger.debug('Recovery password email was sent');
@@ -331,9 +323,6 @@ export class AuthService {
 
   async changePasswordByRecovery(dto: ChangePasswordByRecovery) {
     this.logger.log('POST in Auth Service - changePasswordByRecovery');
-
-    // Public end point
-    const currentUser = null;
 
     try {
       const userDataByToken: {
@@ -490,9 +479,7 @@ export class AuthService {
       role: user?.Role?.name,
       id: user.id,
       name: user.name,
-      version: user.version,
       email: user.email,
-      telephone: user.telephone,
       recoveryPasswordToken: user.recoveryPasswordToken,
       deletedAt: user.deletedAt,
       createdAt: user.createdAt,

@@ -1,7 +1,7 @@
 import { InternalServerErrorException, HttpException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 
-import { isDevelopmentEnviroment, isTestEnviroment } from './environment';
+import { isDevelopmentEnviroment } from './environment';
 
 export const handleError = (
   error: Error,
