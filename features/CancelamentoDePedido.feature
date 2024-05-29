@@ -16,3 +16,11 @@ Scenario: Cancelar pedido entregue
     And o pedido “Mocassin” com o ID “1101” está com o status “entregue” 
     When usuário seleciona o botão “cancelar pedido”
     Then pop-up com mensagem de aviso “cancelamento não permitido, produto já entregue!" 
+
+Scenario: Cancelar pedido não entregue 1
+    Given que o usuário (cliente) está na página “histórico de pedidos” do usuário “Carla Pinheiro” com CPF “123.456.789-11”
+    And o pedido “Nike Inspiration” com o ID “102” está com o status “em preparação” 
+    When usuário seleciona o botão “cancelar pedido”
+    Then pop-up de confirmação de cancelamento aparece para o usuário
+    And pedido cancelado “Nike Inspiration” com o ID “102”  passa a ter com o status “cancelado
+    And aparece a mensagem “Pedido foi cancelado com sucesso”
