@@ -13,3 +13,10 @@ Scenario: Adicionar Produto ao Carrinho
 	When O usuário de CPF "12312312301" adiciona o produto "Tênis vermelho" ao carrinho
 	Then O usuário de CPF "12312312301" recebe uma sinalização visual com a mensagem "Produto adicionado ao carrinho"
 	And O usuário de CPF "12312312301" visualiza o item "Tênis vermelho" na aba do carrinho
+
+Scenario: Remover Produto do Carrinho
+	Given O usuário de CPF "12312312301" está na página "Carrinho"
+	And O produto “Tênis vermelho” está no carrinho do usuário
+	When O usuário de CPF "12312312301" remove o produto "Tênis vermelho" do carrinho
+	Then O carrinho do usuário de CPF "12312312301" não contém mais o item "Tênis vermelho"
+
