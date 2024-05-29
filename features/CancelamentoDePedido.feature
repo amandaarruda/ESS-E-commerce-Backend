@@ -15,4 +15,4 @@ Scenario: Cancelar pedido entregue
     Given que o usuário (cliente) está na página de histórico de pedidos do usuário “Maria Julia - nome usuário” com CPF “123.456.789-10”
     And o pedido “Mocassin” com o ID “1101” está com o status “entregue” 
     When usuário seleciona o botão “cancelar pedido”
-    Then pop-up com mensagem de erro “cancelamento não permitido, produto já entregue"
+    Then pop-up com mensagem de aviso “cancelamento não permitido, produto já entregue!" 
