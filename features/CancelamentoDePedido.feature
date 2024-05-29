@@ -34,5 +34,6 @@ Scenario: Cancelar pedido não entregue 2
     When usuário seleciona o botão “cancelar pedido”
     Then pop-up de confirmação de cancelamento aparece para o usuário
     And pedido cancelado “Adidas Adventure” com o ID “103” passa a ter com o status “cancelado
-    And aparece a mensagem “Pedido foi cancelado com sucesso”
+    And aparece a mensagem “Pedido foi cancelado com sucesso"
+    And aparece pop-up a mensagem “finalizado"
 >>>>>>> dev
