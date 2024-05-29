@@ -16,3 +16,4 @@ Scenario: Cancelar pedido entregue
     And o pedido “Mocassin” com o ID “1101” está com o status “entregue” 
     When usuário seleciona o botão “cancelar pedido”
     Then pop-up com mensagem de aviso “cancelamento não permitido, produto já entregue!" 
+    And pop-up com mensagem de aviso “finalizado" 
