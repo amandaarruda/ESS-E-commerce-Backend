@@ -20,6 +20,3 @@ Scenario: Remover Produto do Carrinho
 	When O usuário de CPF "12312312301" remove o produto "Tênis vermelho" do carrinho
 	Then O carrinho do usuário de CPF "12312312301" não contém mais o item "Tênis vermelho"
 
-//endline
-
-
