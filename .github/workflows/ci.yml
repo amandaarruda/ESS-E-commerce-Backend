@@ -46,12 +46,9 @@ jobs:
 
     - name: Apply database migrations
       run: npm run prisma:migrate
-
-    - name: Run tests
-      run: npm test
-
-    - name: Run user tests
-      run: npm test:user
     
     - name: Run auth tests
       run: npm test:auth
+
+    - name: Run user tests
+      run: npm test:user
