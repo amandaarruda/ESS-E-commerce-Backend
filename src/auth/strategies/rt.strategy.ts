@@ -31,7 +31,6 @@ export class RtStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
       sub: payload?.sub,
       createdAt: payload?.createdAt,
       deletedAt: payload?.deletedAt,
-      version: payload?.version,
       refreshToken,
     };
   }

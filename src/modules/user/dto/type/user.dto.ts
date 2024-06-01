@@ -9,12 +9,6 @@ export class UserDto {
   id: number;
 
   @ApiResponseProperty({
-    example: 1,
-  })
-  @AutoMap()
-  version: number;
-
-  @ApiResponseProperty({
     example: '03/11/2024',
   })
   @AutoMap()

@@ -24,9 +24,7 @@ export class UserRepository {
           not: StatusEnum.INACTIVE,
         },
         deletedAt: null,
-        Role: {
-          name: RoleEnum.CUSTOMER,
-        },
+        role: RoleEnum.CUSTOMER,
       },
     ];
 
@@ -58,11 +56,7 @@ export class UserRepository {
       status: true,
       email: true,
       name: true,
-      Role: {
-        select: {
-          name: true,
-        },
-      },
+      role: true,
     };
 
     return await Paginator.applyPagination(this.prisma.user, {
@@ -108,7 +102,6 @@ export class UserRepository {
         },
       },
       include: {
-        Role: true,
         Media: true,
       },
     });
@@ -133,7 +126,6 @@ export class UserRepository {
         status: StatusEnum.ACTIVE,
       },
       include: {
-        Role: true,
         Media: true,
       },
     });
@@ -151,7 +143,6 @@ export class UserRepository {
     const user = await this.prisma.user.findUnique({
       where: { email: email?.trim()?.toLowerCase() },
       include: {
-        Role: true,
         Media: true,
       },
     });

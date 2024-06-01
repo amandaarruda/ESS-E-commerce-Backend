@@ -16,7 +16,7 @@ Then o sistema deve registrar um novo usuário cliente,
 And o cliente deve receber uma mensagem de confirmação "Usuário registrado com sucesso".
 
 Cenário: Registrar um usuário cliente com o email já utilizado
-Should throw bad request exception when the user try to register itself with invalid data
+Should throw bad request exception when the user try to register itself with used email
 
 Given que um novo cliente está na tela de registro,
 And existe um usuário cadastrado no sistema com o email "cliente123@gmail.com"

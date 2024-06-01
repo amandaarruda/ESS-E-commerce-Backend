@@ -53,7 +53,7 @@ export const setMessage = (
   reason?: string,
 ): string => {
   return (
-    message.replace('X', JSON.stringify(replace)) +
+    message?.replace('X', JSON.stringify(replace)) +
     (reason ? ` - description: ${reason}` : '')
   );
 };
