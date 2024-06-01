@@ -27,7 +27,7 @@ jobs:
           --health-retries 5
 
     env:
-      DATABASE_URL: "postgresql://root:root@localhost:5432/database_test?schema=public&connect_timeout=30"
+      DATABASE_URL: postgresql://root:root@localhost:5432/database_test?schema=public&connect_timeout=30
       AT_SECRET: AT_sECRET
       RT_SECRET: RT_sECRET
       TK_EMAIL_SECRET: EMAIL_sECRET
@@ -46,6 +46,10 @@ jobs:
 
     - name: Install NPM dependencies
       run: npm install
+
+    - name: Wait for Database Initialization
+      run: |
+        sleep 10
 
     - name: Apply database migrations
       run: npm run prisma:migrate
