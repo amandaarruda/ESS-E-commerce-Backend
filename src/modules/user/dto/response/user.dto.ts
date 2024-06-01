@@ -93,10 +93,4 @@ export class UserResponseDto {
     type: String,
   })
   status: string;
-
-  @AutoMap()
-  @ApiResponseProperty({
-    type: Number,
-  })
-  version: number;
 }

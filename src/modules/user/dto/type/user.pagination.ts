@@ -1,12 +1,9 @@
 import { AutoMap } from '@automapper/classes';
-import { RoleEnum, StatusEnum } from '@prisma/client';
+import { StatusEnum } from '@prisma/client';
 
 export class TUserPagination {
   @AutoMap()
   id: string;
-
-  @AutoMap()
-  version: number;
 
   @AutoMap()
   createdAt: Date | any;
@@ -30,11 +27,7 @@ export class TUserPagination {
   ip: string;
 
   @AutoMap()
-  Roles: {
-    Role: {
-      name: RoleEnum;
-    };
-  }[];
+  role: string;
 
   @AutoMap()
   blocked: boolean;

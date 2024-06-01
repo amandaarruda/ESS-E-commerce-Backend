@@ -45,11 +45,10 @@ export class AuthController {
   @Post('register')
   @IsPublic()
   protected async registerAsync(
-    @AuthenticatedUser() currentUser: UserPayload,
     @Res() response: Response,
     @Body() dto: UserCreateDto,
   ) {
-    const data = await this.authService.register(dto, currentUser);
+    const data = await this.authService.register(dto);
 
     return response.status(HttpStatus.CREATED).json(data.id);
   }

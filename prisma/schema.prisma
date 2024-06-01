@@ -34,9 +34,8 @@ model User {
   createdAt             DateTime   @default(now()) @db.Timestamptz(3)
   updatedAt             DateTime   @updatedAt @db.Timestamptz(3)
   status                StatusEnum @default(ACTIVE)
-  roleId                Int        @db.Integer
   mediaId               Int?       @db.Integer
-  Role                  Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  role                  RoleEnum
   Media                 Media?     @relation(fields: [mediaId], references: [id], onDelete: SetNull)
   orders                Order[]
 
@@ -131,15 +130,4 @@ model Media {
   productMedia ProductMedia[]
 
   @@map("TB_MEDIA")
-}
-
-model Role {
-  id        Int        @id @default(autoincrement())
-  createdAt DateTime   @default(now()) @db.Timestamptz(3)
-  deletedAt DateTime?  @db.Timestamptz(3)
-  name      RoleEnum   @unique
-  status    StatusEnum @default(ACTIVE)
-  User      User[]
-
-  @@map("TB_ROLE")
 }
