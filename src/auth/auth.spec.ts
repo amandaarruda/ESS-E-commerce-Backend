@@ -1,39 +1,34 @@
+import { classes } from '@automapper/classes';
 import {
-  Mapper,
   createMapper,
   CamelCaseNamingConvention,
   SnakeCaseNamingConvention,
 } from '@automapper/core';
 import { AutomapperModule, getMapperToken } from '@automapper/nestjs';
-import {
-  NotFoundException,
-  ConflictException,
-  BadRequestException,
-  ForbiddenException,
-} from '@nestjs/common';
+import { UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { RoleEnum, StatusEnum } from '@prisma/client';
+import { any, anyObject, anyString } from 'jest-mock-extended';
 import { AuthRepository } from 'src/auth/auth.repository';
 import { AuthService } from 'src/auth/auth.service';
-import { UserPayload } from 'src/auth/models/UserPayload';
-import { compareHash, hashData } from 'src/utils/hash';
+import { EmailService } from 'src/modules/email/email.service';
+import { UserEntity } from 'src/modules/user/entity/user.entity';
+import { UserMapping } from 'src/modules/user/user.mapping';
+import { UserRepository } from 'src/modules/user/user.repository';
+import { UserService } from 'src/modules/user/user.service';
+import { hashData } from 'src/utils/hash';
 
-import { EmailService } from '../email/email.service';
-import { UserCreateDto } from './dto/request/user.create.dto';
-import { UserEntity } from './entity/user.entity';
-import { UserMapping } from './user.mapping';
-import { UserRepository } from './user.repository';
-import { UserService } from './user.service';
-import { UpdateUserPassword } from './dto/request/update.personal.password.dto';
-import { classes } from '@automapper/classes';
+import { ChangePasswordByRecovery } from './dto/request/change-password-by-recovery.dto';
+import { LoginDto } from './dto/request/login.dto';
+import { UserToken } from './dto/response/UserToken';
+import { UserPayload } from './models/UserPayload';
 
-describe('UsersService', () => {
-  let service: UserService;
+describe('AuthService', () => {
+  let userService: UserService;
   let authService: AuthService;
   let userRepositoryMock: jest.Mocked<UserRepository>;
   let authRepositoryMock: jest.Mocked<AuthRepository>;
-  let mapperMock: Mapper;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -86,248 +81,262 @@ describe('UsersService', () => {
       ],
     }).compile();
 
-    service = module.get<UserService>(UserService);
+    userService = module.get<UserService>(UserService);
     authService = module.get<AuthService>(AuthService);
 
     userRepositoryMock = module.get(UserRepository);
     authRepositoryMock = module.get(AuthRepository);
-    mapperMock = module.get(getMapperToken());
   });
 
   beforeEach(() => {
     authService.updateRt = jest.fn(() => Promise.resolve());
     authService.sendRegistrationEmail = jest.fn(() => Promise.resolve());
+    authService.sendEmailRecovery = jest.fn(() => Promise.resolve());
   });
 
-  describe('Create', () => {
-    it('Should create a new user', async () => {
-      /* 
-      Should register an customer user
-      Given que um novo cliente está na tela de registro,
-        And o usuário preenche o campo nome com o valor "cliente cadatro"
-        And o usuário preenche o campo email com o valor "cliente@gmail.com"
-        And o usuário preenche o campo senha com o valor "Senha@1238"
-        And não existe outro usuário com o mesmo email cadastrado no sistema
-      When clica no botão "Registrar",
-      Then o sistema deve registrar um novo usuário cliente,
-        And o cliente deve receber uma mensagem de confirmação "Usuário registrado com sucesso".
-       */
+  describe('Login > Validate User', () => {
+    it('Should validate user successfully', async () => {
+      /*
+    Cenário: Login
+    Should return a status 200 and the JWT access and refresh in the body
+
+    Given que o usuário inseriu no campo email o valor "email@gmail.com" 
+    And o usuário inseriu no campo senha o valor "teste",
+    And existe um usuário no sistema com o email "email@gmail.com" e com a senha "teste",
+    And o campo "status" do usuário está como "ACTIVE",
+    When clica em “Fazer login no sistema”,
+    Then o usuário deve ser redirecionado para a página inicial da aplicação autenticado
+    And deve receber a token de acesso na resposta da requisição
+    And deve receber a token de refresh na resposta da requisição
+    */
 
       // Given
-      const userName = 'cliente cadastro';
-      const userEmail = 'cliente@gmail.com';
-      const userPassword = 'Senha@1238';
-      const userRole = RoleEnum.CUSTOMER;
+      const userEmail = 'email@gmail.com';
+      const userPassword = 'teste';
 
-      // Mocking repository methods
-      userRepositoryMock.exists.mockResolvedValue(Promise.resolve(false));
-
-      const mockReturn: UserEntity = {
+      const existingUser: UserEntity = {
         id: 1,
-        name: userName,
+        name: 'administrador cliente',
         email: userEmail,
         password: await hashData(userPassword),
         refreshToken: null,
         recoveryPasswordToken: '',
         deletedAt: null,
         createdAt: new Date(),
-        updatedAt: null,
+        updatedAt: new Date(),
         status: StatusEnum.ACTIVE,
         Media: null,
         mediaId: null,
-        role: userRole,
+        role: RoleEnum.CUSTOMER,
       };
 
-      userRepositoryMock.createAsync.mockResolvedValue(
-        Promise.resolve(mockReturn),
+      jest.spyOn(userService, 'findByEmail').mockResolvedValue(existingUser);
+
+      // When
+      const validatedUser = await authService.validateUser(
+        userEmail,
+        userPassword,
       );
 
-      const createUserDto: UserCreateDto = {
-        name: userName,
+      // Then
+      expect(validatedUser).toBeDefined();
+      expect(validatedUser.email).toEqual(userEmail);
+      expect(validatedUser.status).toEqual(StatusEnum.ACTIVE);
+    });
+
+    it('Should throw UnauthorizedException if user is not found', async () => {
+      // Given
+      const userEmail = 'email@gmail.com';
+      const userPassword = 'teste';
+
+      jest.spyOn(userService, 'findByEmail').mockResolvedValue(null);
+
+      // When
+      const validateUser = async () =>
+        await authService.validateUser(userEmail, userPassword);
+
+      // Then
+      await expect(validateUser).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('Should throw UnauthorizedException if user is inactive', async () => {
+      /*
+      Cenário: Login com um usuário inativo
+      Should throw an forbidden exception
+
+      Given que o usuário inseriu no campo email o valor "email@gmail.com" 
+        And o usuário inseriu no campo senha o valor "teste",
+        And existe um usuário no sistema com o email "email@gmail.com" e com a senha "teste",
+        And o campo "status" do usuário está como "INACTIVE",
+      When tenta fazer login no sistema,
+      Then deve lançar uma exceção de proibido (Forbidden).
+        And o usuário deve se manter na tela de login
+        And o usuário deve ver uma mensagem de “Usuário inativo”
+      */
+
+      // Given
+      const userEmail = 'email@gmail.com';
+      const userPassword = 'teste';
+
+      const inactiveUser: UserEntity = {
+        id: 1,
+        name: 'administrador cliente',
+        email: userEmail,
+        password: await hashData(userPassword),
+        refreshToken: null,
+        recoveryPasswordToken: '',
+        deletedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        status: StatusEnum.INACTIVE,
+        Media: null,
+        mediaId: null,
+        role: RoleEnum.CUSTOMER,
+      };
+
+      jest.spyOn(userService, 'findByEmail').mockResolvedValue(inactiveUser);
+
+      // When
+      const validateUser = async () =>
+        await authService.validateUser(userEmail, userPassword);
+
+      // Then
+      await expect(validateUser).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('Should throw UnauthorizedException if password is invalid', async () => {
+      /*
+      Cenário: Login com um email/senha inválido
+      Should throw an unauthorized exception
+
+      Given que o usuário inseriu no campo email o valor "email@gmail.com" 
+        And o usuário inseriu no campo senha o valor "teste@123",
+        And não existe um usuário no sistema com o email "email@gmail.com",
+      When clica em “Fazer login no sistema”,
+      Then o usuário deve ver uma mensagem de “Login ou senha incorreta”
+        And o usuário deve se manter na tela de login
+        And o usuário recebe uma mensagem de não autorizado "Email ou senha incorretos"
+      */
+
+      // Given
+      const userEmail = 'email@gmail.com';
+      const userPassword = 'validPassword';
+
+      const existingUser: UserEntity = {
+        id: 1,
+        name: 'administrador cliente',
+        email: userEmail,
+        password: await hashData(userPassword),
+        refreshToken: null,
+        recoveryPasswordToken: '',
+        deletedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        status: StatusEnum.ACTIVE,
+        Media: null,
+        mediaId: null,
+        role: RoleEnum.CUSTOMER,
+      };
+
+      jest.spyOn(userService, 'findByEmail').mockResolvedValue(existingUser);
+
+      // When
+      const wrongUserPassword = 'invalidpassword';
+      const validateUser = async () =>
+        await authService.validateUser(userEmail, wrongUserPassword);
+
+      // Then
+      await expect(validateUser).rejects.toThrow(UnauthorizedException);
+    });
+  });
+
+  describe('Login', () => {
+    /*
+    Cenário: Login
+    Should return a status 200 and the JWT access and refresh in the body
+
+    Given que o usuário inseriu no campo email o valor "email@gmail.com" 
+    And o usuário inseriu no campo senha o valor "teste",
+    And existe um usuário no sistema com o email "email@gmail.com" e com a senha "teste",
+    And o campo "status" do usuário está como "ACTIVE",
+    When clica em “Fazer login no sistema”,
+    Then o usuário deve ser redirecionado para a página inicial da aplicação autenticado
+    And deve receber a token de acesso na resposta da requisição
+    And deve receber a token de refresh na resposta da requisição
+    */
+
+    it('Should return tokens for a valid user', async () => {
+      // Given
+      const userEmail = 'email@gmail.com';
+      const userPassword = 'teste';
+      const user: UserEntity = {
+        id: 1,
+        name: 'User Test',
+        email: userEmail,
+        password: await hashData(userPassword),
+        refreshToken: null,
+        recoveryPasswordToken: '',
+        deletedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        status: StatusEnum.ACTIVE,
+        Media: null,
+        mediaId: null,
+        role: null,
+      };
+      jest.spyOn(userService, 'findByEmail').mockResolvedValue(user);
+
+      const loginDto: LoginDto = {
         email: userEmail,
         password: userPassword,
       };
 
       // When
-      const result = await authService.register(createUserDto);
+      const tokens: UserToken = await authService.login(loginDto);
 
       // Then
-      expect(result).toEqual(
-        expect.objectContaining({
-          password: expect.any(String),
-          email: userEmail,
-          name: userName,
-        }),
-      );
-      expect(result.status).toBe(StatusEnum.ACTIVE);
-      expect(userRepositoryMock.exists).toHaveBeenCalledWith({
-        email: userEmail,
-      });
-      expect(userRepositoryMock.createAsync).toHaveBeenCalledWith(
-        expect.objectContaining({
-          name: userName,
-          email: userEmail,
-          status: StatusEnum.ACTIVE,
-          role: RoleEnum.CUSTOMER,
-        }),
-      );
+      expect(tokens).toBeDefined();
+      expect(tokens.accessToken).toBeDefined();
+      expect(tokens.refreshToken).toBeDefined();
     });
 
-    it('Should throw conflict request exception when the user try to register with an already used email', async () => {
-      /*
-      Cenário: Registrar um usuário cliente com o email já utilizado
-      Should throw bad request exception when the user try to register itself with used email
-
-      Given que um novo cliente está na tela de registro,
-        And existe um usuário cadastrado no sistema com o email "cliente123@gmail.com"
-        And o usuário insere o email dele "cliente123@gmail.com"
-        And o usuário insere o nome dele "cliente abc"
-        And o usuário insere a senha dele "ClienteAbc@123"
-        And clica no botão "Registrar",
-      Then o sistema não deve cadastrar o usuário
-        And o cliente deve receber uma mensagem de erro "Email já utilizado por outro usuário".
-      */
-
+    it('Should throw an error for an invalid user', async () => {
       // Given
-      const createUserDto: UserCreateDto = {
-        name: 'cliente abc',
-        email: 'cliente123@gmail.com',
-        password: 'ClienteAbc@123',
+      const userEmail = 'email@gmail.com';
+      const userPassword = 'invalidpassword';
+      jest.spyOn(userService, 'findByEmail').mockResolvedValue(null);
+
+      const loginDto: LoginDto = {
+        email: userEmail,
+        password: userPassword,
       };
 
-      // And already exists an user with the same email
-      userRepositoryMock.exists.mockResolvedValue(Promise.resolve(true));
-
       // When
-      const createUser = async () => await authService.register(createUserDto);
+      const login = async () => await authService.login(loginDto);
 
       // Then
-      await expect(createUser).rejects.toThrow(ConflictException);
-      expect(userRepositoryMock.exists).toHaveBeenCalledWith({
-        email: createUserDto.email,
-      });
+      await expect(login).rejects.toThrow(UnauthorizedException);
     });
   });
 
-  describe('Deleting user', () => {
-    it('Should set the user status to "Inactive"', async () => {
-      // Given
-      const id = 1;
-      const userEmail = 'cliente123@gmail.com';
-
-      const userToUpdate: UserEntity = {
-        id: 1,
-        name: 'cliente cadastro',
-        email: userEmail,
-        password: 'mockValue',
-        refreshToken: null,
-        recoveryPasswordToken: '',
-        deletedAt: null,
-        createdAt: new Date(),
-        updatedAt: null,
-        status: StatusEnum.ACTIVE,
-        Media: null,
-        mediaId: null,
-        role: RoleEnum.CUSTOMER,
-      };
-
-      // Mockando o usuário cliente a ser deletado
-      userRepositoryMock.findByEmail.mockResolvedValue(userToUpdate);
-      userRepositoryMock.exists.mockResolvedValue(Promise.resolve(true));
-      userRepositoryMock.deleteAsync.mockResolvedValue(Promise.resolve());
-      userRepositoryMock.findByIdAsync.mockResolvedValue(userToUpdate);
-
-      // When
-      await service.deleteAsync(id);
-
-      // Then
-      expect(userRepositoryMock.findByIdAsync).toHaveBeenCalledWith(id);
-      expect(userRepositoryMock.exists).toHaveBeenCalledWith({ id });
-      expect(userRepositoryMock.deleteAsync).toHaveBeenCalledWith(id);
-    });
-
-    it('Should throw ForbiddenException when user with given email is already inactive', async () => {
-      // Given
-      const id = 1;
-      const userEmail = 'cliente123@gmail.com';
-
-      const inactiveUser: UserEntity = {
-        id: 1,
-        name: 'cliente cadastro',
-        email: userEmail,
-        password: 'mockValue',
-        refreshToken: null,
-        recoveryPasswordToken: '',
-        deletedAt: new Date(),
-        createdAt: new Date(),
-        updatedAt: null,
-        status: StatusEnum.INACTIVE,
-        Media: null,
-        mediaId: null,
-        role: RoleEnum.CUSTOMER,
-      };
-
-      userRepositoryMock.exists.mockResolvedValue(Promise.resolve(true));
-      userRepositoryMock.findByIdAsync.mockResolvedValue(inactiveUser);
-
-      // When
-      const deleteUser = async () => await service.deleteAsync(id);
-
-      // Then
-      await expect(deleteUser).rejects.toThrow(ForbiddenException);
-    });
-
-    it('Should throw NotFoundException when user with given email does not exist', async () => {
-      // Given
-      const id = 1;
-
-      userRepositoryMock.findByIdAsync.mockResolvedValue(null);
-
-      // When
-      const deleteUser = async () => await service.deleteAsync(id);
-
-      // Then
-      await expect(deleteUser).rejects.toThrow(NotFoundException);
-    });
-  });
-
-  describe('Update User Personal Data', () => {
-    it('Should update the register data of the logged user', async () => {
+  describe('Recovery password', () => {
+    it('Should send an email with the recovery password link', async () => {
       /*
-      Cenário: Atualizar os próprios dados
-      Should update the register data of the logged user
-  
-      Given que o usuário "cliente123@gmail.com" está logado no sistema,
-        And está na tela de perfil,
-        And o email dele é igual a "cliente123@gmail.com"
-        And o nome dele é "administrador cliente"
-      When o usuário altera o nome dele para "cliente normal"
-        And clica na opção de atualizar
-      Then o sistema deve atualizar os dados do usuário logado,
-        And o usuário deve receber uma mensagem de confirmação "Dados atualizados com sucesso".
-        And o usuário vai ver o seu nome atualizado no sistema
+      Cenário: Solicitar recuperação de senha
+      Given que o usuário inseriu o valor "email@gmail.com" no campo de email
+        And No sistema existe um usuário com o campo email com o valor "email@gmail.com"
+      When ele clica em “Recuperar senha”
+      Then ele deve ver uma mensagem de “Se o e mail existir, você receberá instruções de recuperação na sua caixa de email”
       */
 
       // Given
-      const currentUser: UserPayload = {
-        id: 1,
-        email: 'cliente123@gmail.com',
-        sub: 'cliente123@gmail.com',
-        name: 'cliente',
-        role: RoleEnum.CUSTOMER,
-        status: StatusEnum.ACTIVE,
-        createdAt: new Date().toString(),
-        iat: 0,
-        exp: 0,
-      };
+      const userEmail = 'email@gmail.com';
 
-      const updatedName = 'cliente atualizado';
-
-      const existingUser: UserEntity = {
+      const user: UserEntity = {
         id: 1,
-        name: 'administrador cliente',
-        email: 'cliente123@gmail.com',
-        password: 'mockPassword',
+        name: 'User Test',
+        email: userEmail,
+        password: await hashData('random'),
         refreshToken: null,
         recoveryPasswordToken: '',
         deletedAt: null,
@@ -336,433 +345,102 @@ describe('UsersService', () => {
         status: StatusEnum.ACTIVE,
         Media: null,
         mediaId: null,
-        role: RoleEnum.CUSTOMER,
+        role: null,
       };
 
-      // Mocking repository methods
-      userRepositoryMock.findByIdAsync.mockResolvedValue(existingUser);
-      userRepositoryMock.updateAsync.mockResolvedValue({
-        ...existingUser,
-        name: updatedName,
-      });
-
-      const updateUserPersonalDataDto = {
-        name: updatedName,
-      };
+      jest.spyOn(userService, 'findByEmail').mockResolvedValue(user);
 
       // When
-      await service.updateUserPersonalData(
-        updateUserPersonalDataDto,
-        currentUser,
-      );
+      const dto = { email: userEmail };
+      await authService.sendRecoveryPasswordEmail(dto);
 
       // Then
-      expect(userRepositoryMock.findByIdAsync).toHaveBeenCalledWith(
-        currentUser.id,
-      );
-      expect(userRepositoryMock.updateAsync).toHaveBeenCalledWith(
-        currentUser.id,
-        {
-          name: updatedName,
-        },
-      );
+      expect(userService.findByEmail).toHaveBeenCalledWith(userEmail);
+      expect(userRepositoryMock.updateAsync).toHaveBeenCalled();
+      expect(authService.sendEmailRecovery).toHaveBeenCalledWith(any(), user);
     });
 
-    it('Should not update if no data is provided', async () => {
-      // Given
-      const currentUser: UserPayload = {
-        id: 1,
-        email: 'cliente123@gmail.com',
-        sub: 'cliente123@gmail.com',
-        name: 'cliente',
-        role: RoleEnum.CUSTOMER,
-        status: StatusEnum.ACTIVE,
-        createdAt: new Date().toString(),
-        iat: 0,
-        exp: 0,
-      };
-
-      const updateUserPersonalDataDto = {}; // No data provided
-
-      // When
-      await service.updateUserPersonalData(
-        updateUserPersonalDataDto,
-        currentUser,
-      );
-
-      // Then
-      expect(userRepositoryMock.findByIdAsync).not.toHaveBeenCalled();
-      expect(userRepositoryMock.updateAsync).not.toHaveBeenCalled();
-    });
-
-    it('Should throw error if user not found', async () => {
-      // Given
-      const currentUser: UserPayload = {
-        id: 1,
-        email: 'cliente123@gmail.com',
-        sub: 'cliente123@gmail.com',
-        name: 'cliente',
-        role: RoleEnum.CUSTOMER,
-        status: StatusEnum.ACTIVE,
-        createdAt: new Date().toString(),
-        iat: 0,
-        exp: 0,
-      };
-
-      const updatedName = 'cliente normal';
-
-      userRepositoryMock.findByIdAsync.mockResolvedValue(null); // User not found
-
-      const updateUserPersonalDataDto = {
-        name: updatedName,
-      };
-
-      // When
-      const updateUser = async () =>
-        await service.updateUserPersonalData(
-          updateUserPersonalDataDto,
-          currentUser,
-        );
-
-      // Then
-      await expect(updateUser).rejects.toThrow(NotFoundException);
-    });
-
-    it('Should throw error if user is inactive or deleted', async () => {
-      // Given
-      const currentUser: UserPayload = {
-        id: 1,
-        email: 'cliente123@gmail.com',
-        sub: 'cliente123@gmail.com',
-        name: 'cliente',
-        role: RoleEnum.CUSTOMER,
-        status: StatusEnum.ACTIVE,
-        createdAt: new Date().toString(),
-        iat: 0,
-        exp: 0,
-      };
-
-      const updatedName = 'cliente normal';
-
-      const inactiveUser: UserEntity = {
-        id: 1,
-        name: 'administrador cliente',
-        email: 'cliente123@gmail.com',
-        password: 'mockPassword',
-        refreshToken: null,
-        recoveryPasswordToken: '',
-        deletedAt: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        status: StatusEnum.INACTIVE,
-        Media: null,
-        mediaId: null,
-        role: RoleEnum.CUSTOMER,
-      };
-
-      userRepositoryMock.findByIdAsync.mockResolvedValue(inactiveUser);
-
-      const updateUserPersonalDataDto = {
-        name: updatedName,
-      };
-
-      // When
-      const updateUser = async () =>
-        await service.updateUserPersonalData(
-          updateUserPersonalDataDto,
-          currentUser,
-        );
-
-      // Then
-      await expect(updateUser).rejects.toThrow(ForbiddenException);
-    });
-  });
-
-  describe('Update User Password', () => {
-    it('Should update the logged user password', async () => {
+    it('Should change the user password by recovery token', async () => {
       /*
-      Cenário: Atualizar a própria senha com sucesso
-      Should update the logged user password
-  
-      Given que o usuário "administrador123@gmail.com" está logado no sistema,
-        And está na tela de edição de senha,
-        And a senha atual é igual a "Senha@123"
-      When o usuário preenche o campos de senha atual com o valor "Senha@123"
-        And o usuário preenche o campo nova senha com o valor "Senha@8858"
-        And clica na opção de atualizar senha,
-      Then o sistema deve atualizar a senha do usuário logado,
-        And o usuário deve receber uma mensagem de confirmação "Senha atualizada com sucesso"
-        And o usuário não deve mais conseguir logar com a senha antiga
+      Cenário: Trocar a senha com a token de recuperação válida
+      Should change the password from the token’s user 
+
+      Given que o usuário tem uma token de recuperação com o valor "192x7x8asjdjas89d8"
+        And o sistema tem a token de recuperação com o valor "192x7x8asjdjas89d8" atrelado ao email "email@gmail.com"
+        And o usuário inseriu no campo senha o valor "Senha@8858"
+      When o usuário clica em “Trocar senha”
+      Then a senha do usuário atrelado a token de recuperação é modificada
+        And o usuário ver uma mensagem de sucesso na tela “Senha trocada com sucesso”
+        And o usuário é redirecionado para a tela de login
       */
 
       // Given
-      const currentUser: UserPayload = {
-        id: 1,
-        email: 'cliente123@gmail.com',
-        sub: 'cliente123@gmail.com',
-        name: 'cliente',
-        role: RoleEnum.CUSTOMER,
-        status: StatusEnum.ACTIVE,
-        createdAt: new Date().toString(),
-        iat: 0,
-        exp: 0,
-      };
-
-      const currentPassword = 'Senha@123';
+      const userEmail = 'email@gmail.com';
+      const recoveryPasswordToken = 'recoveryPasswordToken';
       const newPassword = 'Senha@8858';
-
-      const currentPasswordHashed = await hashData(currentPassword);
-      const existingUser: UserEntity = {
-        id: 1,
-        name: 'Administrador',
-        email: 'administrador123@gmail.com',
-        password: currentPasswordHashed,
-        refreshToken: null,
-        recoveryPasswordToken: '',
-        deletedAt: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        status: StatusEnum.ACTIVE,
-        Media: null,
-        mediaId: null,
-        role: RoleEnum.ADMIN,
-      };
-
-      // Mocking repository methods
-      userRepositoryMock.findByIdAsync.mockResolvedValue(existingUser);
-      userRepositoryMock.updateUserPassword.mockResolvedValue(Promise.resolve());
-
-      const updateUserPasswordDto: UpdateUserPassword = {
-        actualPassword: currentPassword,
-        newPassword: newPassword,
-      };
-
-      // When
-      await service.updateUserPassword(updateUserPasswordDto, currentUser);
-
-      // Then
-      expect(userRepositoryMock.findByIdAsync).toHaveBeenCalledWith(
-        currentUser.id,
-      );
-      expect(userRepositoryMock.updateUserPassword).toHaveBeenCalledWith(
-        currentUser.id,
-        expect.any(String),
-      );
-
-      // Verifying that the user can log in with the new password
       const hashedNewPassword = await hashData(newPassword);
-      const isNewPasswordValid = await compareHash(
+
+      const userId = 1;
+
+      const currentUser: UserPayload = {
+        id: userId,
+        email: userEmail,
+        sub: userEmail,
+        name: 'cliente',
+        role: RoleEnum.CUSTOMER,
+        status: StatusEnum.ACTIVE,
+        createdAt: new Date().toString(),
+        iat: 0,
+        exp: 0,
+      };
+
+      const userFindBy: UserEntity = {
+        id: userId,
+        name: 'administrador cliente',
+        email: userEmail,
+        password: await hashData('mockPassword'),
+        refreshToken: null,
+        recoveryPasswordToken: await hashData(recoveryPasswordToken),
+        deletedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        status: StatusEnum.ACTIVE,
+        Media: null,
+        mediaId: null,
+        role: RoleEnum.CUSTOMER,
+      };
+
+      jest
+        .spyOn(authService, 'decodeEmailToken')
+        .mockResolvedValue(currentUser);
+
+      jest.spyOn(userService, 'findBy').mockResolvedValue(userFindBy);
+
+      jest
+        .spyOn(userRepositoryMock, 'updateUserPassword')
+        .mockResolvedValue(Promise.resolve());
+
+      // When
+      const dto: ChangePasswordByRecovery = {
+        recoveryToken: recoveryPasswordToken,
         newPassword,
-        hashedNewPassword,
+      };
+      await authService.changePasswordByRecovery(dto);
+
+      // Then
+      expect(authService.decodeEmailToken).toHaveBeenCalledWith(
+        recoveryPasswordToken,
       );
 
-      expect(isNewPasswordValid).toBe(true);
-    });
+      expect(userService.findBy).toHaveBeenCalledWith(
+        { email: userEmail },
+        anyObject(),
+      );
 
-    it('Should throw error if actual password is the same as the new password', async () => {
-      // Given
-      const currentUser: UserPayload = {
-        id: 1,
-        email: 'cliente123@gmail.com',
-        sub: 'cliente123@gmail.com',
-        name: 'cliente',
-        role: RoleEnum.CUSTOMER,
-        status: StatusEnum.ACTIVE,
-        createdAt: new Date().toString(),
-        iat: 0,
-        exp: 0,
-      };
-
-      const password = 'Senha@123';
-
-      const updateUserPasswordDto: UpdateUserPassword = {
-        actualPassword: password,
-        newPassword: password,
-      };
-
-      // When
-      const updateUserPassword = async () =>
-        await service.updateUserPassword(updateUserPasswordDto, currentUser);
-
-      // Then
-      await expect(updateUserPassword).rejects.toThrow(BadRequestException);
-    });
-
-    it('Should throw error if actual password is incorrect', async () => {
-      // Given
-      const currentUser: UserPayload = {
-        id: 1,
-        email: 'cliente123@gmail.com',
-        sub: 'cliente123@gmail.com',
-        name: 'cliente',
-        role: RoleEnum.CUSTOMER,
-        status: StatusEnum.ACTIVE,
-        createdAt: new Date().toString(),
-        iat: 0,
-        exp: 0,
-      };
-
-      const currentPassword = 'Senha@123';
-      const wrongPassword = 'SenhaErrada@123';
-      const newPassword = 'Senha@8858';
-
-      const existingUser: UserEntity = {
-        id: 1,
-        name: 'Administrador',
-        email: 'administrador123@gmail.com',
-        password: await hashData(currentPassword),
-        refreshToken: null,
-        recoveryPasswordToken: '',
-        deletedAt: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        status: StatusEnum.ACTIVE,
-        Media: null,
-        mediaId: null,
-        role: RoleEnum.ADMIN,
-      };
-
-      // Mocking repository methods
-      userRepositoryMock.findByIdAsync.mockResolvedValue(existingUser);
-
-      const updateUserPasswordDto: UpdateUserPassword = {
-        actualPassword: wrongPassword,
-        newPassword: newPassword,
-      };
-
-      // When
-      const updateUserPassword = async () =>
-        await service.updateUserPassword(updateUserPasswordDto, currentUser);
-
-      // Then
-      await expect(updateUserPassword).rejects.toThrow(BadRequestException);
+      expect(userRepositoryMock.updateUserPassword).toHaveBeenCalledWith(
+        userId,
+        anyString(),
+      );
     });
   });
-
-  describe('Delete user / delete myself', () => {
-      
-    it('Should delete user', async () => {
-      /*
-      Cenário: Deleção da própria conta
-      Should set the current logged user status to inactive
-
-      Given que o usuário "usuario@gmail.com" está logado no sistema,
-        And está com o status ativo,
-        And está na tela de perfil,
-      When ele seleciona a opção de deletar conta,
-      Then o sistema deve definir o status do usuário logado como inativo,
-        And o usuário deve receber uma mensagem de confirmação "Conta inativada com sucesso"
-        And o usuário deve ser deslogado do sistema.
-      */
-     
-      // Given
-      const userId = 1;
-      const existingUser: UserEntity = {
-        id: userId,
-        name: 'cliente',
-        email: 'cliente123@gmail.com',
-        password: 'Senha@123',
-        refreshToken: null,
-        recoveryPasswordToken: '',
-        deletedAt: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        status: StatusEnum.ACTIVE,
-        Media: null,
-        mediaId: null,
-        role: RoleEnum.CUSTOMER,
-      };
-  
-      userRepositoryMock.exists.mockResolvedValue(true);
-      userRepositoryMock.findByIdAsync.mockResolvedValue(existingUser);
-  
-      // When
-      await service.deleteAsync(userId);
-  
-      // Then
-      expect(userRepositoryMock.deleteAsync).toHaveBeenCalledWith(userId);
-    });
-
-    it('Should throw BadRequestException if id is null', async () => {
-      // When
-      const deleteUser = async () => await service.deleteAsync(null);
-  
-      // Then
-      await expect(deleteUser).rejects.toThrow(BadRequestException);
-    });
-  
-    it('Should throw NotFoundException if user does not exist', async () => {
-      // Given
-      userRepositoryMock.exists.mockResolvedValue(false);
-      const userId = 1;
-
-      // When
-      const deleteUser = async () => await service.deleteAsync(userId);
-  
-      // Then
-      await expect(deleteUser).rejects.toThrow(NotFoundException);
-      expect(userRepositoryMock.exists).toHaveBeenCalledWith({ id: userId });
-    });
-  
-    it('Should throw ForbiddenException if user is already inactive', async () => {
-      // Given
-      const userId = 1;
-      const existingUser: UserEntity = {
-        id: userId,
-        name: 'cliente',
-        email: 'cliente123@gmail.com',
-        password: 'Senha@123',
-        refreshToken: null,
-        recoveryPasswordToken: '',
-        deletedAt: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        status: StatusEnum.INACTIVE,
-        Media: null,
-        mediaId: null,
-        role: RoleEnum.CUSTOMER,
-      };
-      
-
-      userRepositoryMock.exists.mockResolvedValue(true);
-      userRepositoryMock.findByIdAsync.mockResolvedValue(existingUser);
-  
-      // When
-      const deleteUser = async () => await service.deleteAsync(userId);
-  
-      // Then
-      await expect(deleteUser).rejects.toThrow(ForbiddenException);
-      expect(userRepositoryMock.findByIdAsync).toHaveBeenCalledWith(userId);
-    });
-  
-    it('Should throw ForbiddenException if user is an admin', async () => {
-      // Given
-      const userId = 1;
-      const existingUser: UserEntity = {
-        id: userId,
-        name: 'admin',
-        email: 'admin@gmail.com',
-        password: 'Senha@123',
-        refreshToken: null,
-        recoveryPasswordToken: '',
-        deletedAt: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        status: StatusEnum.ACTIVE,
-        Media: null,
-        mediaId: null,
-        role: RoleEnum.ADMIN,
-      };
-  
-      userRepositoryMock.exists.mockResolvedValue(true);
-      userRepositoryMock.findByIdAsync.mockResolvedValue(existingUser);
-  
-      // When
-      const deleteUser = async () => await service.deleteAsync(userId);
-  
-      // Then
-      await expect(deleteUser).rejects.toThrow(ForbiddenException);
-      expect(userRepositoryMock.findByIdAsync).toHaveBeenCalledWith(userId);
-    });
-  })
 });

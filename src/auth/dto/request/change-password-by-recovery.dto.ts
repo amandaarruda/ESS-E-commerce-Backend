@@ -27,15 +27,15 @@ export class ChangePasswordByRecovery {
   newPassword: string;
 
   @IsNotEmpty({
-    message: 'O token de acesso é obrigatório',
+    message: 'O token de recuperação é obrigatória',
   })
   @ApiProperty({
-    description: 'Token de acesso',
+    description: 'Token de recuperação',
     example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZjI',
   })
   @Transform(
     ({ value }: TransformFnParams) =>
       typeof value === 'string' && value?.trim(),
   )
-  accessToken: string;
+  recoveryToken: string;
 }
