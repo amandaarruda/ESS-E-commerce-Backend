@@ -3,9 +3,6 @@ name: Continuous Integration
 on:
   pull_request:
     branches: [ main, develop ]
-  push:
-    branches:
-      - '*'
       
 jobs:
   run-tests:
@@ -13,21 +10,20 @@ jobs:
 
     services:
       postgres:
-        image: postgres:15.4-alpine
+        image: postgres
         env:
-          POSTGRES_USER: root
-          POSTGRES_PASSWORD: root
-          POSTGRES_DB: database_test
-        ports:
-          - 5432:5432
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+        ports:
+          - 5432:5432
 
     env:
-      DATABASE_URL: postgresql://root:root@localhost:5432/database_test?schema=public&connect_timeout=30
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/database_test
       AT_SECRET: AT_sECRET
       RT_SECRET: RT_sECRET
       TK_EMAIL_SECRET: EMAIL_sECRET
@@ -35,6 +31,8 @@ jobs:
       JWT_ACCESS_LIFETIME: 1h
       JWT_REFRESH_LIFETIME: 7d
       ENV: TEST
+      SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+      EMAIL_OPTIONS_FROM: ${{ secrets.EMAIL_OPTIONS_FROM }}
 
     steps:
     - uses: actions/checkout@v2
@@ -47,15 +45,11 @@ jobs:
     - name: Install NPM dependencies
       run: npm install
 
-    - name: Wait for Database Initialization
-      run: |
-        sleep 60
-
     - name: Apply database migrations
       run: npm run prisma:migrate
     
     - name: Run auth tests
-      run: npm test:auth
+      run: npm run test:auth
 
     - name: Run user tests
-      run: npm test:user
+      run: npm run test:user
