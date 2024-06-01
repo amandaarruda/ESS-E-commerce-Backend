@@ -24,7 +24,7 @@ jobs:
           --health-retries 5
 
     env:
-      DATABASE_URL: "postgresql://root:123@root:5432/database_test?schema=public"
+      DATABASE_URL: "postgresql://root:123@localhost:5432/database_test?schema=public"
       AT_SECRET: AT_sECRET
       RT_SECRET: RT_sECRET
       TK_EMAIL_SECRET: EMAIL_sECRET
