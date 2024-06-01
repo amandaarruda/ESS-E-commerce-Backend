@@ -13,6 +13,8 @@
     "pre-commit-husky": "lint-staged",
     "test:all": "jest",
     "test:user": "jest user.spec.ts",
+    "test:auth": "jest auth.spec.ts",
+    "prisma:migrate": "prisma migrate deploy",
     "start": "nest start",
     "prebuild": "rimraf dist",
     "build": "nest build",
