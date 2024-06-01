@@ -28,6 +28,9 @@ jobs:
       AT_SECRET: AT_sECRET
       RT_SECRET: RT_sECRET
       TK_EMAIL_SECRET: EMAIL_sECRET
+      TK_EMAIL_LIFETIME: 1d
+      JWT_ACCESS_LIFETIME: 1h
+      JWT_REFRESH_LIFETIME: 7d
       ENV: TEST
 
     steps:
@@ -42,10 +45,13 @@ jobs:
       run: npm install
 
     - name: Apply database migrations
-      run: npm run migrate prod
+      run: npm run prisma:migrate
 
     - name: Run tests
       run: npm test
 
     - name: Run user tests
       run: npm test:user
+    
+    - name: Run auth tests
+      run: npm test:auth
