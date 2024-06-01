@@ -13,20 +13,21 @@ jobs:
 
     services:
       postgres:
-        image: postgres
+        image: postgres:15.4-alpine
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: root
+          POSTGRES_DB: database_test
+        ports:
+          - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-        ports:
-          - 5432:5432
 
     env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/database_test
+      DATABASE_URL: postgresql://root:root@localhost:5432/database_test?schema=public&connect_timeout=30
       AT_SECRET: AT_sECRET
       RT_SECRET: RT_sECRET
       TK_EMAIL_SECRET: EMAIL_sECRET
