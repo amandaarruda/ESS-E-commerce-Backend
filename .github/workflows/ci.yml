@@ -49,7 +49,7 @@ jobs:
 
     - name: Wait for Database Initialization
       run: |
-        sleep 10
+        sleep 60
 
     - name: Apply database migrations
       run: npm run prisma:migrate
