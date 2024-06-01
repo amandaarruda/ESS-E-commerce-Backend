@@ -23,6 +23,13 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+    env:
+      DATABASE_URL: "postgresql://root:123@root:5432/database_test?schema=public"
+      AT_SECRET: AT_sECRET
+      RT_SECRET: RT_sECRET
+      TK_EMAIL_SECRET: EMAIL_sECRET
+      ENV: TEST
+
     steps:
     - uses: actions/checkout@v2
 
@@ -33,3 +40,12 @@ jobs:
 
     - name: Install NPM dependencies
       run: npm install
+
+    - name: Apply database migrations
+      run: npm run migrate prod
+
+    - name: Run tests
+      run: npm test
+
+    - name: Run user tests
+      run: npm test:user

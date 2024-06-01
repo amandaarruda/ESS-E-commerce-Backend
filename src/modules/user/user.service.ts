@@ -96,7 +96,7 @@ export class UserService {
         );
       }
 
-      if (userToBeDeleted.Role.name === RoleEnum.ADMIN) {
+      if (userToBeDeleted.role === RoleEnum.ADMIN) {
         throw new ForbiddenException(
           setMessage(getMessage(MessagesHelperKey.USER_ADMIN_DELETE), id),
         );

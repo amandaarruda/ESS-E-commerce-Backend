@@ -45,12 +45,6 @@ export class UserMapping extends AutomapperProfile {
               source?.updatedAt && format(source?.createdAt, 'dd/MM/yyyy'),
           ),
         ),
-        forMember(
-          destination => destination.role,
-          mapFrom(source => {
-            return source?.Role?.name;
-          }),
-        ),
       );
 
       createMap(
@@ -70,15 +64,6 @@ export class UserMapping extends AutomapperProfile {
             source =>
               source?.createdAt && format(source?.createdAt, 'dd/MM/yyyy'),
           ),
-        ),
-        forMember(
-          destination => destination.role,
-          mapFrom(source => {
-            return {
-              id: source?.Role?.id,
-              name: source?.Role?.name,
-            };
-          }),
         ),
       );
     };

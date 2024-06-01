@@ -44,7 +44,6 @@ export class AuthService {
     private readonly authRepository: AuthRepository,
     private readonly userService: UserService,
     private readonly userRepository: UserRepository,
-    private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService,
   ) {}
@@ -88,10 +87,7 @@ export class AuthService {
     }
   }
 
-  async register(
-    registerDto: UserCreateDto,
-    currentUser: UserPayload,
-  ): Promise<Partial<UserEntity>> {
+  async register(registerDto: UserCreateDto): Promise<UserEntity> {
     this.logger.log('POST IN Auth Service - register');
 
     try {
@@ -130,11 +126,7 @@ export class AuthService {
             },
           },
         }),
-        Role: {
-          connect: {
-            name: RoleEnum.CUSTOMER,
-          },
-        },
+        role: RoleEnum.CUSTOMER,
       };
 
       const newUser = (await this.userService.createAsync(
@@ -149,9 +141,7 @@ export class AuthService {
 
       await this.sendRegistrationEmail(newUser.email);
 
-      return {
-        id: newUser.id,
-      };
+      return newUser;
     } catch (error) {
       handleError(error);
     }
@@ -476,7 +466,7 @@ export class AuthService {
 
     const payload = {
       sub: user.email,
-      role: user?.Role?.name,
+      role: user?.role,
       id: user.id,
       name: user.name,
       email: user.email,
@@ -513,11 +503,10 @@ export class AuthService {
 
     const userDb = await this.userRepository.findByIdAsync(currentUser.id);
 
-    const { password, Role, ...userWithoutPassword } = userDb;
+    const { password, ...userWithoutPassword } = userDb;
 
     return {
       sub: currentUser.id,
-      role: Role?.name,
       ...userWithoutPassword,
     };
   }

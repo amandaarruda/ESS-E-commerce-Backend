@@ -51,12 +51,6 @@ export class UserPayload {
   deletedAt?: string | null;
 
   @ApiProperty({
-    description: 'Versão do usuário',
-    example: 1,
-  })
-  version: number;
-
-  @ApiProperty({
     description: 'Data de criação da token',
     example: '2021-01-01T00:00:00.000Z',
   })

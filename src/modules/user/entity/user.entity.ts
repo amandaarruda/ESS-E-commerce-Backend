@@ -1,6 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { StatusEnum, User } from '@prisma/client';
-import { RoleEntity } from 'src/modules/user/entity/role.entity';
+import { $Enums, RoleEnum, StatusEnum, User } from '@prisma/client';
 
 import { MediaEntity } from './media.entity';
 
@@ -84,13 +83,9 @@ export class UserEntity implements User {
   })
   mediaId: number | null;
 
-  @ApiPropertyOptional({ type: RoleEntity })
-  Role: RoleEntity | null;
-
   @ApiPropertyOptional({
-    type: Number,
-    description: 'The unique identifier for the role',
-    example: 123,
+    type: String,
+    example: 'ADMIN',
   })
-  roleId: number | null;
+  role: RoleEnum;
 }
