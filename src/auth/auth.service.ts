@@ -178,6 +178,14 @@ export class AuthService {
     try {
       const usuario = await this.userService.findByEmail(user.email);
 
+      if (!usuario) {
+        this.logger.debug(`User ${user.email} not found`);
+
+        throw new UnauthorizedException(
+          setMessage(getMessage(MessagesHelperKey.USER_NOT_FOUND), user.email),
+        );
+      }
+
       const tokens: UserToken = await this.getTokens(usuario);
 
       this.logger.debug(`Tokens generated successfully`);
@@ -269,33 +277,9 @@ export class AuthService {
 
       const token = await this.encodeEmailToken(userDb.email, userDb.id);
 
-      let templatePath = '';
-
-      const rootDir = process.cwd();
-
-      templatePath = join(rootDir, 'src/utils/templates/recover-password.html');
-
-      const templateHtml = readFileSync(templatePath).toString();
-
-      if (!templateHtml || templateHtml == '') {
-        this.logger.debug(`Template not found`);
-        throw new Error(
-          'Não foi possível encontrar o template de recuperação de email',
-        );
-      }
-
-      const link = `${process.env.FRONTEND_RECOVER_PASSWORD_URL}?token=${token}`;
-
-      const templateBody = recoverTemplateDataBind(templateHtml, {
-        name: userDb.name,
-        link,
-      });
-
-      const subject = 'Recuperação de senha';
-
-      await this.emailService.sendEmail(templateBody, subject, userDb.email);
-
       const tokenEncrypted = await hashData(token);
+
+      await this.sendEmailRecovery(token, userDb);
 
       await this.userRepository.updateAsync(userDb.id, {
         recoveryPasswordToken: tokenEncrypted,
@@ -311,6 +295,34 @@ export class AuthService {
     }
   }
 
+  async sendEmailRecovery(token: string, userDb: UserEntity) {
+    let templatePath = '';
+
+    const rootDir = process.cwd();
+
+    templatePath = join(rootDir, 'src/utils/templates/recover-password.html');
+
+    const templateHtml = readFileSync(templatePath).toString();
+
+    if (!templateHtml || templateHtml == '') {
+      this.logger.debug(`Template not found`);
+      throw new Error(
+        'Não foi possível encontrar o template de recuperação de email',
+      );
+    }
+
+    const link = `${process.env.FRONTEND_RECOVER_PASSWORD_URL}?token=${token}`;
+
+    const templateBody = recoverTemplateDataBind(templateHtml, {
+      name: userDb.name,
+      link,
+    });
+
+    const subject = 'Recuperação de senha';
+
+    await this.emailService.sendEmail(templateBody, subject, userDb.email);
+  }
+
   async changePasswordByRecovery(dto: ChangePasswordByRecovery) {
     this.logger.log('POST in Auth Service - changePasswordByRecovery');
 
@@ -320,7 +332,7 @@ export class AuthService {
         id: number;
         iat: number;
         exp: number;
-      } = await this.decodeEmailToken(dto.accessToken);
+      } = await this.decodeEmailToken(dto.recoveryToken);
 
       const user = (await this.userService.findBy(
         {
@@ -336,7 +348,7 @@ export class AuthService {
       )) as {
         id: number;
         email: string;
-        recoveryToken: string;
+        recoveryPasswordToken: string;
         blocked: boolean;
         status: StatusEnum;
         deletedAt: Date | null;
@@ -367,10 +379,10 @@ export class AuthService {
 
       let recoveryTokenIsValid = false;
 
-      if (user?.recoveryToken) {
+      if (user?.recoveryPasswordToken) {
         recoveryTokenIsValid = await bcrypt.compare(
-          dto.accessToken,
-          user.recoveryToken,
+          dto.recoveryToken,
+          user.recoveryPasswordToken,
         );
       }
 
@@ -399,7 +411,7 @@ export class AuthService {
     }
   }
 
-  async decodeEmailToken(accessToken: string) {
+  async decodeEmailToken(recoveryToken: string) {
     this.logger.debug(`Service - decodeEmailToken`);
 
     let decodedToken: {
@@ -410,7 +422,7 @@ export class AuthService {
     } | null;
 
     try {
-      decodedToken = this.jwtService.verify(accessToken, {
+      decodedToken = this.jwtService.verify(recoveryToken, {
         secret: process.env.TK_EMAIL_SECRET,
       });
     } catch (error) {

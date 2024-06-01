@@ -1,3 +1,4 @@
+import { classes } from '@automapper/classes';
 import {
   Mapper,
   createMapper,
@@ -20,13 +21,12 @@ import { UserPayload } from 'src/auth/models/UserPayload';
 import { compareHash, hashData } from 'src/utils/hash';
 
 import { EmailService } from '../email/email.service';
+import { UpdateUserPassword } from './dto/request/update.personal.password.dto';
 import { UserCreateDto } from './dto/request/user.create.dto';
 import { UserEntity } from './entity/user.entity';
 import { UserMapping } from './user.mapping';
 import { UserRepository } from './user.repository';
 import { UserService } from './user.service';
-import { UpdateUserPassword } from './dto/request/update.personal.password.dto';
-import { classes } from '@automapper/classes';
 
 describe('UsersService', () => {
   let service: UserService;
@@ -219,7 +219,7 @@ describe('UsersService', () => {
         id: 1,
         name: 'cliente cadastro',
         email: userEmail,
-        password: 'mockValue',
+        password: await hashData('mockValue'),
         refreshToken: null,
         recoveryPasswordToken: '',
         deletedAt: null,
@@ -255,7 +255,7 @@ describe('UsersService', () => {
         id: 1,
         name: 'cliente cadastro',
         email: userEmail,
-        password: 'mockValue',
+        password: await hashData('mockValue'),
         refreshToken: null,
         recoveryPasswordToken: '',
         deletedAt: new Date(),
@@ -327,7 +327,7 @@ describe('UsersService', () => {
         id: 1,
         name: 'administrador cliente',
         email: 'cliente123@gmail.com',
-        password: 'mockPassword',
+        password: await hashData('mockValue'),
         refreshToken: null,
         recoveryPasswordToken: '',
         deletedAt: null,
@@ -448,7 +448,7 @@ describe('UsersService', () => {
         id: 1,
         name: 'administrador cliente',
         email: 'cliente123@gmail.com',
-        password: 'mockPassword',
+        password: await hashData('mockValue'),
         refreshToken: null,
         recoveryPasswordToken: '',
         deletedAt: null,
@@ -530,7 +530,9 @@ describe('UsersService', () => {
 
       // Mocking repository methods
       userRepositoryMock.findByIdAsync.mockResolvedValue(existingUser);
-      userRepositoryMock.updateUserPassword.mockResolvedValue(Promise.resolve());
+      userRepositoryMock.updateUserPassword.mockResolvedValue(
+        Promise.resolve(),
+      );
 
       const updateUserPasswordDto: UpdateUserPassword = {
         actualPassword: currentPassword,
@@ -640,7 +642,6 @@ describe('UsersService', () => {
   });
 
   describe('Delete user / delete myself', () => {
-      
     it('Should delete user', async () => {
       /*
       Cenário: Deleção da própria conta
@@ -654,14 +655,14 @@ describe('UsersService', () => {
         And o usuário deve receber uma mensagem de confirmação "Conta inativada com sucesso"
         And o usuário deve ser deslogado do sistema.
       */
-     
+
       // Given
       const userId = 1;
       const existingUser: UserEntity = {
         id: userId,
         name: 'cliente',
         email: 'cliente123@gmail.com',
-        password: 'Senha@123',
+        password: await hashData('Senha@123'),
         refreshToken: null,
         recoveryPasswordToken: '',
         deletedAt: null,
@@ -672,13 +673,13 @@ describe('UsersService', () => {
         mediaId: null,
         role: RoleEnum.CUSTOMER,
       };
-  
+
       userRepositoryMock.exists.mockResolvedValue(true);
       userRepositoryMock.findByIdAsync.mockResolvedValue(existingUser);
-  
+
       // When
       await service.deleteAsync(userId);
-  
+
       // Then
       expect(userRepositoryMock.deleteAsync).toHaveBeenCalledWith(userId);
     });
@@ -686,11 +687,11 @@ describe('UsersService', () => {
     it('Should throw BadRequestException if id is null', async () => {
       // When
       const deleteUser = async () => await service.deleteAsync(null);
-  
+
       // Then
       await expect(deleteUser).rejects.toThrow(BadRequestException);
     });
-  
+
     it('Should throw NotFoundException if user does not exist', async () => {
       // Given
       userRepositoryMock.exists.mockResolvedValue(false);
@@ -698,12 +699,12 @@ describe('UsersService', () => {
 
       // When
       const deleteUser = async () => await service.deleteAsync(userId);
-  
+
       // Then
       await expect(deleteUser).rejects.toThrow(NotFoundException);
       expect(userRepositoryMock.exists).toHaveBeenCalledWith({ id: userId });
     });
-  
+
     it('Should throw ForbiddenException if user is already inactive', async () => {
       // Given
       const userId = 1;
@@ -711,7 +712,7 @@ describe('UsersService', () => {
         id: userId,
         name: 'cliente',
         email: 'cliente123@gmail.com',
-        password: 'Senha@123',
+        password: await hashData('Senha@123'),
         refreshToken: null,
         recoveryPasswordToken: '',
         deletedAt: null,
@@ -722,19 +723,18 @@ describe('UsersService', () => {
         mediaId: null,
         role: RoleEnum.CUSTOMER,
       };
-      
 
       userRepositoryMock.exists.mockResolvedValue(true);
       userRepositoryMock.findByIdAsync.mockResolvedValue(existingUser);
-  
+
       // When
       const deleteUser = async () => await service.deleteAsync(userId);
-  
+
       // Then
       await expect(deleteUser).rejects.toThrow(ForbiddenException);
       expect(userRepositoryMock.findByIdAsync).toHaveBeenCalledWith(userId);
     });
-  
+
     it('Should throw ForbiddenException if user is an admin', async () => {
       // Given
       const userId = 1;
@@ -742,7 +742,7 @@ describe('UsersService', () => {
         id: userId,
         name: 'admin',
         email: 'admin@gmail.com',
-        password: 'Senha@123',
+        password: await hashData('Senha@123'),
         refreshToken: null,
         recoveryPasswordToken: '',
         deletedAt: null,
@@ -753,16 +753,16 @@ describe('UsersService', () => {
         mediaId: null,
         role: RoleEnum.ADMIN,
       };
-  
+
       userRepositoryMock.exists.mockResolvedValue(true);
       userRepositoryMock.findByIdAsync.mockResolvedValue(existingUser);
-  
+
       // When
       const deleteUser = async () => await service.deleteAsync(userId);
-  
+
       // Then
       await expect(deleteUser).rejects.toThrow(ForbiddenException);
       expect(userRepositoryMock.findByIdAsync).toHaveBeenCalledWith(userId);
     });
-  })
+  });
 });
