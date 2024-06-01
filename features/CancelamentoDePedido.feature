@@ -23,7 +23,7 @@ Scenario: Cancelar pedido não entregue 1
     And o pedido “Nike Inspiration” com o ID “102” está com o status “em preparação” 
     When usuário seleciona o botão “cancelar pedido”
     Then pop-up de confirmação de cancelamento aparece para o usuário
-    And pedido cancelado “Nike Inspiration” com o ID “102”  passa a ter com o status “cancelado
+    And pedido cancelado “Nike Inspiration” com o ID “102”  passa a ter com o status “cancelado"
     And aparece a mensagem “Pedido foi cancelado com sucesso”
 
 Scenario: Cancelar pedido não entregue 2
@@ -31,7 +31,7 @@ Scenario: Cancelar pedido não entregue 2
     And o pedido “Adidas Adventure” com o ID “103” está com o status “chega hoje” 
     When usuário seleciona o botão “cancelar pedido”
     Then pop-up de confirmação de cancelamento aparece para o usuário
-    And pedido cancelado “Adidas Adventure” com o ID “103” passa a ter com o status “cancelado
+    And pedido cancelado “Adidas Adventure” com o ID “103” passa a ter com o status “cancelado"
     And aparece a mensagem “Pedido foi cancelado com sucesso"
     And aparece pop-up a mensagem “finalizado"
 
