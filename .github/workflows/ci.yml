@@ -46,15 +46,11 @@ jobs:
     - name: Install NPM dependencies
       run: npm install
 
-    - name: Wait for Database Initialization
-      run: |
-        sleep 60
-
     - name: Apply database migrations
       run: npm run prisma:migrate
     
     - name: Run auth tests
-      run: npm test:auth
+      run: npm run test:auth
 
     - name: Run user tests
-      run: npm test:user
+      run: npm run test:user
