@@ -16,16 +16,14 @@ Scenario: Cancelar pedido entregue
     And o pedido “Mocassin” com o ID “1101” está com o status “entregue” 
     When usuário seleciona o botão “cancelar pedido”
     Then pop-up com mensagem de aviso “cancelamento não permitido, produto já entregue!" 
-<<<<<<< HEAD
     And pop-up com mensagem de aviso “finalizado" 
-=======
 
 Scenario: Cancelar pedido não entregue 1
     Given que o usuário (cliente) está na página “histórico de pedidos” do usuário “Carla Pinheiro” com CPF “123.456.789-11”
     And o pedido “Nike Inspiration” com o ID “102” está com o status “em preparação” 
     When usuário seleciona o botão “cancelar pedido”
     Then pop-up de confirmação de cancelamento aparece para o usuário
-    And pedido cancelado “Nike Inspiration” com o ID “102”  passa a ter com o status “cancelado
+    And pedido cancelado “Nike Inspiration” com o ID “102”  passa a ter com o status “cancelado"
     And aparece a mensagem “Pedido foi cancelado com sucesso”
 
 Scenario: Cancelar pedido não entregue 2
@@ -33,7 +31,6 @@ Scenario: Cancelar pedido não entregue 2
     And o pedido “Adidas Adventure” com o ID “103” está com o status “chega hoje” 
     When usuário seleciona o botão “cancelar pedido”
     Then pop-up de confirmação de cancelamento aparece para o usuário
-    And pedido cancelado “Adidas Adventure” com o ID “103” passa a ter com o status “cancelado
+    And pedido cancelado “Adidas Adventure” com o ID “103” passa a ter com o status “cancelado"
     And aparece a mensagem “Pedido foi cancelado com sucesso"
     And aparece pop-up a mensagem “finalizado"
->>>>>>> dev
