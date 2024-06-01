@@ -3,9 +3,6 @@ name: Continuous Integration
 on:
   pull_request:
     branches: [ main, develop ]
-  push:
-    branches:
-      - '*'
       
 jobs:
   run-tests:
@@ -34,8 +31,8 @@ jobs:
       JWT_ACCESS_LIFETIME: 1h
       JWT_REFRESH_LIFETIME: 7d
       ENV: TEST
-      SENDGRID_API_KEY: ${{ env.SENDGRID_API_KEY }}
-      EMAIL_OPTIONS_FROM: ${{ env.EMAIL_OPTIONS_FROM }}
+      SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+      EMAIL_OPTIONS_FROM: ${{ secrets.EMAIL_OPTIONS_FROM }}
 
     steps:
     - uses: actions/checkout@v2
