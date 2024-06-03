@@ -12,21 +12,17 @@ import {
 import {
   ApiBearerAuth,
   ApiBody,
-  ApiNoContentResponse,
   ApiOperation,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { RoleEnum } from '@prisma/client';
 import { Response } from 'express';
 import { UserCreateDto } from 'src/modules/user/dto/request/user.create.dto';
-import { generatePassword } from 'src/utils/generate-password';
 import { ApiExceptionResponse } from 'src/utils/swagger-schemas/SwaggerSchema';
 
 import { AuthService } from './auth.service';
 import { AuthenticatedUser } from './decorators/current-user.decorator';
 import { IsPublic } from './decorators/is-public.decorator';
-import { Roles } from './decorators/roles.decorator';
 import { ChangePasswordByRecovery } from './dto/request/change-password-by-recovery.dto';
 import { EmailDto } from './dto/request/email.dto';
 import { LoginDto } from './dto/request/login.dto';
@@ -49,11 +45,10 @@ export class AuthController {
   @Post('register')
   @IsPublic()
   protected async registerAsync(
-    @AuthenticatedUser() currentUser: UserPayload,
     @Res() response: Response,
     @Body() dto: UserCreateDto,
   ) {
-    const data = await this.authService.register(dto, currentUser);
+    const data = await this.authService.register(dto);
 
     return response.status(HttpStatus.CREATED).json(data.id);
   }

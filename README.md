@@ -2,7 +2,6 @@
 - **Node.js**: Version 20.11.0
 - **NestJS**: A progressive Node.js framework for building efficient and scalable server-side applications.
 - **Prisma**: An open-source database toolkit.
-- **Python**: Version 3.11.7, used for generating modules.
 
 <hr>
 

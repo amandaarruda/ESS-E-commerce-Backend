@@ -11,14 +11,6 @@ import {
 
 export class UpdateUserPassword {
   @ApiProperty({
-    description: 'Versão do usuário',
-    example: 3,
-  })
-  @IsNumber({}, { message: 'O campo de versão deve ser um número' })
-  @IsNotEmpty({ message: 'A versão é obrigatória' })
-  version: number;
-
-  @ApiProperty({
     description: 'Senha atual do usuário',
     example: '123456',
   })

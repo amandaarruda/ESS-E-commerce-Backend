@@ -1,0 +1,55 @@
+name: Continuous Integration
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+      
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/database_test
+      AT_SECRET: AT_sECRET
+      RT_SECRET: RT_sECRET
+      TK_EMAIL_SECRET: EMAIL_sECRET
+      TK_EMAIL_LIFETIME: 1d
+      JWT_ACCESS_LIFETIME: 1h
+      JWT_REFRESH_LIFETIME: 7d
+      ENV: TEST
+      SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+      EMAIL_OPTIONS_FROM: ${{ secrets.EMAIL_OPTIONS_FROM }}
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: '20.11.0'
+
+    - name: Install NPM dependencies
+      run: npm install
+
+    - name: Apply database migrations
+      run: npm run prisma:migrate
+    
+    - name: Run auth tests
+      run: npm run test:auth
+
+    - name: Run user tests
+      run: npm run test:user

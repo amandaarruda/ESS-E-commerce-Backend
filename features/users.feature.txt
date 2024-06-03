@@ -1,0 +1,144 @@
+Feature: Cadastro e manutenção de usuários
+
+User Story:
+Como cliente do sistema eu quero me cadastrar e alterar minhas informações.
+
+Cenário: Registrar um usuário cliente
+Should register an customer user
+
+Given que um novo cliente está na tela de registro,
+And o usuário preenche o campo nome com o valor "cliente cadatro"
+And o usuário preenche o campo email com o valor "cliente@gmail.com"
+And o usuário preenche o campo senha com o valor "Senha@1238"
+And não existe outro usuário com o mesmo email cadastrado no sistema
+When clica no botão "Registrar",
+Then o sistema deve registrar um novo usuário cliente,
+And o cliente deve receber uma mensagem de confirmação "Usuário registrado com sucesso".
+
+Cenário: Registrar um usuário cliente com o email já utilizado
+Should throw bad request exception when the user try to register itself with used email
+
+Given que um novo cliente está na tela de registro,
+And existe um usuário cadastrado no sistema com o email "cliente123@gmail.com"
+And o usuário insere o email dele "cliente123@gmail.com"
+And o usuário insere o nome dele "cliente abc"
+And o usuário insere a senha dele "ClienteAbc@123"
+And clica no botão "Registrar",
+Then o sistema não deve cadastrar o usuário
+And o cliente deve receber uma mensagem de erro "Email já utilizado por outro usuário".
+
+Cenário: Deletar um usuário cliente
+Should set the user status to “Inactive”
+
+Given que o administrador "administrador@gmail.com" está logado no sistema,
+And está na tela de gerenciamento de usuários,
+And existe um usuário do tipo cliente com o email "cliente123@gmail.com"
+When o usuário seleciona a opção de deletar o usuário "cliente123@gmail.com",
+Then o sistema deve definir o status do usuário como "Inativo",
+And o administrador deve receber uma mensagem de confirmação "Usuário inativado com sucesso".
+And o administrador deve parar de listar esse usuário no sistema
+
+Cenário: Atualizar os próprios dados
+Should update the register data of the logged user
+
+Given que o usuário "cliente123@gmail.com" está logado no sistema,
+And está na tela de perfil,
+And o email dele é igual a "cliente123@gmail.com"
+And o nome dele é "administrador cliente"
+When o usuário altera o nome dele para "cliente normal"
+And clica na opção de atualizar
+Then o sistema deve atualizar os dados do usuário logado,
+And o usuário deve receber uma mensagem de confirmação "Dados atualizados com sucesso".
+And o usuário vai ver o seu nome atualizado no sistema
+
+Cenário: Atualizar a própria senha com sucesso
+Should update the logged user password
+
+Given que o usuário "administrador123@gmail.com" está logado no sistema,
+And está na tela de edição de senha,
+And a senha atual é igual a "Senha@123"
+When o usuário preenche o campos de senha atual com o valor "Senha@123"
+And o usuário preenche o campo nova senha com o valor "Senha@8858"
+And clica na opção de atualizar senha,
+Then o sistema deve atualizar a senha do usuário logado,
+And o usuário deve receber uma mensagem de confirmação "Senha atualizada com sucesso"
+And o usuário não deve mais conseguir logar com a senha antiga
+
+Cenário: Deleção da própria conta
+Should set the current logged user status to inactive
+
+Given que o usuário "usuario@gmail.com" está logado no sistema,
+And está com o status ativo,
+And está na tela de perfil,
+When ele seleciona a opção de deletar conta,
+Then o sistema deve definir o status do usuário logado como inativo,
+And o usuário deve receber uma mensagem de confirmação "Conta inativada com sucesso"
+And o usuário deve ser deslogado do sistema.
+
+--------------
+
+Feature: Login
+	
+User Story:
+Como usuário do sistema, eu quero fazer login para que eu possa acessar minhas informações e funcionalidades.
+
+Cenário: Login
+Should return a status 200 and the JWT access and refresh in the body
+
+Given que o usuário inseriu no campo email o valor "email@gmail.com" 
+And o usuário inseriu no campo senha o valor "teste",
+And existe um usuário no sistema com o email "email@gmail.com" e com a senha "teste",
+And o campo "status" do usuário está como "ACTIVE",
+When clica em “Fazer login no sistema”,
+Then o usuário deve ser redirecionado para a página inicial da aplicação autenticado
+And deve receber a token de acesso na resposta da requisição
+And deve receber a token de refresh na resposta da requisição
+
+Cenário: Login com um email/senha inválido
+Should throw an unauthorized exception
+
+Given que o usuário inseriu no campo email o valor "email@gmail.com" 
+And o usuário inseriu no campo senha o valor "teste@123",
+And não existe um usuário no sistema com o email "email@gmail.com",
+When clica em “Fazer login no sistema”,
+Then o usuário deve ver uma mensagem de “Login ou senha incorreta”
+And o usuário deve se manter na tela de login
+And o usuário recebe uma mensagem de não autorizado "Email ou senha incorretos"
+
+Cenário: Login com um usuário inativo
+Should throw an forbidden exception
+
+Given que o usuário inseriu no campo email o valor "email@gmail.com" 
+And o usuário inseriu no campo senha o valor "teste",
+And existe um usuário no sistema com o email "email@gmail.com" e com a senha "teste",
+And o campo "status" do usuário está como "INACTIVE",
+When tenta fazer login no sistema,
+Then deve lançar uma exceção de proibido (Forbidden).
+And o usuário deve se manter na tela de login
+And o usuário deve ver uma mensagem de “Usuário inativo”
+
+-----------
+
+Feature: Recuperação de conta via e-mail / Esqueci minha senha
+
+User Story:
+Como usuário do sistema, eu quero recuperar minha conta via e-mail, para que eu possa redefinir minha senha caso a tenha esquecido.
+
+Cenário: Solicitar recuperação de senha
+Should return status 200
+
+Given que o usuário inseriu o valor "email@gmail.com" no campo de email
+And No sistema existe um usuário com o campo email com o valor "email@gmail.com"
+When ele clica em “Recuperar senha”
+Then ele deve ver uma mensagem de “Se o e mail existir, você receberá instruções de recuperação na sua caixa de email”
+
+Cenário: Trocar a senha com a token de recuperação válida
+Should change the password from the token’s user 
+
+Given que o usuário tem uma token de recuperação com o valor "192x7x8asjdjas89d8"
+And o sistema tem a token de recuperação com o valor "192x7x8asjdjas89d8" atrelado ao email "email@gmail.com"
+And o usuário inseriu no campo senha o valor "Senha@8858"
+When o usuário clica em “Trocar senha”
+Then a senha do usuário atrelado a token de recuperação é modificada
+And o usuário ver uma mensagem de sucesso na tela “Senha trocada com sucesso”
+And o usuário é redirecionado para a tela de login

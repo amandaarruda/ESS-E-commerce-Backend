@@ -26,7 +26,6 @@ export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
       sub: payload?.sub,
       createdAt: payload?.createdAt,
       deletedAt: payload?.deletedAt,
-      version: payload?.version,
     };
   }
 }

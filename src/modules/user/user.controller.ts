@@ -4,17 +4,13 @@ import {
   Delete,
   Get,
   Param,
-  Post,
-  Put,
   Query,
   Res,
-  HttpCode,
   HttpStatus,
   Patch,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
-  ApiBody,
   ApiOperation,
   ApiParam,
   ApiQuery,
@@ -26,7 +22,6 @@ import { Response } from 'express';
 import { AuthService } from 'src/auth/auth.service';
 import { AuthenticatedUser } from 'src/auth/decorators/current-user.decorator';
 import { Roles } from 'src/auth/decorators/roles.decorator';
-import { UserRegisteredResponse } from 'src/auth/dto/response/UserToken';
 import { UserPayload } from 'src/auth/models/UserPayload';
 import { DefaultFilter } from 'src/filters/DefaultFilter';
 import {
@@ -36,10 +31,7 @@ import {
 
 import { UpdateUserPersonalData } from './dto/request/update.personal.data.dto';
 import { UpdateUserPassword } from './dto/request/update.personal.password.dto';
-import { UserCreateDto } from './dto/request/user.create.dto';
-import { UserUpdateDto } from './dto/request/user.update.dto';
 import { UserPaginationResponse } from './dto/response/user.pagination.response';
-import { UserEntity } from './entity/user.entity';
 import { UserTypeMap } from './entity/user.type.map';
 import { UserService } from './user.service';
 
@@ -58,59 +50,12 @@ export class UserController {
   @Get()
   @Roles(RoleEnum.ADMIN)
   async getFilteredAsync(
-    @AuthenticatedUser() currentUser: UserPayload,
     @Res() response: Response,
     @Query() filter: DefaultFilter<UserTypeMap>,
   ) {
-    const filteredData = await this.service.findFilteredAsync(
-      filter,
-      currentUser,
-    );
+    const filteredData = await this.service.findFilteredAsync(filter);
 
     return response.status(HttpStatus.OK).json(filteredData);
-  }
-
-  @ApiOperation({ summary: 'Get one user' })
-  @HttpCode(HttpStatus.OK)
-  @ApiResponse({
-    status: HttpStatus.OK,
-    type: UserEntity,
-  })
-  @ApiParam({
-    name: 'id',
-    type: String,
-    required: true,
-  })
-  @ApiExceptionResponse()
-  @Get('/:id')
-  @Roles(RoleEnum.ADMIN)
-  protected async findByIdAsync(
-    @AuthenticatedUser() currentUser: UserPayload,
-    @Res() response: Response,
-    @Param('id') id: number,
-  ) {
-    const userById = await this.service.findByIdAsync(id);
-
-    return response.status(HttpStatus.OK).json(userById);
-  }
-
-  @ApiOperation({ summary: 'Update user' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-  })
-  @ApiBody({ type: UserUpdateDto })
-  @ApiExceptionResponse()
-  @Put('/:id')
-  @Roles(RoleEnum.ADMIN)
-  protected async updateAsync(
-    @AuthenticatedUser() currentUser: UserPayload,
-    @Res() response: Response,
-    @Param('id') id: number,
-    @Body() dto: UserUpdateDto,
-  ) {
-    await this.service.updateAsync(id, dto, currentUser);
-
-    return response.status(HttpStatus.OK).json(id);
   }
 
   @ApiOperation({ summary: 'Delete user' })
@@ -131,12 +76,10 @@ export class UserController {
   @Delete('/:id')
   @Roles(RoleEnum.ADMIN)
   protected async deleteAsync(
-    @AuthenticatedUser() currentUser: UserPayload,
     @Res() response: Response,
     @Param('id') id: number,
-    @Query('version') version: number,
   ) {
-    await this.service.deleteAsync(id, version, currentUser);
+    await this.service.deleteAsync(id);
 
     return response.status(HttpStatus.OK).json(id);
   }
@@ -183,11 +126,7 @@ export class UserController {
     @AuthenticatedUser() currentUser: UserPayload,
     @Res() response: Response,
   ) {
-    await this.service.deleteAsync(
-      currentUser.id,
-      currentUser.version,
-      currentUser,
-    );
+    await this.service.deleteAsync(currentUser.id);
 
     return response.status(HttpStatus.OK).send();
   }

@@ -12,7 +12,6 @@ CREATE TABLE "TB_USER" (
     "id" SERIAL NOT NULL,
     "name" VARCHAR(255) NOT NULL,
     "email" TEXT NOT NULL,
-    "telephone" VARCHAR(255) NOT NULL,
     "password" VARCHAR(255) NOT NULL,
     "refreshToken" VARCHAR(255),
     "recoveryPasswordToken" VARCHAR(255),
@@ -20,9 +19,8 @@ CREATE TABLE "TB_USER" (
     "createdAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMPTZ(3) NOT NULL,
     "status" "StatusEnum" NOT NULL DEFAULT 'ACTIVE',
-    "version" INTEGER NOT NULL DEFAULT 1,
-    "roleId" INTEGER NOT NULL,
     "mediaId" INTEGER,
+    "role" "RoleEnum" NOT NULL,
 
     CONSTRAINT "TB_USER_pkey" PRIMARY KEY ("id")
 );
@@ -108,17 +106,6 @@ CREATE TABLE "TB_MEDIA" (
     CONSTRAINT "TB_MEDIA_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "TB_ROLE" (
-    "id" SERIAL NOT NULL,
-    "createdAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "deletedAt" TIMESTAMPTZ(3),
-    "name" "RoleEnum" NOT NULL,
-    "status" "StatusEnum" NOT NULL DEFAULT 'ACTIVE',
-
-    CONSTRAINT "TB_ROLE_pkey" PRIMARY KEY ("id")
-);
-
 -- CreateIndex
 CREATE UNIQUE INDEX "TB_USER_email_key" ON "TB_USER"("email");
 
@@ -127,12 +114,6 @@ CREATE UNIQUE INDEX "TB_ORDER_code_key" ON "TB_ORDER"("code");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "TB_CATEGORY_name_key" ON "TB_CATEGORY"("name");
-
--- CreateIndex
-CREATE UNIQUE INDEX "TB_ROLE_name_key" ON "TB_ROLE"("name");
-
--- AddForeignKey
-ALTER TABLE "TB_USER" ADD CONSTRAINT "TB_USER_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "TB_ROLE"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "TB_USER" ADD CONSTRAINT "TB_USER_mediaId_fkey" FOREIGN KEY ("mediaId") REFERENCES "TB_MEDIA"("id") ON DELETE SET NULL ON UPDATE CASCADE;

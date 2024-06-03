@@ -12,6 +12,6 @@ export const registrationTemplateDataBind = (
   template = template.replace('{{CSS}}', registrationCss);
   template = template.replace(/{{userName}}/g, data.name);
   template = template.replace(/{{link}}/g, data.link);
-  
+
   return template;
 };

@@ -4,7 +4,6 @@ import {
   Injectable,
   Logger,
   UnauthorizedException,
-  BadRequestException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { RoleEnum, StatusEnum } from '@prisma/client';
@@ -19,8 +18,6 @@ import { UserTypeMap } from 'src/modules/user/entity/user.type.map';
 import { UserRepository } from 'src/modules/user/user.repository';
 import { UserService } from 'src/modules/user/user.service';
 import { CrudType } from 'src/utils/base/ICrudTypeMap';
-import { isDevelopmentEnviroment } from 'src/utils/environment';
-import { generatePassword } from 'src/utils/generate-password';
 import { guardUser } from 'src/utils/guards/guard-user';
 import { hashData } from 'src/utils/hash';
 import {
@@ -29,7 +26,6 @@ import {
   setMessage,
 } from 'src/utils/messages.helper';
 import { recoverTemplateDataBind } from 'src/utils/templates/processors/recover-password-processor';
-import { registrationAdminTemplateDataBind } from 'src/utils/templates/processors/registration-admin-processor';
 import { registrationTemplateDataBind } from 'src/utils/templates/processors/registration-processor';
 import { handleError } from 'src/utils/treat.exceptions';
 
@@ -48,7 +44,6 @@ export class AuthService {
     private readonly authRepository: AuthRepository,
     private readonly userService: UserService,
     private readonly userRepository: UserRepository,
-    private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService,
   ) {}
@@ -92,10 +87,7 @@ export class AuthService {
     }
   }
 
-  async register(
-    registerDto: UserCreateDto,
-    currentUser: UserPayload,
-  ): Promise<Partial<UserEntity>> {
+  async register(registerDto: UserCreateDto): Promise<UserEntity> {
     this.logger.log('POST IN Auth Service - register');
 
     try {
@@ -125,9 +117,7 @@ export class AuthService {
       const createUserData: UserTypeMap[CrudType.CREATE] = {
         name: registerDto.name,
         email: registerDto.email,
-        telephone: registerDto?.telephone,
         password: hash,
-        version: 1,
         status: StatusEnum.ACTIVE,
         ...(registerDto.image && {
           Media: {
@@ -136,16 +126,11 @@ export class AuthService {
             },
           },
         }),
-        Role: {
-          connect: {
-            name: RoleEnum.CUSTOMER,
-          },
-        },
+        role: RoleEnum.CUSTOMER,
       };
 
       const newUser = (await this.userService.createAsync(
         createUserData,
-        currentUser,
       )) as UserEntity;
 
       this.logger.debug(`User ${newUser.email} created`);
@@ -156,9 +141,7 @@ export class AuthService {
 
       await this.sendRegistrationEmail(newUser.email);
 
-      return {
-        id: newUser.id,
-      };
+      return newUser;
     } catch (error) {
       handleError(error);
     }
@@ -194,6 +177,14 @@ export class AuthService {
 
     try {
       const usuario = await this.userService.findByEmail(user.email);
+
+      if (!usuario) {
+        this.logger.debug(`User ${user.email} not found`);
+
+        throw new UnauthorizedException(
+          setMessage(getMessage(MessagesHelperKey.USER_NOT_FOUND), user.email),
+        );
+      }
 
       const tokens: UserToken = await this.getTokens(usuario);
 
@@ -286,37 +277,12 @@ export class AuthService {
 
       const token = await this.encodeEmailToken(userDb.email, userDb.id);
 
-      let templatePath = '';
-
-      const rootDir = process.cwd();
-
-      templatePath = join(rootDir, 'src/utils/templates/recover-password.html');
-
-      const templateHtml = readFileSync(templatePath).toString();
-
-      if (!templateHtml || templateHtml == '') {
-        this.logger.debug(`Template not found`);
-        throw new Error(
-          'Não foi possível encontrar o template de recuperação de email',
-        );
-      }
-
-      const link = `${process.env.FRONTEND_RECOVER_PASSWORD_URL}?token=${token}`;
-
-      const templateBody = recoverTemplateDataBind(templateHtml, {
-        name: userDb.name,
-        link,
-      });
-
-      const subject = 'Recuperação de senha';
-
-      await this.emailService.sendEmail(templateBody, subject, userDb.email);
-
       const tokenEncrypted = await hashData(token);
+
+      await this.sendEmailRecovery(token, userDb);
 
       await this.userRepository.updateAsync(userDb.id, {
         recoveryPasswordToken: tokenEncrypted,
-        version: userDb.version,
       });
 
       this.logger.debug('Recovery password email was sent');
@@ -329,11 +295,36 @@ export class AuthService {
     }
   }
 
+  async sendEmailRecovery(token: string, userDb: UserEntity) {
+    let templatePath = '';
+
+    const rootDir = process.cwd();
+
+    templatePath = join(rootDir, 'src/utils/templates/recover-password.html');
+
+    const templateHtml = readFileSync(templatePath).toString();
+
+    if (!templateHtml || templateHtml == '') {
+      this.logger.debug(`Template not found`);
+      throw new Error(
+        'Não foi possível encontrar o template de recuperação de email',
+      );
+    }
+
+    const link = `${process.env.FRONTEND_RECOVER_PASSWORD_URL}?token=${token}`;
+
+    const templateBody = recoverTemplateDataBind(templateHtml, {
+      name: userDb.name,
+      link,
+    });
+
+    const subject = 'Recuperação de senha';
+
+    await this.emailService.sendEmail(templateBody, subject, userDb.email);
+  }
+
   async changePasswordByRecovery(dto: ChangePasswordByRecovery) {
     this.logger.log('POST in Auth Service - changePasswordByRecovery');
-
-    // Public end point
-    const currentUser = null;
 
     try {
       const userDataByToken: {
@@ -341,7 +332,7 @@ export class AuthService {
         id: number;
         iat: number;
         exp: number;
-      } = await this.decodeEmailToken(dto.accessToken);
+      } = await this.decodeEmailToken(dto.recoveryToken);
 
       const user = (await this.userService.findBy(
         {
@@ -357,7 +348,7 @@ export class AuthService {
       )) as {
         id: number;
         email: string;
-        recoveryToken: string;
+        recoveryPasswordToken: string;
         blocked: boolean;
         status: StatusEnum;
         deletedAt: Date | null;
@@ -388,10 +379,10 @@ export class AuthService {
 
       let recoveryTokenIsValid = false;
 
-      if (user?.recoveryToken) {
+      if (user?.recoveryPasswordToken) {
         recoveryTokenIsValid = await bcrypt.compare(
-          dto.accessToken,
-          user.recoveryToken,
+          dto.recoveryToken,
+          user.recoveryPasswordToken,
         );
       }
 
@@ -420,7 +411,7 @@ export class AuthService {
     }
   }
 
-  async decodeEmailToken(accessToken: string) {
+  async decodeEmailToken(recoveryToken: string) {
     this.logger.debug(`Service - decodeEmailToken`);
 
     let decodedToken: {
@@ -431,7 +422,7 @@ export class AuthService {
     } | null;
 
     try {
-      decodedToken = this.jwtService.verify(accessToken, {
+      decodedToken = this.jwtService.verify(recoveryToken, {
         secret: process.env.TK_EMAIL_SECRET,
       });
     } catch (error) {
@@ -487,12 +478,10 @@ export class AuthService {
 
     const payload = {
       sub: user.email,
-      role: user?.Role?.name,
+      role: user?.role,
       id: user.id,
       name: user.name,
-      version: user.version,
       email: user.email,
-      telephone: user.telephone,
       recoveryPasswordToken: user.recoveryPasswordToken,
       deletedAt: user.deletedAt,
       createdAt: user.createdAt,
@@ -526,11 +515,10 @@ export class AuthService {
 
     const userDb = await this.userRepository.findByIdAsync(currentUser.id);
 
-    const { password, Role, ...userWithoutPassword } = userDb;
+    const { password, ...userWithoutPassword } = userDb;
 
     return {
       sub: currentUser.id,
-      role: Role?.name,
       ...userWithoutPassword,
     };
   }

@@ -9,20 +9,17 @@
     "seed": "ts-node -r tsconfig-paths/register prisma/seed.ts"
   },
   "scripts": {
-    "start:project": "node startup.js",
     "start:dev": "nest start --watch",
-    "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
+    "pre-commit-husky": "lint-staged",
+    "test:all": "jest",
+    "test:user": "jest user.spec.ts",
+    "test:auth": "jest auth.spec.ts",
+    "prisma:migrate": "prisma migrate deploy",
     "start": "nest start",
-    "pre-commit-husky": "npx lint-staged",
-    "pre-push-husky": "npm run test:all",
     "prebuild": "rimraf dist",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "lint": "eslint \"{src,apps,libs,tests}/**/*.ts\" --fix",
-    "prisma:migrate:dev": "prisma migrate dev",
-    "prisma:migrate:deploy": "prisma migrate deploy",
-    "prisma:start:deploy": "prisma migrate deploy && prisma db seed && node dist/src/main.js"
+    "lint": "eslint \"{src,apps,libs,tests}/**/*.ts\" --fix"
   },
   "engineStrict": true,
   "engines": {
@@ -32,30 +29,25 @@
     "@automapper/classes": "^8.7.7",
     "@automapper/nestjs": "^8.7.7",
     "@faker-js/faker": "^8.0.2",
-    "@nestjs/axios": "^3.0.0",
     "@nestjs/config": "^3.1.1",
     "@nestjs/core": "^9.4.0",
     "@nestjs/jwt": "^10.1.1",
-    "@nestjs/mongoose": "^10.0.1",
     "@nestjs/passport": "^10.0.2",
     "@nestjs/platform-express": "^9.4.3",
     "@nestjs/platform-socket.io": "^9.4.3",
-    "@nestjs/schedule": "^3.0.4",
     "@nestjs/swagger": "^7.1.13",
     "@nestjs/testing": "^9.4.3",
-    "@prisma/client": "^5.4.2",
+    "@prisma/client": "^5.14.0",
     "@sendgrid/mail": "^8.1.0",
-    "@types/qrcode": "^1.5.2",
     "bcrypt": "^5.1.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
-    "cpf": "^2.0.1",
     "date-fns": "^3.3.1",
     "eslint": "^8.51.0",
     "eslint-plugin-import-helpers": "^1.3.1",
-    "generate-password-ts": "^1.6.5",
     "helmet": "^7.0.0",
     "inquirer": "^9.2.12",
+    "jest-mock-extended": "^3.0.7",
     "npm": "^10.2.0",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.1",
@@ -76,7 +68,6 @@
     "@types/supertest": "^2.0.11",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
-    "dotenv-cli": "^7.3.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.1",
     "husky": "^8.0.3",
@@ -87,7 +78,7 @@
     "ts-jest": "28.0.1",
     "ts-loader": "^9.2.3",
     "ts-node": "^10.0.0",
-    "tsconfig-paths": "4.0.0"
+    "tsconfig-paths": "^4.0.0"
   },
   "lint-staged": {
     "*.{js,ts}": "eslint --fix"
@@ -106,6 +97,9 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^src/(.*)$": "<rootDir>/src/$1"
+    }
   }
 }

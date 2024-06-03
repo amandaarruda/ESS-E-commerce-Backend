@@ -14,12 +14,6 @@ export class UserPaginationResponse {
   id: string;
 
   @ApiResponseProperty({
-    example: 1,
-  })
-  @AutoMap()
-  version: number;
-
-  @ApiResponseProperty({
     example: '03/11/2024',
   })
   @AutoMap()
