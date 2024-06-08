@@ -101,18 +101,6 @@ describe('UsersService', () => {
 
   describe('Create', () => {
     it('Should create a new user', async () => {
-      /* 
-      Should register an customer user
-      Given que um novo cliente está na tela de registro,
-        And o usuário preenche o campo nome com o valor "cliente cadatro"
-        And o usuário preenche o campo email com o valor "cliente@gmail.com"
-        And o usuário preenche o campo senha com o valor "Senha@1238"
-        And não existe outro usuário com o mesmo email cadastrado no sistema
-      When clica no botão "Registrar",
-      Then o sistema deve registrar um novo usuário cliente,
-        And o cliente deve receber uma mensagem de confirmação "Usuário registrado com sucesso".
-       */
-
       // Given
       const userName = 'cliente cadastro';
       const userEmail = 'cliente@gmail.com';
@@ -174,20 +162,6 @@ describe('UsersService', () => {
     });
 
     it('Should throw conflict request exception when the user try to register with an already used email', async () => {
-      /*
-      Cenário: Registrar um usuário cliente com o email já utilizado
-      Should throw bad request exception when the user try to register itself with used email
-
-      Given que um novo cliente está na tela de registro,
-        And existe um usuário cadastrado no sistema com o email "cliente123@gmail.com"
-        And o usuário insere o email dele "cliente123@gmail.com"
-        And o usuário insere o nome dele "cliente abc"
-        And o usuário insere a senha dele "ClienteAbc@123"
-        And clica no botão "Registrar",
-      Then o sistema não deve cadastrar o usuário
-        And o cliente deve receber uma mensagem de erro "Email já utilizado por outro usuário".
-      */
-
       // Given
       const createUserDto: UserCreateDto = {
         name: 'cliente abc',
@@ -293,21 +267,6 @@ describe('UsersService', () => {
 
   describe('Update User Personal Data', () => {
     it('Should update the register data of the logged user', async () => {
-      /*
-      Cenário: Atualizar os próprios dados
-      Should update the register data of the logged user
-  
-      Given que o usuário "cliente123@gmail.com" está logado no sistema,
-        And está na tela de perfil,
-        And o email dele é igual a "cliente123@gmail.com"
-        And o nome dele é "administrador cliente"
-      When o usuário altera o nome dele para "cliente normal"
-        And clica na opção de atualizar
-      Then o sistema deve atualizar os dados do usuário logado,
-        And o usuário deve receber uma mensagem de confirmação "Dados atualizados com sucesso".
-        And o usuário vai ver o seu nome atualizado no sistema
-      */
-
       // Given
       const currentUser: UserPayload = {
         id: 1,
@@ -480,21 +439,6 @@ describe('UsersService', () => {
 
   describe('Update User Password', () => {
     it('Should update the logged user password', async () => {
-      /*
-      Cenário: Atualizar a própria senha com sucesso
-      Should update the logged user password
-  
-      Given que o usuário "administrador123@gmail.com" está logado no sistema,
-        And está na tela de edição de senha,
-        And a senha atual é igual a "Senha@123"
-      When o usuário preenche o campos de senha atual com o valor "Senha@123"
-        And o usuário preenche o campo nova senha com o valor "Senha@8858"
-        And clica na opção de atualizar senha,
-      Then o sistema deve atualizar a senha do usuário logado,
-        And o usuário deve receber uma mensagem de confirmação "Senha atualizada com sucesso"
-        And o usuário não deve mais conseguir logar com a senha antiga
-      */
-
       // Given
       const currentUser: UserPayload = {
         id: 1,
@@ -643,19 +587,6 @@ describe('UsersService', () => {
 
   describe('Delete user / delete myself', () => {
     it('Should delete user', async () => {
-      /*
-      Cenário: Deleção da própria conta
-      Should set the current logged user status to inactive
-
-      Given que o usuário "usuario@gmail.com" está logado no sistema,
-        And está com o status ativo,
-        And está na tela de perfil,
-      When ele seleciona a opção de deletar conta,
-      Then o sistema deve definir o status do usuário logado como inativo,
-        And o usuário deve receber uma mensagem de confirmação "Conta inativada com sucesso"
-        And o usuário deve ser deslogado do sistema.
-      */
-
       // Given
       const userId = 1;
       const existingUser: UserEntity = {
