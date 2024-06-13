@@ -22,6 +22,18 @@ And Eu vejo uma categoria com o nome "Tênis" e uma imagem "Tenis.png"
 And Eu vejo uma categoria com o nome "Bota" e uma imagem "Bota.png"
 And Eu vejo uma categoria com o nome "Chuteira" e uma imagem "Chuteira.png"
 
+Scenario: Adicionar categoria com o mesmo nome
+Given Eu estou logado como "Administrador"
+And Existe uma categoria "Tênis" cadastrada
+And Existe uma categoria "Bota" cadastrada
+And Existe uma categoria "Chuteira" cadastrada
+When Eu escolho "adicionar categoria"
+And Preencho o nome com "Chuteira" e a imagem com "Chuteira.png"
+Then Eu vejo uma mensagem de erro "Categoria já existente"
+And Eu vejo uma categoria com o nome "Tênis" e uma imagem "Tenis.png"
+And Eu vejo uma categoria com o nome "Bota" e uma imagem "Bota.png"
+And Eu vejo uma categoria com o nome "Chuteira" e uma imagem "Chuteira.png"
+
 Scenario: Atualizar nome da categoria
 Given Eu estou logado como "Administrador"
 And Existe uma categoria "Tenis" cadastrada
