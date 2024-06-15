@@ -49,4 +49,4 @@ jobs:
       run: npm run prisma:migrate
     
     - name: Cocumber - tests
-      run: npm run test:cocumber
+      run: npm run test:all
