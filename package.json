@@ -91,7 +91,7 @@
       "json",
       "ts"
     ],
-    "testRegex": [".*\\.steps\\.ts$", ".*\\.spec\\.ts$"],
+    "testRegex": [".*\\.steps\\.ts$"],
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },

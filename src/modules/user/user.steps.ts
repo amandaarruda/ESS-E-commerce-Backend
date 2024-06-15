@@ -105,33 +105,25 @@ defineFeature(feature, test => {
     authService.sendEmailRecovery = jest.fn(() => Promise.resolve());
   });
 
-  test('Criar um novo usuário com sucesso', ({ given, when, then }) => {
+  test('Criar um novo usuário com sucesso', ({ given, when, then, and }) => {
     let result: UserEntity;
+    let createUserDto: UserCreateDto;
+    let userName: string;
+    let userEmail: string;
+    let userPassword: string;
 
-    const userName = 'cliente cadastro';
-    const userEmail = 'cliente@gmail.com';
-    const userPassword = 'Senha@1238';
-    const userRole = RoleEnum.CUSTOMER;
-
-    const createUserDto: UserCreateDto = {
-      email: '',
-      name: '',
-      password: '',
-    };
+    given(/^que não existe um usuário com o email "([^"]*)"$/, async email => {
+      userRepositoryMock.exists.mockResolvedValue(Promise.resolve(false));
+      userEmail = email;
+    });
 
     given(
-      'que não existe um usuário com o email "cliente@gmail.com"',
-      async () => {
-        userRepositoryMock.exists.mockResolvedValue(Promise.resolve(false));
-      },
-    );
-
-    given(
-      'o dado de criação do usuário contém o nome "cliente cadastro", o email "cliente@gmail.com" e a senha "Senha@1238"',
-      () => {
-        createUserDto.name = userName;
-        createUserDto.email = userEmail;
-        createUserDto.password = userPassword;
+      /^o dado de criação do usuário contém o nome "([^"]*)", o email "([^"]*)" e a senha "([^"]*)"$/,
+      (name, email, password) => {
+        createUserDto = { name, email, password };
+        userName = name;
+        userEmail = email;
+        userPassword = password;
       },
     );
 
@@ -149,7 +141,7 @@ defineFeature(feature, test => {
         status: StatusEnum.ACTIVE,
         Media: null,
         mediaId: null,
-        role: userRole,
+        role: RoleEnum.CUSTOMER,
       };
 
       userRepositoryMock.createAsync.mockResolvedValue(
@@ -160,13 +152,13 @@ defineFeature(feature, test => {
     });
 
     then(
-      'o usuário deve ser criado com nome "cliente cadastro" e email "cliente@gmail.com"',
-      () => {
+      /^o usuário deve ser criado com nome "([^"]*)" e email "([^"]*)"$/,
+      (name, email) => {
         expect(result).toEqual(
           expect.objectContaining({
             password: expect.any(String),
-            email: userEmail,
-            name: userName,
+            email: email,
+            name: name,
           }),
         );
       },
@@ -177,21 +169,19 @@ defineFeature(feature, test => {
     });
 
     then(
-      'o repositório de usuários deve verificar a existência de um usuário com o email "cliente@gmail.com"',
-      () => {
-        expect(userRepositoryMock.exists).toHaveBeenCalledWith({
-          email: userEmail,
-        });
+      /^o repositório de usuários deve verificar a existência de um usuário com o email "([^"]*)"$/,
+      email => {
+        expect(userRepositoryMock.exists).toHaveBeenCalledWith({ email });
       },
     );
 
     then(
-      'o repositório de usuários deve criar o usuário com nome "cliente cadastro", email "cliente@gmail.com" e status "ACTIVE"',
-      () => {
+      /^o repositório de usuários deve criar o usuário com nome "([^"]*)", email "([^"]*)" e status "ACTIVE"$/,
+      (name, email) => {
         expect(userRepositoryMock.createAsync).toHaveBeenCalledWith(
           expect.objectContaining({
-            name: userName,
-            email: userEmail,
+            name: name,
+            email: email,
             status: StatusEnum.ACTIVE,
             role: RoleEnum.CUSTOMER,
           }),
@@ -205,29 +195,19 @@ defineFeature(feature, test => {
     when,
     then,
   }) => {
-    const userName = 'cliente cadastro';
-    const userEmail = 'cliente@gmail.com';
-    const userPassword = 'Senha@1238';
+    let createUserDto: UserCreateDto;
+    let userEmail: string;
 
-    const createUserDto: UserCreateDto = {
-      email: '',
-      name: '',
-      password: '',
-    };
+    given(/^que já existe um usuário com o email "([^"]*)"$/, async email => {
+      userRepositoryMock.exists.mockResolvedValue(Promise.resolve(true));
+      userEmail = email;
+    });
 
     given(
-      'que já existe um usuário com o email "cliente123@gmail.com"',
-      async () => {
-        userRepositoryMock.exists.mockResolvedValue(Promise.resolve(true));
-      },
-    );
-
-    given(
-      'o dado de criação do usuário contém o nome "cliente cadastro", o email "cliente@gmail.com" e a senha "Senha@1238"',
-      () => {
-        createUserDto.name = userName;
-        createUserDto.email = userEmail;
-        createUserDto.password = userPassword;
+      /^o dado de criação do usuário contém o nome "([^"]*)", o email "([^"]*)" e a senha "([^"]*)"$/,
+      (name, email, password) => {
+        createUserDto = { name, email, password };
+        userEmail = email;
       },
     );
 
@@ -239,7 +219,7 @@ defineFeature(feature, test => {
     then('deve lançar uma ConflictException', async () => {
       await expect(createUser).rejects.toThrow(ConflictException);
       expect(userRepositoryMock.exists).toHaveBeenCalledWith({
-        email: createUserDto.email,
+        email: userEmail,
       });
     });
   });
@@ -248,17 +228,18 @@ defineFeature(feature, test => {
     given,
     when,
     then,
+    and,
   }) => {
-    let id: number;
-    const userEmail = 'cliente123@gmail.com';
+    let userId: number;
 
     given(
-      'existe um usuário com o ID 1 e email "cliente123@gmail.com" com status "ACTIVE"',
-      async () => {
+      /^existe um usuário com o ID (\d+) e email "([^"]*)" com status "ACTIVE"$/,
+      async (id, email) => {
+        userId = parseInt(id, 10);
         const userToUpdate: UserEntity = {
-          id: 1,
+          id: userId,
           name: 'cliente cadastro',
-          email: userEmail,
+          email: email,
           password: await hashData('mockValue'),
           refreshToken: null,
           recoveryPasswordToken: '',
@@ -278,41 +259,53 @@ defineFeature(feature, test => {
       },
     );
 
-    given('o ID do usuário a ser deletado é 1', () => {
-      id = 1;
+    given(/^o ID do usuário a ser deletado é (\d+)$/, id => {
+      userId = parseInt(id, 10);
     });
 
     when('o serviço de usuário deleta o usuário', async () => {
-      await userService.deleteAsync(id);
-    });
-
-    then('o repositório de usuários deve encontrar o usuário pelo ID 1', () => {
-      expect(userRepositoryMock.findByIdAsync).toHaveBeenCalledWith(id);
+      await userService.deleteAsync(userId);
     });
 
     then(
-      'o repositório de usuários deve verificar a existência do usuário com ID 1',
-      () => {
-        expect(userRepositoryMock.exists).toHaveBeenCalledWith({ id });
+      /^o repositório de usuários deve encontrar o usuário pelo ID (\d+)$/,
+      id => {
+        expect(userRepositoryMock.findByIdAsync).toHaveBeenCalledWith(
+          parseInt(id, 10),
+        );
       },
     );
 
-    then('o repositório de usuários deve deletar o usuário com ID 1', () => {
-      expect(userRepositoryMock.deleteAsync).toHaveBeenCalledWith(id);
-    });
+    and(
+      /^o repositório de usuários deve verificar a existência do usuário com ID (\d+)$/,
+      id => {
+        expect(userRepositoryMock.exists).toHaveBeenCalledWith({
+          id: parseInt(id, 10),
+        });
+      },
+    );
+
+    and(
+      /^o repositório de usuários deve deletar o usuário com ID (\d+)$/,
+      id => {
+        expect(userRepositoryMock.deleteAsync).toHaveBeenCalledWith(
+          parseInt(id, 10),
+        );
+      },
+    );
   });
 
   test('Tentar deletar um usuário já inativo', ({ given, when, then }) => {
-    let id: number;
-    const userEmail = 'cliente123@gmail.com';
+    let userId: number;
 
     given(
-      'existe um usuário com o ID 1 e email "cliente123@gmail.com" com status "INACTIVE"',
-      async () => {
+      /^existe um usuário com o ID (\d+) e email "([^"]*)" com status "INACTIVE"$/,
+      async (id, email) => {
+        userId = parseInt(id, 10);
         const inactiveUser: UserEntity = {
-          id: 1,
+          id: userId,
           name: 'cliente cadastro',
-          email: userEmail,
+          email: email,
           password: await hashData('mockValue'),
           refreshToken: null,
           recoveryPasswordToken: '',
@@ -330,40 +323,45 @@ defineFeature(feature, test => {
       },
     );
 
-    given('o ID do usuário a ser deletado é 1', () => {
-      id = 1;
+    given(/^o ID do usuário a ser deletado é (\d+)$/, id => {
+      userId = parseInt(id, 10);
     });
 
     when('o serviço de usuário tenta deletar o usuário', async () => {
-      const deleteUser = async () => await userService.deleteAsync(id);
+      const deleteUser = async () => await userService.deleteAsync(userId);
       await expect(deleteUser).rejects.toThrow(ForbiddenException);
     });
 
     then('deve lançar uma ForbiddenException', () => {
-      expect(userRepositoryMock.findByIdAsync).toHaveBeenCalledWith(id);
+      expect(userRepositoryMock.findByIdAsync).toHaveBeenCalledWith(userId);
     });
   });
 
-  test('Tentar deletar um usuário que não existe', ({ given, when, then }) => {
-    let id: number;
+  test('Tentar deletar um usuário que não existe', ({
+    given,
+    when,
+    then,
+    and,
+  }) => {
+    let userId: number;
 
-    given('o ID do usuário a ser deletado é 1', () => {
-      id = 1;
+    given(/^o ID do usuário a ser deletado é (\d+)$/, id => {
+      userId = parseInt(id, 10);
     });
 
-    given('o usuário com ID 1 não existe', async () => {
+    and(/^o usuário com ID (\d+) não existe$/, async id => {
       userRepositoryMock.exists.mockResolvedValue(false);
     });
 
     let deleteUser = () => {};
 
     when('o serviço de usuário tenta deletar o usuário', async () => {
-      deleteUser = async () => await userService.deleteAsync(id);
+      deleteUser = async () => await userService.deleteAsync(userId);
     });
 
     then('deve lançar uma NotFoundException', async () => {
       await expect(deleteUser).rejects.toThrow(NotFoundException);
-      expect(userRepositoryMock.exists).toHaveBeenCalledWith({ id });
+      expect(userRepositoryMock.exists).toHaveBeenCalledWith({ id: userId });
     });
   });
 
@@ -371,17 +369,19 @@ defineFeature(feature, test => {
     given,
     when,
     then,
+    and,
   }) => {
     let currentUser: UserPayload;
     let updatedName: string;
+    let updateUserPersonalDataDto: UpdateUserPersonalData;
 
     given(
-      'existe um usuário logado com ID 1 e email "cliente123@gmail.com"',
-      () => {
+      /^existe um usuário logado com ID (\d+) e email "([^"]*)"$/,
+      (id, email) => {
         currentUser = {
-          id: 1,
-          email: 'cliente123@gmail.com',
-          sub: 'cliente123@gmail.com',
+          id: parseInt(id, 10),
+          email: email,
+          sub: email,
           name: 'cliente',
           role: RoleEnum.CUSTOMER,
           status: StatusEnum.ACTIVE,
@@ -392,17 +392,19 @@ defineFeature(feature, test => {
       },
     );
 
-    given('o nome atualizado do usuário é "cliente atualizado"', () => {
-      updatedName = 'cliente atualizado';
+    given(/^o nome atualizado do usuário é "([^"]*)"$/, name => {
+      updatedName = name;
     });
 
     given(
-      'o dado de atualização dos dados pessoais contém "cliente atualizado"',
-      async () => {
+      /^o dado de atualização dos dados pessoais contém "([^"]*)"$/,
+      async name => {
+        updateUserPersonalDataDto = { name: name };
+
         const existingUser: UserEntity = {
-          id: 1,
+          id: currentUser.id,
           name: 'administrador cliente',
-          email: 'cliente123@gmail.com',
+          email: currentUser.email,
           password: await hashData('mockValue'),
           refreshToken: null,
           recoveryPasswordToken: '',
@@ -426,7 +428,6 @@ defineFeature(feature, test => {
     when(
       'o serviço de usuário atualiza os dados pessoais do usuário logado',
       async () => {
-        const updateUserPersonalDataDto = { name: updatedName };
         await userService.updateUserPersonalData(
           updateUserPersonalDataDto,
           currentUser,
@@ -434,20 +435,21 @@ defineFeature(feature, test => {
       },
     );
 
-    then('o repositório de usuários deve encontrar o usuário pelo ID 1', () => {
-      expect(userRepositoryMock.findByIdAsync).toHaveBeenCalledWith(
-        currentUser.id,
-      );
-    });
-
     then(
-      'o repositório de usuários deve atualizar o usuário com nome "cliente atualizado"',
-      () => {
+      /^o repositório de usuários deve encontrar o usuário pelo ID (\d+)$/,
+      id => {
+        expect(userRepositoryMock.findByIdAsync).toHaveBeenCalledWith(
+          parseInt(id, 10),
+        );
+      },
+    );
+
+    and(
+      /^o repositório de usuários deve atualizar o usuário com nome "([^"]*)"$/,
+      name => {
         expect(userRepositoryMock.updateAsync).toHaveBeenCalledWith(
           currentUser.id,
-          {
-            name: updatedName,
-          },
+          { name: name },
         );
       },
     );
@@ -462,12 +464,12 @@ defineFeature(feature, test => {
     let updateUserPersonalDataDto: UpdateUserPersonalData;
 
     given(
-      'existe um usuário logado com ID 1 e email "cliente123@gmail.com"',
-      () => {
+      /^existe um usuário logado com ID (\d+) e email "([^"]*)"$/,
+      (id, email) => {
         currentUser = {
-          id: 1,
-          email: 'cliente123@gmail.com',
-          sub: 'cliente123@gmail.com',
+          id: parseInt(id, 10),
+          email: email,
+          sub: email,
           name: 'cliente',
           role: RoleEnum.CUSTOMER,
           status: StatusEnum.ACTIVE,
@@ -511,13 +513,15 @@ defineFeature(feature, test => {
     given,
     when,
     then,
+    and,
   }) => {
     let currentUser: UserPayload;
-    const updatedName = 'cliente normal';
+    let updatedName: string;
+    let updateUserPersonalDataDto: UpdateUserPersonalData;
 
-    given('o ID do usuário logado é 1', () => {
+    given(/^o ID do usuário logado é (\d+)$/, id => {
       currentUser = {
-        id: 1,
+        id: parseInt(id, 10),
         email: 'cliente123@gmail.com',
         sub: 'cliente123@gmail.com',
         name: 'cliente',
@@ -529,21 +533,18 @@ defineFeature(feature, test => {
       };
     });
 
-    given('o nome atualizado do usuário é "cliente normal"', () => {
-      currentUser.name = updatedName;
+    given(/^o nome atualizado do usuário é "([^"]*)"$/, name => {
+      updatedName = name;
     });
 
-    let updateUserPersonalDataDto: UpdateUserPersonalData;
     given(
-      'o dado de atualização dos dados pessoais contém "cliente normal"',
-      () => {
-        updateUserPersonalDataDto = {
-          name: updatedName,
-        };
+      /^o dado de atualização dos dados pessoais contém "([^"]*)"$/,
+      name => {
+        updateUserPersonalDataDto = { name: name };
       },
     );
 
-    given('o usuário com ID 1 não existe', async () => {
+    and(/^o usuário com ID (\d+) não existe$/, async id => {
       userRepositoryMock.findByIdAsync.mockResolvedValue(null);
     });
 
@@ -572,13 +573,15 @@ defineFeature(feature, test => {
     given,
     when,
     then,
+    and,
   }) => {
     let currentUser: UserPayload;
-    const updatedName = 'cliente normal';
+    let updatedName: string;
+    let updateUserPersonalDataDto: UpdateUserPersonalData;
 
-    given('o ID do usuário logado é 1', () => {
+    given(/^o ID do usuário logado é (\d+)$/, id => {
       currentUser = {
-        id: 1,
+        id: parseInt(id, 10),
         email: 'cliente123@gmail.com',
         sub: 'cliente123@gmail.com',
         name: 'cliente',
@@ -590,23 +593,20 @@ defineFeature(feature, test => {
       };
     });
 
-    given('o nome atualizado do usuário é "cliente normal"', () => {
-      currentUser.name = updatedName;
+    given(/^o nome atualizado do usuário é "([^"]*)"$/, name => {
+      updatedName = name;
     });
 
-    let updateUserPersonalDataDto: UpdateUserPersonalData;
     given(
-      'o dado de atualização dos dados pessoais contém "cliente normal"',
-      () => {
-        updateUserPersonalDataDto = {
-          name: updatedName,
-        };
+      /^o dado de atualização dos dados pessoais contém "([^"]*)"$/,
+      name => {
+        updateUserPersonalDataDto = { name: name };
       },
     );
 
-    given('o usuário com ID 1 está inativo ou deletado', async () => {
+    and(/^o usuário com ID (\d+) está inativo ou deletado$/, async id => {
       const inactiveUser: UserEntity = {
-        id: 1,
+        id: parseInt(id, 10),
         name: 'administrador cliente',
         email: 'cliente123@gmail.com',
         password: await hashData('mockValue'),
@@ -646,18 +646,19 @@ defineFeature(feature, test => {
     });
   });
 
-  test('Atualizar a senha do usuário logado', ({ given, when, then }) => {
+  test('Atualizar a senha do usuário logado', ({ given, when, then, and }) => {
     let currentUser: UserPayload;
     let currentPassword: string;
     let newPassword: string;
+    let updateUserPasswordDto: UpdateUserPassword;
 
     given(
-      'existe um usuário logado com ID 1 e email "cliente123@gmail.com"',
-      () => {
+      /^existe um usuário logado com ID (\d+) e email "([^"]*)"$/,
+      (id, email) => {
         currentUser = {
-          id: 1,
-          email: 'cliente123@gmail.com',
-          sub: 'cliente123@gmail.com',
+          id: parseInt(id, 10),
+          email: email,
+          sub: email,
           name: 'cliente',
           role: RoleEnum.CUSTOMER,
           status: StatusEnum.ACTIVE,
@@ -668,22 +669,24 @@ defineFeature(feature, test => {
       },
     );
 
-    given('a senha atual é "Senha@123"', () => {
-      currentPassword = 'Senha@123';
+    given(/^a senha atual é "([^"]*)"$/, password => {
+      currentPassword = password;
     });
 
-    given('a nova senha é "Senha@8858"', () => {
-      newPassword = 'Senha@8858';
+    given(/^a nova senha é "([^"]*)"$/, password => {
+      newPassword = password;
     });
 
     given(
-      'o dado de atualização de senha contém "Senha@123" e "Senha@8858"',
-      async () => {
-        const currentPasswordHashed = await hashData(currentPassword);
+      /^o dado de atualização de senha contém "([^"]*)" e "([^"]*)"$/,
+      async (actualPassword, password) => {
+        updateUserPasswordDto = { actualPassword, newPassword: password };
+
+        const currentPasswordHashed = await hashData(actualPassword);
         const existingUser: UserEntity = {
-          id: 1,
+          id: currentUser.id,
           name: 'Administrador',
-          email: 'administrador123@gmail.com',
+          email: currentUser.email,
           password: currentPasswordHashed,
           refreshToken: null,
           recoveryPasswordToken: '',
@@ -706,10 +709,6 @@ defineFeature(feature, test => {
     when(
       'o serviço de usuário atualiza a senha do usuário logado',
       async () => {
-        const updateUserPasswordDto: UpdateUserPassword = {
-          actualPassword: currentPassword,
-          newPassword: newPassword,
-        };
         await userService.updateUserPassword(
           updateUserPasswordDto,
           currentUser,
@@ -717,11 +716,14 @@ defineFeature(feature, test => {
       },
     );
 
-    then('o repositório de usuários deve encontrar o usuário pelo ID 1', () => {
-      expect(userRepositoryMock.findByIdAsync).toHaveBeenCalledWith(
-        currentUser.id,
-      );
-    });
+    then(
+      /^o repositório de usuários deve encontrar o usuário pelo ID (\d+)$/,
+      id => {
+        expect(userRepositoryMock.findByIdAsync).toHaveBeenCalledWith(
+          parseInt(id, 10),
+        );
+      },
+    );
 
     then('o repositório de usuários deve atualizar a senha do usuário', () => {
       expect(userRepositoryMock.updateUserPassword).toHaveBeenCalledWith(
@@ -738,14 +740,15 @@ defineFeature(feature, test => {
   }) => {
     let currentUser: UserPayload;
     let password: string;
+    let updateUserPasswordDto: UpdateUserPassword;
 
     given(
-      'existe um usuário logado com ID 1 e email "cliente123@gmail.com"',
-      () => {
+      /^existe um usuário logado com ID (\d+) e email "([^"]*)"$/,
+      (id, email) => {
         currentUser = {
-          id: 1,
-          email: 'cliente123@gmail.com',
-          sub: 'cliente123@gmail.com',
+          id: parseInt(id, 10),
+          email: email,
+          sub: email,
           name: 'cliente',
           role: RoleEnum.CUSTOMER,
           status: StatusEnum.ACTIVE,
@@ -756,18 +759,14 @@ defineFeature(feature, test => {
       },
     );
 
-    given('a senha atual e a nova senha são "Senha@123"', () => {
-      password = 'Senha@123';
+    given(/^a senha atual e a nova senha são "([^"]*)"$/, pass => {
+      password = pass;
     });
 
-    let updateUserPasswordDto: UpdateUserPassword;
     given(
-      'o dado de atualização de senha contém "Senha@123" e "Senha@123"',
-      () => {
-        updateUserPasswordDto = {
-          actualPassword: password,
-          newPassword: password,
-        };
+      /^o dado de atualização de senha contém "([^"]*)" e "([^"]*)"$/,
+      (actualPassword, newPass) => {
+        updateUserPasswordDto = { actualPassword, newPassword: newPass };
       },
     );
 
@@ -796,14 +795,18 @@ defineFeature(feature, test => {
     then,
   }) => {
     let currentUser: UserPayload;
+    let currentPassword: string;
+    let wrongPassword: string;
+    let newPassword: string;
+    let updateUserPasswordDto: UpdateUserPassword;
 
     given(
-      'existe um usuário logado com ID 1 e email "cliente123@gmail.com"',
-      async () => {
+      /^existe um usuário logado com ID (\d+) e email "([^"]*)"$/,
+      async (id, email) => {
         currentUser = {
-          id: 1,
-          email: 'cliente123@gmail.com',
-          sub: 'cliente123@gmail.com',
+          id: parseInt(id, 10),
+          email: email,
+          sub: email,
           name: 'cliente',
           role: RoleEnum.CUSTOMER,
           status: StatusEnum.ACTIVE,
@@ -814,36 +817,27 @@ defineFeature(feature, test => {
       },
     );
 
-    let currentPassword: string;
-    let wrongPassword: string;
-    let newPassword: string;
-
-    given('a senha atual é "Senha@123"', () => {
-      currentPassword = 'Senha@123';
+    given(/^a senha atual é "([^"]*)"$/, password => {
+      currentPassword = password;
     });
 
-    given('a senha incorreta é "SenhaErrada@123"', () => {
-      wrongPassword = 'SenhaErrada@123';
+    given(/^a senha incorreta é "([^"]*)"$/, password => {
+      wrongPassword = password;
     });
 
-    given('a nova senha é "Senha@8858"', () => {
-      newPassword = 'Senha@8858';
+    given(/^a nova senha é "([^"]*)"$/, password => {
+      newPassword = password;
     });
-
-    let updateUserPasswordDto: UpdateUserPassword;
 
     given(
-      'o dado de atualização de senha contém "SenhaErrada@123" e "Senha@8858"',
-      async () => {
-        updateUserPasswordDto = {
-          actualPassword: wrongPassword,
-          newPassword: newPassword,
-        };
+      /^o dado de atualização de senha contém "([^"]*)" e "([^"]*)"$/,
+      async (actualPassword, newPass) => {
+        updateUserPasswordDto = { actualPassword, newPassword: newPass };
 
         const existingUser: UserEntity = {
-          id: 1,
+          id: currentUser.id,
           name: 'Administrador',
-          email: 'administrador123@gmail.com',
+          email: currentUser.email,
           password: await hashData(currentPassword),
           refreshToken: null,
           recoveryPasswordToken: '',
@@ -883,12 +877,13 @@ defineFeature(feature, test => {
     let userId: number;
 
     given(
-      'existe um usuário com ID 1 e email "cliente123@gmail.com" com status "ACTIVE"',
-      async () => {
+      /^existe um usuário com ID (\d+) e email "([^"]*)" com status "ACTIVE"$/,
+      async (id, email) => {
+        userId = parseInt(id, 10);
         const existingUser: UserEntity = {
           id: userId,
           name: 'cliente',
-          email: 'cliente123@gmail.com',
+          email: email,
           password: await hashData('Senha@123'),
           refreshToken: null,
           recoveryPasswordToken: '',
@@ -906,17 +901,22 @@ defineFeature(feature, test => {
       },
     );
 
-    given('o ID do usuário a ser deletado é 1', () => {
-      userId = 1;
+    given(/^o ID do usuário a ser deletado é (\d+)$/, id => {
+      userId = parseInt(id, 10);
     });
 
     when('o serviço de usuário deleta o usuário', async () => {
       await userService.deleteAsync(userId);
     });
 
-    then('o repositório de usuários deve deletar o usuário com ID 1', () => {
-      expect(userRepositoryMock.deleteAsync).toHaveBeenCalledWith(userId);
-    });
+    then(
+      /^o repositório de usuários deve deletar o usuário com ID (\d+)$/,
+      id => {
+        expect(userRepositoryMock.deleteAsync).toHaveBeenCalledWith(
+          parseInt(id, 10),
+        );
+      },
+    );
   });
 
   test('Lançar BadRequestException se o ID for nulo', ({ when, then }) => {
@@ -941,11 +941,11 @@ defineFeature(feature, test => {
   }) => {
     let userId: number;
 
-    given('o ID do usuário a ser deletado é 1', () => {
-      userId = 1;
+    given(/^o ID do usuário a ser deletado é (\d+)$/, id => {
+      userId = parseInt(id, 10);
     });
 
-    given('o usuário com ID 1 não existe', async () => {
+    given(/^o usuário com ID (\d+) não existe$/, async id => {
       userRepositoryMock.exists.mockResolvedValue(false);
     });
 
@@ -969,12 +969,13 @@ defineFeature(feature, test => {
     let userId: number;
 
     given(
-      'existe um usuário com ID 1 e email "cliente123@gmail.com" com status "INACTIVE"',
-      async () => {
+      /^existe um usuário com ID (\d+) e email "([^"]*)" com status "INACTIVE"$/,
+      async (id, email) => {
+        userId = parseInt(id, 10);
         const existingUser: UserEntity = {
-          id: 1,
+          id: userId,
           name: 'cliente',
-          email: 'cliente123@gmail.com',
+          email: email,
           password: await hashData('Senha@123'),
           refreshToken: null,
           recoveryPasswordToken: '',
@@ -992,8 +993,8 @@ defineFeature(feature, test => {
       },
     );
 
-    given('o ID do usuário a ser deletado é 1', () => {
-      userId = 1;
+    given(/^o ID do usuário a ser deletado é (\d+)$/, id => {
+      userId = parseInt(id, 10);
     });
 
     let deleteUser = () => {};
@@ -1016,12 +1017,13 @@ defineFeature(feature, test => {
     let userId: number;
 
     given(
-      'existe um usuário com ID 1 e email "admin@gmail.com" com status "ACTIVE" e papel "ADMIN"',
-      async () => {
+      /^existe um usuário com ID (\d+) e email "([^"]*)" com status "ACTIVE" e papel "ADMIN"$/,
+      async (id, email) => {
+        userId = parseInt(id, 10);
         const existingUser: UserEntity = {
-          id: 1,
+          id: userId,
           name: 'admin',
-          email: 'admin@gmail.com',
+          email: email,
           password: await hashData('Senha@123'),
           refreshToken: null,
           recoveryPasswordToken: '',
@@ -1039,8 +1041,8 @@ defineFeature(feature, test => {
       },
     );
 
-    given('o ID do usuário a ser deletado é 1', () => {
-      userId = 1;
+    given(/^o ID do usuário a ser deletado é (\d+)$/, id => {
+      userId = parseInt(id, 10);
     });
 
     let deleteUser = () => {};
@@ -1057,27 +1059,24 @@ defineFeature(feature, test => {
   test('Validar usuário com sucesso', ({ given, when, then }) => {
     let userEmail: string;
     let userPassword: string;
-    let result;
+    let result: Omit<UserEntity, 'password'>;
 
-    given(
-      'que o usuário inseriu no campo email o valor "email@gmail.com"',
-      () => {
-        userEmail = 'email@gmail.com';
-      },
-    );
+    given(/^que o usuário inseriu no campo email o valor "([^"]*)"$/, email => {
+      userEmail = email;
+    });
 
-    given('o usuário inseriu no campo senha o valor "teste"', () => {
-      userPassword = 'teste';
+    given(/^o usuário inseriu no campo senha o valor "([^"]*)"$/, password => {
+      userPassword = password;
     });
 
     given(
-      'existe um usuário no sistema com o email "email@gmail.com" e com a senha "teste"',
-      async () => {
+      /^existe um usuário no sistema com o email "([^"]*)" e com a senha "([^"]*)"$/,
+      async (email, password) => {
         const existingUser: UserEntity = {
           id: 1,
           name: 'administrador cliente',
-          email: userEmail,
-          password: await hashData(userPassword),
+          email: email,
+          password: await hashData(password),
           refreshToken: null,
           recoveryPasswordToken: '',
           deletedAt: null,
@@ -1098,7 +1097,7 @@ defineFeature(feature, test => {
     });
 
     then(
-      'o usuário deve receber o próprio usuário validado com o email',
+      /^o usuário deve receber o próprio usuário validado com o email$/,
       () => {
         expect(result).toBeDefined();
         expect(result.email).toEqual(userEmail);
@@ -1114,20 +1113,17 @@ defineFeature(feature, test => {
     let userEmail: string;
     let userPassword: string;
 
-    given(
-      'que o usuário inseriu no campo email o valor "email@gmail.com"',
-      () => {
-        userEmail = 'email@gmail.com';
-      },
-    );
+    given(/^que o usuário inseriu no campo email o valor "([^"]*)"$/, email => {
+      userEmail = email;
+    });
 
-    given('o usuário inseriu no campo senha o valor "teste"', () => {
-      userPassword = 'teste';
+    given(/^o usuário inseriu no campo senha o valor "([^"]*)"$/, password => {
+      userPassword = password;
     });
 
     given(
-      'não existe um usuário no sistema com o email "email@gmail.com"',
-      async () => {
+      /^não existe um usuário no sistema com o email "([^"]*)"$/,
+      async email => {
         jest.spyOn(userService, 'findByEmail').mockResolvedValue(null);
       },
     );
@@ -1152,25 +1148,22 @@ defineFeature(feature, test => {
     let userEmail: string;
     let userPassword: string;
 
-    given(
-      'que o usuário inseriu no campo email o valor "email@gmail.com"',
-      () => {
-        userEmail = 'email@gmail.com';
-      },
-    );
+    given(/^que o usuário inseriu no campo email o valor "([^"]*)"$/, email => {
+      userEmail = email;
+    });
 
-    given('o usuário inseriu no campo senha o valor "teste"', () => {
-      userPassword = 'teste';
+    given(/^o usuário inseriu no campo senha o valor "([^"]*)"$/, password => {
+      userPassword = password;
     });
 
     given(
-      'existe um usuário inativo no sistema com o email "email@gmail.com" e com a senha "teste"',
-      async () => {
+      /^existe um usuário inativo no sistema com o email "([^"]*)" e com a senha "([^"]*)"$/,
+      async (email, password) => {
         const inactiveUser: UserEntity = {
           id: 1,
           name: 'administrador cliente',
-          email: userEmail,
-          password: await hashData(userPassword),
+          email: email,
+          password: await hashData(password),
           refreshToken: null,
           recoveryPasswordToken: '',
           deletedAt: null,
@@ -1204,30 +1197,24 @@ defineFeature(feature, test => {
     then,
   }) => {
     let userEmail: string;
-    let userPassword: string;
     let wrongUserPassword: string;
 
-    given(
-      'que o usuário inseriu no campo email o valor "email@gmail.com"',
-      () => {
-        userEmail = 'email@gmail.com';
-      },
-    );
+    given(/^que o usuário inseriu no campo email o valor "([^"]*)"$/, email => {
+      userEmail = email;
+    });
 
-    given('o usuário inseriu no campo senha o valor "teste@123"', () => {
-      wrongUserPassword = 'teste@123';
+    given(/^o usuário inseriu no campo senha o valor "([^"]*)"$/, password => {
+      wrongUserPassword = password;
     });
 
     given(
-      'não existe um usuário no sistema com o email "email@gmail.com"',
-      async () => {
-        userPassword = 'teste';
-
+      /^não existe um usuário no sistema com o email "([^"]*)"$/,
+      async email => {
         const existingUser: UserEntity = {
           id: 1,
           name: 'administrador cliente',
-          email: userEmail,
-          password: await hashData(userPassword),
+          email: email,
+          password: await hashData('teste'),
           refreshToken: null,
           recoveryPasswordToken: '',
           deletedAt: null,
@@ -1255,30 +1242,27 @@ defineFeature(feature, test => {
     });
   });
 
-  test('Login com sucesso', ({ given, when, then }) => {
+  test('Login com sucesso', ({ given, when, then, and }) => {
     let userEmail: string;
     let userPassword: string;
     let tokens: UserToken;
 
-    given(
-      'que o usuário inseriu no campo email o valor "email@gmail.com"',
-      () => {
-        userEmail = 'email@gmail.com';
-      },
-    );
+    given(/^que o usuário inseriu no campo email o valor "([^"]*)"$/, email => {
+      userEmail = email;
+    });
 
-    given('o usuário inseriu no campo senha o valor "teste"', () => {
-      userPassword = 'teste';
+    given(/^o usuário inseriu no campo senha o valor "([^"]*)"$/, password => {
+      userPassword = password;
     });
 
     given(
-      'existe um usuário no sistema com o email "email@gmail.com" e com a senha "teste"',
-      async () => {
+      /^existe um usuário no sistema com o email "([^"]*)" e com a senha "([^"]*)"$/,
+      async (email, password) => {
         const user: UserEntity = {
           id: 1,
           name: 'User Test',
-          email: userEmail,
-          password: await hashData(userPassword),
+          email: email,
+          password: await hashData(password),
           refreshToken: null,
           recoveryPasswordToken: '',
           deletedAt: null,
@@ -1295,10 +1279,7 @@ defineFeature(feature, test => {
     );
 
     when('clica em “Fazer login no sistema”', async () => {
-      const loginDto: LoginDto = {
-        email: userEmail,
-        password: userPassword,
-      };
+      const loginDto: LoginDto = { email: userEmail, password: userPassword };
       tokens = await authService.login(loginDto);
     });
 
@@ -1322,19 +1303,19 @@ defineFeature(feature, test => {
     let userEmail: string;
 
     given(
-      'que o usuário inseriu o valor "email@gmail.com" no campo de email',
-      () => {
-        userEmail = 'email@gmail.com';
+      /^que o usuário inseriu o valor "([^"]*)" no campo de email$/,
+      email => {
+        userEmail = email;
       },
     );
 
     given(
-      'no sistema existe um usuário com o campo email com o valor "email@gmail.com"',
-      async () => {
+      /^no sistema existe um usuário com o campo email com o valor "([^"]*)"$/,
+      async email => {
         const user: UserEntity = {
           id: 1,
           name: 'User Test',
-          email: userEmail,
+          email: email,
           password: await hashData('random'),
           refreshToken: null,
           recoveryPasswordToken: '',
@@ -1370,26 +1351,27 @@ defineFeature(feature, test => {
     given,
     when,
     then,
+    and,
   }) => {
-    const userEmail = 'email@gmail.com';
-    const userId = 1;
     let recoveryPasswordToken: string;
     let newPassword: string;
+    let userEmail: string;
 
     given(
-      'que o usuário tem uma token de recuperação com o valor "192x7x8asjdjas89d8"',
-      () => {
-        recoveryPasswordToken = '192x7x8asjdjas89d8';
+      /^que o usuário tem uma token de recuperação com o valor "([^"]*)"$/,
+      token => {
+        recoveryPasswordToken = token;
       },
     );
 
     given(
-      'o sistema tem a token de recuperação com o valor "192x7x8asjdjas89d8" atrelado ao email "email@gmail.com"',
-      async () => {
+      /^o sistema tem a token de recuperação com o valor "([^"]*)" atrelado ao email "([^"]*)"$/,
+      async (token, email) => {
+        userEmail = email;
         const currentUser: UserPayload = {
-          id: userId,
-          email: userEmail,
-          sub: userEmail,
+          id: 1,
+          email: email,
+          sub: email,
           name: 'cliente',
           role: RoleEnum.CUSTOMER,
           status: StatusEnum.ACTIVE,
@@ -1399,12 +1381,12 @@ defineFeature(feature, test => {
         };
 
         const userFindBy: UserEntity = {
-          id: userId,
+          id: 1,
           name: 'administrador cliente',
-          email: userEmail,
+          email: email,
           password: await hashData('mockPassword'),
           refreshToken: null,
-          recoveryPasswordToken: await hashData(recoveryPasswordToken),
+          recoveryPasswordToken: await hashData(token),
           deletedAt: null,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -1424,8 +1406,8 @@ defineFeature(feature, test => {
       },
     );
 
-    given('o usuário enviou na senha o valor "Senha@8858"', () => {
-      newPassword = 'Senha@8858';
+    given(/^o usuário enviou na senha o valor "([^"]*)"$/, password => {
+      newPassword = password;
     });
 
     when('o usuário clica em “Trocar senha”', async () => {
@@ -1447,7 +1429,7 @@ defineFeature(feature, test => {
           anyObject(),
         );
         expect(userRepositoryMock.updateUserPassword).toHaveBeenCalledWith(
-          userId,
+          1,
           anyString(),
         );
       },
