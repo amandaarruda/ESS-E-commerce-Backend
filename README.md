@@ -64,6 +64,16 @@ or
 npm start
 ```
 
+### Como executar o projeto usando docker
+- Execute o comando `make docker-build` para fazer build das imagens do container do backend.
+- Execute o comando `make docker-start` para inicializar os containers do banco de dados e backend.
+  > [!NOTE]
+  > O Docker cria um volume para o banco de dados que salva os dados de forma persistente
+- Execute o comando `make docker-sync` para rebuildar e reiniciar o container do backend (use para integrar mudanças no container).
+- Execute o comando `make docker-fresh-start` para recriar o volume do banco de dados e reiniciar os containers.
+  > [!CAUTION]
+  > Este comando apaga todos os dados salvos no banco de dados
+
 <hr>
 
 #### Seed da conta base de administrador
