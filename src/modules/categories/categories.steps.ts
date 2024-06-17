@@ -23,7 +23,7 @@ defineFeature(feature, test => {
               provide: CategoriesRepository,
               useFactory: () => ({
                 exists: jest.fn(),
-                add: jest.fn(),
+                create: jest.fn(),
               }),
             }
           ],
@@ -45,21 +45,19 @@ defineFeature(feature, test => {
 
     test('Adicionar categoria', ({ given, when, then }) => {
         let result;
-        let categoryService;
         let categoryName;
-        let categoryImage;
+        let categoryImageURL;
 
         given(/^Não existe a categoria "([^"]*)" no repositório de categorias$/, async (name) => {
         categoriesRepositoryMock.exists.mockResolvedValue(Promise.resolve(false));
         categoryName = name;
         });
 
-        when(/^Eu chamo o método "addCategory" do "CategoriesService" com o nome "([^"]*)" e imagem "([^"]*)"$/, async (name, image) => {
-        categoryImage = image;
-        categoryService = new CategoriesService(categoriesRepositoryMock);
+        when(/^Eu chamo o método "createCategory" do "CategoriesService" com o nome "([^"]*)" e imagem "([^"]*)"$/, async (name, image) => {
+        categoryImageURL = image;
         
         // Mock the add method to return a Promise that resolves to an object with an ID
-        categoriesRepositoryMock.add.mockResolvedValue(Promise.resolve({ 
+        categoriesRepositoryMock.create.mockResolvedValue(Promise.resolve({ 
             id: 1, 
             name: categoryName, 
             deletedAt: null,
@@ -67,12 +65,12 @@ defineFeature(feature, test => {
             updatedAt: new Date(),
             Media: {
                 id: 1,
-                url: categoryImage
+                url: categoryImageURL
             },
             mediaId: 1,
         }));
 
-        result = await categoryService.addCategory({ name: categoryName, image: categoryImage });
+        result = await categoriesService.createCategory({ name: categoryName, imageUrl: categoryImageURL });
         });
 
         then(/^Eu recebo o ID "([^"]*)"$/, async (id) => {
@@ -80,10 +78,14 @@ defineFeature(feature, test => {
         });
 
         then(/^A categoria de ID "([^"]*)", nome "([^"]*)" e imagem "([^"]*)" está no repositório de categorias$/, async (id, name, image) => {
-        expect(categoriesRepositoryMock.add).toHaveBeenCalledWith(
+        expect(categoriesRepositoryMock.create).toHaveBeenCalledWith(
             expect.objectContaining({
                 name: name,
-                image: image
+                Media: {
+                  create: {
+                    url: categoryImageURL
+                  }
+                }
             }),
         );
         });

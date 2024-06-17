@@ -36,5 +36,5 @@ export class CategoryCreateDto {
     ({ value }: TransformFnParams) =>
       typeof value === 'string' && value?.trim(),
   )
-  image_url: string;
+  imageUrl: string;
 }

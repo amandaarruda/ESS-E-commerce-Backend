@@ -19,7 +19,7 @@ export class CategoriesRepository {
     return categoriesCount > 0;
   }
 
-  async add(data: CategoryTypeMap[CrudType.CREATE]): Promise<CategoryEntity> {
+  async create(data: CategoryTypeMap[CrudType.CREATE]): Promise<CategoryEntity> {
     return await this.prisma.category.create({
       data: {
         ...data,

@@ -9,6 +9,7 @@ import { CategoryTypeMap } from './entity/category.type.map';
 import { CrudType } from 'src/utils/base/ICrudTypeMap';
 import { MessagesHelperKey, getMessage } from 'src/utils/messages.helper';
 import { handleError } from 'src/utils/treat.exceptions';
+import { CategoryCreateDto } from './dto/request/category.create.dto';
 
 @Injectable()
 export class CategoriesService {
@@ -16,15 +17,25 @@ export class CategoriesService {
         protected readonly categoriesRepository: CategoriesRepository,
     ) {}
 
-    async addCategory(data: CategoryTypeMap[CrudType.CREATE]): Promise<CategoryEntity> {
+    async createCategory(data: CategoryCreateDto): Promise<CategoryEntity> {
+        let createCategoryData = {
+          name: data.name,
+          ...(data.imageUrl && {
+            Media: {
+              create: {
+                url: data.imageUrl,
+              },
+            },
+          }),
+        }
         try {
-            if ((await this.categoriesRepository.exists({ name: data.name.trim() })) === true) {
+            if ((await this.categoriesRepository.exists({ name: createCategoryData.name.trim() })) === true) {
               throw new ConflictException(
                 getMessage(MessagesHelperKey.CATEGORY_ALREADY_EXISTS),
               );
             }
-      
-            return await this.categoriesRepository.add(data);
+            
+            return await this.categoriesRepository.create(createCategoryData);
           } catch (error) {
             handleError(error);
           }

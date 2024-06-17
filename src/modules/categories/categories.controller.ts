@@ -39,17 +39,7 @@ export class CategoriesController {
     @Res() response: Response,
     @Body() body: CategoryCreateDto
   ) {
-    let createCategoryData = {
-      name: body.name,
-      ...(body.image_url && {
-        Media: {
-          create: {
-            url: body.image_url,
-          },
-        },
-      }),
-    }
-    const category = await this.service.addCategory(createCategoryData);
+    const category = await this.service.createCategory(body);
 
     return response.status(HttpStatus.CREATED).json(category);
   }
