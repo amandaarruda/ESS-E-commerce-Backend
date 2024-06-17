@@ -29,6 +29,7 @@ defineFeature(feature, test => {
                 exists: jest.fn(),
                 create: jest.fn(),
                 getById: jest.fn(),
+                getAll: jest.fn(),
               }),
             }
           ],
@@ -140,9 +141,9 @@ defineFeature(feature, test => {
       then(/^Eu recebo um erro$/, async () => {
         await expect(result).rejects.toThrow(ConflictException);
       });
-  });
+    });
 
-  test('Obter categoria por ID', ({ given, when, then }) => {
+    test('Obter categoria por ID', ({ given, when, then }) => {
     let result: CategoryEntity;
     let categoryId;
     let categoryName;
@@ -184,6 +185,51 @@ defineFeature(feature, test => {
         }),
       );
     });
-});
+    });
+
+    test('Obter todas categorias', ({ given, when, then }) => {
+      let result: CategoryEntity[];
+      let categories: CategoryEntity[] = [
+        {
+          id: 1, 
+          name: "Tênis", 
+          deletedAt: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          Media: {
+              id: 1,
+              url: "https://cdn-icons-png.flaticon.com/512/2589/2589903.png"
+          },
+          mediaId: 1,
+        },
+        {
+          id: 2, 
+          name: "Chinelo", 
+          deletedAt: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          Media: {
+              id: 2,
+              url: "https://static.thenounproject.com/png/2419291-200.png"
+          },
+          mediaId: 2,
+        },
+      ];
+      
+
+      given(/^Existem categorias no repositório de categorias$/, async () => {
+        categoriesRepositoryMock.getAll.mockResolvedValue(Promise.resolve(categories));
+      });
+
+      when(/^Eu chamo o método "getCategories" do "CategoriesService"$/, async () => {
+        result = await categoriesService.getCategories();
+      });
+
+      then(/^Eu recebo uma lista com todas categorias do repositório de categorias$/, async () => {
+        expect(result).toEqual(
+          expect.arrayContaining(categories),
+        );
+      });
+    });
 
 });
