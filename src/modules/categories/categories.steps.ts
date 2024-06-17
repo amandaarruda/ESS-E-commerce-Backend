@@ -8,6 +8,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CategoriesRepository } from './categories.repository';
 import { CategoriesService } from './categories.service';
 import { defineFeature, loadFeature } from 'jest-cucumber';
+import { CategoryEntity } from './entity/category.entity';
 
 const feature = loadFeature('features/Categoria.feature');
 
@@ -44,7 +45,7 @@ defineFeature(feature, test => {
     
 
     test('Adicionar categoria', ({ given, when, then }) => {
-        let result;
+        let result: CategoryEntity;
         let categoryName;
         let categoryImageURL;
 
@@ -76,24 +77,26 @@ defineFeature(feature, test => {
         then(/^Eu recebo a categoria criada com o nome "([^"]*)", imagem "([^"]*)", e ID "([^"]*)"$/, async (id) => {
           expect(result).toEqual(
             expect.objectContaining({
+              id: 1,
               name: categoryName,
-              Media: {
+              Media: expect.objectContaining({
+                id: 1,
                 url: categoryImageURL,
-              },
+              }),
+              mediaId: 1,
             }),
           );
-          expect(result.id).toBe(Number(id));
         });
 
         then(/^A categoria de ID "([^"]*)", nome "([^"]*)" e imagem "([^"]*)" está no repositório de categorias$/, async (id, name, image) => {
         expect(categoriesRepositoryMock.create).toHaveBeenCalledWith(
             expect.objectContaining({
                 name: name,
-                Media: {
-                  create: {
+                Media: expect.objectContaining({
+                  create: expect.objectContaining({
                     url: categoryImageURL
-                  }
-                }
+                  })
+                })
             }),
         );
         });
