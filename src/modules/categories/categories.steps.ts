@@ -73,8 +73,16 @@ defineFeature(feature, test => {
         result = await categoriesService.createCategory({ name: categoryName, imageUrl: categoryImageURL });
         });
 
-        then(/^Eu recebo o ID "([^"]*)"$/, async (id) => {
-            expect(result.id).toBe(Number(id));
+        then(/^Eu recebo a categoria criada com o nome "([^"]*)", imagem "([^"]*)", e ID "([^"]*)"$/, async (id) => {
+          expect(result).toEqual(
+            expect.objectContaining({
+              name: categoryName,
+              Media: {
+                url: categoryImageURL,
+              },
+            }),
+          );
+          expect(result.id).toBe(Number(id));
         });
 
         then(/^A categoria de ID "([^"]*)", nome "([^"]*)" e imagem "([^"]*)" está no repositório de categorias$/, async (id, name, image) => {
