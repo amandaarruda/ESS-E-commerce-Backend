@@ -170,7 +170,7 @@ defineFeature(feature, test => {
         mediaId: 1,
     }));
 
-    result = await categoriesService.getCategoryById(categoryId.toString());
+    result = await categoriesService.getCategoryById(categoryId);
     });
 
     then(/^Eu recebo a categoria de ID "([^"]*)", nome "([^"]*)" e imagem "([^"]*)"$/, async () => {
