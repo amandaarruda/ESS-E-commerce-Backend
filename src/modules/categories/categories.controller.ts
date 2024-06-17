@@ -2,12 +2,16 @@ import { Controller } from '@nestjs/common';
 import {
   Body,
   Post,
+  Get,
   Res,
+  Param,
   HttpStatus,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
+  ApiParam,
+  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { RoleEnum } from '@prisma/client';
@@ -43,4 +47,26 @@ export class CategoriesController {
 
     return response.status(HttpStatus.CREATED).json(category);
   }
+
+  @ApiOperation({ summary: 'Get category by ID' })
+  @ApiParam({
+    name: 'id',
+    type: Number,
+    required: true,
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: CategoryResponseDto
+  })
+  @ApiExceptionResponse()
+  @Get('/:id')
+  async getById(
+    @Res() response: Response,
+    @Param('id') id: number,
+  ) {
+    const category = await this.service.getCategoryById(id);
+
+    return response.status(HttpStatus.OK).json(category)
+  }
 }
+

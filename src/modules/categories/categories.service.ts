@@ -1,6 +1,7 @@
 import {
     Injectable,
     ConflictException,
+    NotFoundException,
 } from '@nestjs/common';
 
 import { CategoriesRepository } from './categories.repository';
@@ -37,5 +38,20 @@ export class CategoriesService {
           } catch (error) {
             handleError(error);
           }
+    }
+
+    async getCategoryById(id: number): Promise<CategoryEntity> {
+      try{
+        const category = await this.categoriesRepository.getById(id);
+        if (category === null) {
+          throw new NotFoundException(
+            getMessage(MessagesHelperKey.CATEGORY_NOT_FOUND),
+          )
+        }
+
+        return category
+      } catch (error) {
+        handleError(error);
+      }
     }
 }
