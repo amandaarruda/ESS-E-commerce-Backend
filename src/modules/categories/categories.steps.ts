@@ -9,6 +9,9 @@ import { CategoriesRepository } from './categories.repository';
 import { CategoriesService } from './categories.service';
 import { defineFeature, loadFeature } from 'jest-cucumber';
 import { CategoryEntity } from './entity/category.entity';
+import {
+  ConflictException,
+} from '@nestjs/common';
 
 const feature = loadFeature('features/Categoria.feature');
 
@@ -25,6 +28,7 @@ defineFeature(feature, test => {
               useFactory: () => ({
                 exists: jest.fn(),
                 create: jest.fn(),
+                getById: jest.fn(),
               }),
             }
           ],
@@ -101,4 +105,85 @@ defineFeature(feature, test => {
         );
         });
     });
+
+    test('Adicionar categoria com o mesmo nome', ({ given, when, then }) => {
+      let result: Promise<CategoryEntity>;
+      let categoryId;
+      let categoryName;
+      let categoryImageURL;
+
+      given(/^A categoria de ID "([^"]*)", nome "([^"]*)" e imagem "([^"]*)" existe no repositório de categorias$/, async (id, name, image) => {
+        categoriesRepositoryMock.exists.mockResolvedValue(Promise.resolve(true));
+        categoryId = id
+        categoryName = name;
+        categoryImageURL = image;
+      });
+
+      when(/^Eu chamo o método "createCategory" do "CategoriesService" com o nome "([^"]*)" e imagem "([^"]*)"$/, async (name, image) => {
+      // Mock the add method to return a Promise that resolves to an object with an ID
+      categoriesRepositoryMock.create.mockResolvedValue(Promise.resolve({ 
+          id: categoryId, 
+          name: categoryName, 
+          deletedAt: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          Media: {
+              id: 1,
+              url: categoryImageURL
+          },
+          mediaId: 1,
+      }));
+
+      result = categoriesService.createCategory({ name: categoryName, imageUrl: categoryImageURL });
+      });
+
+      then(/^Eu recebo um erro$/, async () => {
+        await expect(result).rejects.toThrow(ConflictException);
+      });
+  });
+
+  test('Obter categoria por ID', ({ given, when, then }) => {
+    let result: CategoryEntity;
+    let categoryId;
+    let categoryName;
+    let categoryImageURL;
+
+    given(/^A categoria de ID "([^"]*)", nome "([^"]*)" e imagem "([^"]*)" existe no repositório de categorias$/, async (id, name, image) => {
+      categoriesRepositoryMock.exists.mockResolvedValue(Promise.resolve(true));
+      categoryId = parseInt(id, 10)
+      categoryName = name;
+      categoryImageURL = image;
+    });
+
+    when(/^Eu chamo o metodo "getCategoryById" do "CategoriesService" com o ID "([^"]*)"$/, async (id) => {
+    // Mock the add method to return a Promise that resolves to an object with an ID
+    categoriesRepositoryMock.getById.mockResolvedValue(Promise.resolve({ 
+        id: categoryId, 
+        name: categoryName, 
+        deletedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        Media: {
+            id: 1,
+            url: categoryImageURL
+        },
+        mediaId: 1,
+    }));
+
+    result = await categoriesService.getCategoryById(categoryId);
+    });
+
+    then(/^Eu recebo a categoria de ID "([^"]*)", nome "([^"]*)" e imagem "([^"]*)"$/, async () => {
+      expect(result).toEqual(
+        expect.objectContaining({
+          id: categoryId,
+          name: categoryName,
+          Media: expect.objectContaining({
+            url: categoryImageURL,
+          }),
+        }),
+      );
+    });
+});
+
 });
