@@ -16,6 +16,7 @@ import { PrismaModule } from './database/prisma/prisma.module';
 import { AllExceptionsFilter } from './middlewares/exception.filter';
 import { EmailModule } from './modules/email/email.module';
 import { UserModule } from './modules/user/user.module';
+import { CategoriesModule } from './modules/categories/categories.module';
 
 @Module({
   providers: [
@@ -43,6 +44,7 @@ import { UserModule } from './modules/user/user.module';
     PrismaModule,
     UserModule,
     EmailModule,
+    CategoriesModule,
   ],
 })
 export class AppModule implements NestModule {

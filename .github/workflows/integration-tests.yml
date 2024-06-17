@@ -47,6 +47,6 @@ jobs:
 
     - name: Apply database migrations
       run: npm run prisma:migrate
-    
+      
     - name: Cocumber - tests
       run: npm run test:all
