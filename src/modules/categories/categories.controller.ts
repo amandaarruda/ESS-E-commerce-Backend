@@ -70,5 +70,20 @@ export class CategoriesController {
 
     return response.status(HttpStatus.OK).json(category)
   }
+
+  @ApiOperation({ summary: 'Get categories' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: [CategoryResponseDto]
+  })
+  @ApiExceptionResponse()
+  @Get('/')
+  async getAll(
+    @Res() response: Response,
+  ) {
+    const categories = await this.service.getCategories();
+
+    return response.status(HttpStatus.OK).json(categories)
+  }
 }
 

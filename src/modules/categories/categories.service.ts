@@ -41,7 +41,7 @@ export class CategoriesService {
     }
 
     async getCategoryById(id: number): Promise<CategoryEntity> {
-      try{
+      try {
         const category = await this.categoriesRepository.getById(id);
         if (category === null) {
           throw new NotFoundException(
@@ -50,6 +50,21 @@ export class CategoriesService {
         }
 
         return category
+      } catch (error) {
+        handleError(error);
+      }
+    }
+
+    async getCategories(): Promise<CategoryEntity[]> {
+      try {
+        const categories = await this.categoriesRepository.getAll();
+        if (categories === null) {
+          throw new NotFoundException(
+            getMessage(MessagesHelperKey.CATEGORY_NOT_FOUND),
+          )
+        }
+        
+        return categories
       } catch (error) {
         handleError(error);
       }
