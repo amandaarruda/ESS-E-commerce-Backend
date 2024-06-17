@@ -14,6 +14,7 @@
     "test:all": "jest",
     "test:user": "jest user.spec.ts",
     "test:auth": "jest auth.spec.ts",
+    "test:categories": "jest categories.steps.ts",
     "prisma:migrate": "prisma migrate deploy",
     "start": "nest start",
     "prebuild": "rimraf dist",
@@ -89,7 +90,7 @@
       "json",
       "ts"
     ],
-    "testRegex": ".*\\.spec\\.ts$",
+    "testRegex": [".*\\.steps\\.ts$"],
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
