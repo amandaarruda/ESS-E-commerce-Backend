@@ -5,8 +5,6 @@ import {
 
 import { CategoriesRepository } from './categories.repository';
 import { CategoryEntity } from './entity/category.entity';
-import { CategoryTypeMap } from './entity/category.type.map';
-import { CrudType } from 'src/utils/base/ICrudTypeMap';
 import { MessagesHelperKey, getMessage } from 'src/utils/messages.helper';
 import { handleError } from 'src/utils/treat.exceptions';
 import { CategoryCreateDto } from './dto/request/category.create.dto';
