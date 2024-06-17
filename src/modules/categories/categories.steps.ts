@@ -28,6 +28,7 @@ defineFeature(feature, test => {
               useFactory: () => ({
                 exists: jest.fn(),
                 create: jest.fn(),
+                getById: jest.fn(),
               }),
             }
           ],
@@ -140,5 +141,49 @@ defineFeature(feature, test => {
         await expect(result).rejects.toThrow(ConflictException);
       });
   });
+
+  test('Obter categoria por ID', ({ given, when, then }) => {
+    let result: CategoryEntity;
+    let categoryId;
+    let categoryName;
+    let categoryImageURL;
+
+    given(/^A categoria de ID "([^"]*)", nome "([^"]*)" e imagem "([^"]*)" existe no repositório de categorias$/, async (id, name, image) => {
+      categoriesRepositoryMock.exists.mockResolvedValue(Promise.resolve(true));
+      categoryId = parseInt(id, 10)
+      categoryName = name;
+      categoryImageURL = image;
+    });
+
+    when(/^Eu chamo o metodo "getCategoryById" do "CategoriesService" com o ID "([^"]*)"$/, async (id) => {
+    // Mock the add method to return a Promise that resolves to an object with an ID
+    categoriesRepositoryMock.getById.mockResolvedValue(Promise.resolve({ 
+        id: categoryId, 
+        name: categoryName, 
+        deletedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        Media: {
+            id: 1,
+            url: categoryImageURL
+        },
+        mediaId: 1,
+    }));
+
+    result = await categoriesService.getCategoryById(categoryId.toString());
+    });
+
+    then(/^Eu recebo a categoria de ID "([^"]*)", nome "([^"]*)" e imagem "([^"]*)"$/, async () => {
+      expect(result).toEqual(
+        expect.objectContaining({
+          id: categoryId,
+          name: categoryName,
+          Media: expect.objectContaining({
+            url: categoryImageURL,
+          }),
+        }),
+      );
+    });
+});
 
 });
