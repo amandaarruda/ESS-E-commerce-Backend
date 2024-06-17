@@ -11,4 +11,4 @@ COPY . .
 
 EXPOSE 8080
 
-CMD /bin/sh -c "npm run prisma:migrate && npm run start"
+CMD /bin/sh -c "npm run prisma:migrate && npm run prisma:seed && npm run start"
