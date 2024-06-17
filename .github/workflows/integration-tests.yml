@@ -53,3 +53,6 @@ jobs:
 
     - name: Run user tests
       run: npm run test:user
+
+    - name: Run categories test
+      run: npm run test:categories
