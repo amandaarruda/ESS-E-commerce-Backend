@@ -47,12 +47,6 @@ jobs:
 
     - name: Apply database migrations
       run: npm run prisma:migrate
-    
-    - name: Run auth tests
-      run: npm run test:auth
-
-    - name: Run user tests
-      run: npm run test:user
-
-    - name: Run categories test
-      run: npm run test:categories
+      
+    - name: Cocumber - tests
+      run: npm run test:all
