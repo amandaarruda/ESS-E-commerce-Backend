@@ -19,7 +19,6 @@ import { Response } from 'express';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import {
   ApiExceptionResponse,
-  ApiOkResponsePaginated,
 } from 'src/utils/swagger-schemas/SwaggerSchema';
 
 import { CategoryCreateDto } from './dto/request/category.create.dto';
@@ -35,7 +34,10 @@ export class CategoriesController {
   ) {}
 
   @ApiOperation({ summary: 'Create category' })
-  @ApiOkResponsePaginated(CategoryResponseDto)
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    type: CategoryResponseDto,
+  })
   @ApiExceptionResponse()
   @Post()
   @Roles(RoleEnum.ADMIN)
