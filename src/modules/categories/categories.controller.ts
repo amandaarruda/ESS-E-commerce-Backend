@@ -3,6 +3,7 @@ import {
   Body,
   Post,
   Get,
+  Put,
   Res,
   Param,
   HttpStatus,
@@ -21,7 +22,9 @@ import {
   ApiExceptionResponse,
 } from 'src/utils/swagger-schemas/SwaggerSchema';
 
-import { CategoryCreateDto } from './dto/request/category.create.dto';
+import { CategoryCreateDto,
+         CategoryUpdateDto,
+ } from './dto/request/category.create.dto';
 import { CategoryResponseDto } from './dto/response/category.dto';
 import { CategoriesService } from './categories.service';
 
@@ -84,6 +87,22 @@ export class CategoriesController {
     const categories = await this.service.getCategories();
 
     return response.status(HttpStatus.OK).json(categories)
+  }
+  
+  @ApiOperation({ summary: 'Update category' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+  })
+  @ApiExceptionResponse()
+  @Put()
+  @Roles(RoleEnum.ADMIN)
+  async update(
+    @Res() response: Response,
+    @Body() body: CategoryUpdateDto
+  ) {
+    await this.service.updateCategory(body);
+
+    return response.status(HttpStatus.OK).send();
   }
 }
 

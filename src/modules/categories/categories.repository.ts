@@ -49,4 +49,14 @@ export class CategoriesRepository {
       }
     })
   }
+
+  async update(id: number, data: CategoryTypeMap[CrudType.UPDATE]) {
+    return this.prisma.category.update({
+      where: {
+        id,
+        deletedAt: null
+      },
+      data
+    })
+  }
 }
