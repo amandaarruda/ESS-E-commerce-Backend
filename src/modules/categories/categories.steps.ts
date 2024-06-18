@@ -31,6 +31,7 @@ defineFeature(feature, test => {
                 getById: jest.fn(),
                 getAll: jest.fn(),
                 update: jest.fn(),
+                delete: jest.fn(),
               }),
             }
           ],
@@ -255,6 +256,21 @@ defineFeature(feature, test => {
           }),
       );
       });
-  });
+    });
 
+    test('Deletar categoria', ({ given, when, then }) => {
+      given(/^A categoria de ID "([^"]*)", nome "([^"]*)" e imagem "([^"]*)" existe no repositório de categorias$/, async (id, name, image) => {
+        categoriesRepositoryMock.exists.mockResolvedValue(Promise.resolve(true));
+      });
+
+      when(/^Eu chamo o método "deleteCategory" do "CategoriesService" com o ID "([^"]*)"$/, async (id) => {
+        await categoriesService.deleteCategory(parseInt(id, 10));
+      });
+
+      then(/^A categoria de ID "([^"]*)" não existe no repositório de categorias$/, async (id) => {
+        expect(categoriesRepositoryMock.delete).toHaveBeenCalledWith(
+            parseInt(id, 10),
+        );
+      });
+    });
 });
