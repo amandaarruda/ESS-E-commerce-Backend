@@ -786,9 +786,7 @@ describe('UserService - Orders', () => {
         },
         {
           provide: AuthRepository,
-          useFactory: () => ({
-            // Add necessary mocks for AuthRepository methods used in AuthService
-          }),
+          useFactory: () => ({}),
         },
       ],
     }).compile();
@@ -799,17 +797,17 @@ describe('UserService - Orders', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks(); // Clear mocks between tests if needed
+    jest.clearAllMocks();
   });
 
   it('should fetch orders when user is authorized', async () => {
     // Arrange
     const currentUser = {
-      email: 'user@example.com',
+      email: 'user@gmail.com',
       role: RoleEnum.ADMIN,
       id: 1,
     };
-    const targetEmail = 'target@example.com';
+    const targetEmail = 'target@gmail.com';
     const userId = 1;
 
     const expectedOrders = [
@@ -839,7 +837,6 @@ describe('UserService - Orders', () => {
 
     userRepositoryMock.getOrders.mockResolvedValue(expectedOrders);
 
-    // Act
     const result = await service.fetchOrders(
       currentUser.email,
       currentUser.role,
@@ -847,13 +844,11 @@ describe('UserService - Orders', () => {
       currentUser.id,
     );
 
-    // Assert
     expect(result).toEqual(expectedOrders);
     expect(userRepositoryMock.getOrders).toHaveBeenCalledWith(userId);
   });
 
   it('should return empty array when user is not authorized', async () => {
-    // Arrange
     const currentUser = {
       email: 'user@example.com',
       role: RoleEnum.CUSTOMER,
@@ -861,7 +856,6 @@ describe('UserService - Orders', () => {
     };
     const targetEmail = 'target@example.com';
 
-    // Act
     const result = await service.fetchOrders(
       currentUser.email,
       currentUser.role,
@@ -869,7 +863,6 @@ describe('UserService - Orders', () => {
       currentUser.id,
     );
 
-    // Assert
     expect(result).toEqual([]);
     expect(userRepositoryMock.getOrders).not.toHaveBeenCalled();
   });
