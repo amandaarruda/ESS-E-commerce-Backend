@@ -20,7 +20,7 @@ export class CategoriesRepository {
   }
 
   async create(data: CategoryTypeMap[CrudType.CREATE]): Promise<CategoryEntity> {
-    return await this.prisma.category.create({
+    return this.prisma.category.create({
       data: {
         ...data,
       },
@@ -31,7 +31,7 @@ export class CategoriesRepository {
   }
 
   async getById(id: number): Promise<CategoryEntity> {
-    return await this.prisma.category.findUnique({
+    return this.prisma.category.findUnique({
       where: {
         id,
         deletedAt: null,
@@ -40,5 +40,31 @@ export class CategoriesRepository {
         Media: true,
       },
     });
+  }
+
+  async getAll(): Promise<CategoryEntity[]> {
+    return this.prisma.category.findMany({
+      include: {
+        Media: true,
+      }
+    })
+  }
+
+  async update(id: number, data: CategoryTypeMap[CrudType.UPDATE]) {
+    return this.prisma.category.update({
+      where: {
+        id,
+        deletedAt: null
+      },
+      data
+    })
+  }
+
+  async delete(id: number) {
+    return this.prisma.category.delete({
+      where: {
+        id,
+      }
+    })
   }
 }
