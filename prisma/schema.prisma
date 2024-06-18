@@ -108,9 +108,11 @@ model Category {
   updatedAt DateTime  @updatedAt @db.Timestamptz(3)
   Products  Product[]
   Media     Media?    @relation(fields: [mediaId], references: [id], onDelete: SetNull)
+  itens Itens[]
 
   @@map("TB_CATEGORY")
 }
+
 
 model ProductMedia {
   id        Int     @id @default(autoincrement())
@@ -131,3 +133,17 @@ model Media {
 
   @@map("TB_MEDIA")
 }
+
+model Itens {
+  id            Int            @id @default(autoincrement())
+  name          String         @db.VarChar(255)
+  price         Float          @db.DoublePrecision
+  stock         Int            @default(0)
+  categoryId    Int            @db.Integer
+  category      Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  description   String         @db.Text    
+  imageUrl      String         @db.VarChar(255) 
+
+  @@map("TB_ITENS")
+}
+

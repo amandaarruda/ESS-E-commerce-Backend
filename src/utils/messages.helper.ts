@@ -45,6 +45,8 @@ export enum MessagesHelperKey {
   ACCESS_DENIED = 'ACCESS_DENIED',
   CATEGORY_ALREADY_EXISTS = 'CATEGORY_ALREADY_EXISTS',
   CATEGORY_NOT_FOUND = 'CATEGORY_NOT_FOUND',
+  ITEM_ALREADY_EXISTS = 'ITEM_ALREADY_EXISTS',
+  ITEM_NOT_FOUND = 'ITEM_NOT_FOUND',
 }
 
 export const getMessage = (key: MessagesHelperKey): string => {
