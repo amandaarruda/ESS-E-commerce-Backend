@@ -19,7 +19,8 @@
     "prebuild": "rimraf dist",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "lint": "eslint \"{src,apps,libs,tests}/**/*.ts\" --fix"
+    "lint": "eslint \"{src,apps,libs,tests}/**/*.ts\" --fix",
+    "test": "jest"
   },
   "engineStrict": true,
   "engines": {
@@ -53,7 +54,7 @@
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
     "prettier": "^3.0.3",
-    "prisma": "^5.4.2",
+    "prisma": "^5.14.0",
     "prisma-pagination": "^0.2.3",
     "reflect-metadata": "^0.1.13",
     "typescript": "^5.2.2"
@@ -61,7 +62,7 @@
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
     "@types/express": "^4.17.21",
-    "@types/jest": "27.5.0",
+    "@types/jest": "^27.5.0",
     "@types/node": "^16.0.0",
     "@types/passport-jwt": "^3.0.10",
     "@types/passport-local": "^1.0.36",
@@ -71,11 +72,11 @@
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.1",
     "husky": "^8.0.3",
-    "jest": "28.0.3",
+    "jest": "^28.0.3",
     "lint-staged": "^15.1.0",
     "source-map-support": "^0.5.20",
     "supertest": "^6.3.3",
-    "ts-jest": "28.0.1",
+    "ts-jest": "^28.0.1",
     "ts-loader": "^9.2.3",
     "ts-node": "^10.0.0",
     "tsconfig-paths": "^4.0.0"

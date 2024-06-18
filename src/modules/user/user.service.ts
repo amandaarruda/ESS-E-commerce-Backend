@@ -287,4 +287,17 @@ export class UserService {
       handleError(error);
     }
   }
+
+  async fetchOrders(
+    email: string,
+    role: string,
+    targetEmail: string,
+    userId: number,
+  ) {
+    if (email == targetEmail || role === RoleEnum.ADMIN) {
+      return await this.userRepository.getOrders(userId);
+    } else {
+      return [];
+    }
+  }
 }

@@ -766,3 +766,111 @@ describe('UsersService', () => {
     });
   });
 });
+
+//----------bgls
+
+describe('UserService - Orders', () => {
+  let service: UserService;
+  let userRepositoryMock: jest.Mocked<UserRepository>;
+  let authRepositoryMock: jest.Mocked<AuthRepository>;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        UserService,
+        {
+          provide: UserRepository,
+          useFactory: () => ({
+            getOrders: jest.fn(),
+          }),
+        },
+        {
+          provide: AuthRepository,
+          useFactory: () => ({
+            // Add necessary mocks for AuthRepository methods used in AuthService
+          }),
+        },
+      ],
+    }).compile();
+
+    service = module.get<UserService>(UserService);
+    userRepositoryMock = module.get(UserRepository);
+    authRepositoryMock = module.get(AuthRepository);
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks(); // Clear mocks between tests if needed
+  });
+
+  it('should fetch orders when user is authorized', async () => {
+    // Arrange
+    const currentUser = {
+      email: 'user@example.com',
+      role: RoleEnum.ADMIN,
+      id: 1,
+    };
+    const targetEmail = 'target@example.com';
+    const userId = 1;
+
+    const expectedOrders = [
+      {
+        id: 1,
+        code: 'Product1',
+        price: 50.5,
+        userId: 1,
+        estimatedDelivery: new Date('2024-06-18 10:30:45.123+00'),
+        status: null,
+        develiryAddressId: 1,
+        createdAt: new Date('2024-06-18 10:30:45.123+00'),
+        updatedAt: new Date('2024-06-18 10:30:45.123+00'),
+      },
+      {
+        id: 2,
+        code: 'Product2',
+        price: 50.5,
+        userId: 1,
+        estimatedDelivery: new Date('2024-06-18 10:30:45.123+00'),
+        status: null,
+        develiryAddressId: 1,
+        createdAt: new Date('2024-06-18 10:30:45.123+00'),
+        updatedAt: new Date('2024-06-18 10:30:45.123+00'),
+      },
+    ];
+
+    userRepositoryMock.getOrders.mockResolvedValue(expectedOrders);
+
+    // Act
+    const result = await service.fetchOrders(
+      currentUser.email,
+      currentUser.role,
+      targetEmail,
+      currentUser.id,
+    );
+
+    // Assert
+    expect(result).toEqual(expectedOrders);
+    expect(userRepositoryMock.getOrders).toHaveBeenCalledWith(userId);
+  });
+
+  it('should return empty array when user is not authorized', async () => {
+    // Arrange
+    const currentUser = {
+      email: 'user@example.com',
+      role: RoleEnum.CUSTOMER,
+      id: 1,
+    };
+    const targetEmail = 'target@example.com';
+
+    // Act
+    const result = await service.fetchOrders(
+      currentUser.email,
+      currentUser.role,
+      targetEmail,
+      currentUser.id,
+    );
+
+    // Assert
+    expect(result).toEqual([]);
+    expect(userRepositoryMock.getOrders).not.toHaveBeenCalled();
+  });
+});

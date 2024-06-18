@@ -17,6 +17,7 @@ export const MessagesHelper = {
   EMAIL_ALREADY_EXISTS: 'Email já cadastrado no sistema',
   ACCESS_DENIED: 'Acesso negado',
   USER_ADMIN_DELETE: 'Usuário administrador não pode ser deletado',
+  CART_ALREADY_EXISTS: 'Carrinho já existe para este usuário',
 };
 
 export enum MessagesHelperKey {
@@ -41,6 +42,7 @@ export enum MessagesHelperKey {
   USER_DELETE_YOURSELF = 'USER_DELETE_YOURSELF',
   USERS_NOT_FOUND = 'USERS_NOT_FOUND',
   ACCESS_DENIED = 'ACCESS_DENIED',
+  CART_ALREADY_EXISTS = 'CART_ALREADY_EXISTS',
 }
 
 export const getMessage = (key: MessagesHelperKey): string => {
