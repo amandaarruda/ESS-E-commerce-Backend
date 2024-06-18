@@ -80,7 +80,7 @@ export class CategoriesController {
     type: [CategoryResponseDto]
   })
   @ApiExceptionResponse()
-  @Get('/')
+  @Get()
   async getAll(
     @Res() response: Response,
   ) {
