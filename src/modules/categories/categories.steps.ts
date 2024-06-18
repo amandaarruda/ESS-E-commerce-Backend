@@ -30,6 +30,7 @@ defineFeature(feature, test => {
                 create: jest.fn(),
                 getById: jest.fn(),
                 getAll: jest.fn(),
+                update: jest.fn(),
               }),
             }
           ],
@@ -231,5 +232,29 @@ defineFeature(feature, test => {
         );
       });
     });
+
+    test('Atualizar categoria', ({ given, when, then }) => {
+      given(/^A categoria de ID "([^"]*)", nome "([^"]*)" e imagem "([^"]*)" existe no repositório de categorias$/, async (id, name, image) => {
+        categoriesRepositoryMock.exists.mockResolvedValue(Promise.resolve(true));
+      });
+
+      when(/^Eu chamo o método "updateCategory" do "CategoriesService" com o ID "([^"]*)", nome "([^"]*)" e imagem "([^"]*)"$/, async (id, name, image) => {
+        await categoriesService.updateCategory({ id: parseInt(id, 10), name: name, imageUrl: image });
+      });
+
+      then(/^A categoria de ID "([^"]*)" agora possui nome "([^"]*)" e imagem "([^"]*)"$/, async (id, name, image) => {
+      expect(categoriesRepositoryMock.update).toHaveBeenCalledWith(
+          parseInt(id, 10),
+          expect.objectContaining({
+              name,
+              Media: expect.objectContaining({
+                update: expect.objectContaining({
+                  url: image
+                })
+              })
+          }),
+      );
+      });
+  });
 
 });
