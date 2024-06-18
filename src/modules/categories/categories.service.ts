@@ -95,4 +95,19 @@ export class CategoriesService {
         handleError(error)
       }
     }
+
+    async deleteCategory(id: number) {
+      try {
+        const category = await this.categoriesRepository.getById(id);
+        if (category === null) {
+          throw new NotFoundException(
+            getMessage(MessagesHelperKey.CATEGORY_NOT_FOUND),
+          )
+        }
+
+        await this.categoriesRepository.delete(id)
+      } catch(error) {
+        handleError(error)
+      }
+    }
 }

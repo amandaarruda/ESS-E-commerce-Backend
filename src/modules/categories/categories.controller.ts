@@ -3,6 +3,7 @@ import {
   Body,
   Post,
   Get,
+  Delete,
   Put,
   Res,
   Param,
@@ -103,6 +104,27 @@ export class CategoriesController {
     await this.service.updateCategory(body);
 
     return response.status(HttpStatus.OK).send();
+  }
+
+  @ApiOperation({ summary: 'Delete category' })
+  @ApiParam({
+    name: 'id',
+    type: Number,
+    required: true,
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+  })
+  @ApiExceptionResponse()
+  @Delete('/:id')
+  @Roles(RoleEnum.ADMIN)
+  async delete(
+    @Res() response: Response,
+    @Param('id') id: number,
+  ) {
+    await this.service.deleteCategory(id);
+
+    return response.status(HttpStatus.OK).send()
   }
 }
 

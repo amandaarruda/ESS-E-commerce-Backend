@@ -59,4 +59,12 @@ export class CategoriesRepository {
       data
     })
   }
+
+  async delete(id: number) {
+    return this.prisma.category.delete({
+      where: {
+        id,
+      }
+    })
+  }
 }
