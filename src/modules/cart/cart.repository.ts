@@ -44,7 +44,7 @@ export class CartRepository {
     }
   }
 
-  async removeFromCart(data: CartProductDto): Promise<CartProductEntity> {
+  async removeFromCart(data: CartProductDto): Promise<any> {
     try {
       const cartProduct = await this.prisma.cartProduct.delete({
         where: {
@@ -54,7 +54,7 @@ export class CartRepository {
           },
         },
       });
-      return cartProduct;
+      return {ok: "true", message: "Item removido do carrinho com sucesso"};
     } catch (error) {
       throw new ConflictException('Unable to remove product from cart');
     }

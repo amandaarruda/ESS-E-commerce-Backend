@@ -43,7 +43,7 @@ export class CartController {
     });
   }
 
-  @Get('get')
+  @Get()
   async getCart(@AuthenticatedUser() currentUser: UserPayload) {
     this.logger.log('Getting cart');
     return this.cartService.getCart({ userId: currentUser.id });

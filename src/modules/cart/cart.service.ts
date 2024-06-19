@@ -137,18 +137,4 @@ export class CartService {
       throw new NotFoundException('Cart not found or not authorized');
     }
   }
-
-  // async removeFromCart(userId: number, productId: number): Promise<void> {
-  //   try {
-  //     await this.prisma.cartProduct.deleteMany({
-  //       where: {
-  //         userId,
-  //         productId,
-  //       },
-  //     });
-  //   } catch (error) {
-  //     this.logger.error(`Error removing product ${productId} from cart for user ID ${userId}: ${error}`);
-  //     throw new NotFoundException('Product not found in cart');
-  //   }
-  // }
 }
