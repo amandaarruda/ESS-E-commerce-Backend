@@ -18,6 +18,8 @@ export const MessagesHelper = {
   ACCESS_DENIED: 'Acesso negado',
   USER_ADMIN_DELETE: 'Usuário administrador não pode ser deletado',
   CART_ALREADY_EXISTS: 'Carrinho já existe para este usuário',
+  CATEGORY_ALREADY_EXISTS: 'Categoria já existe no sistema',
+  CATEGORY_NOT_FOUND: 'Categoria X não encontrado!',
 };
 
 export enum MessagesHelperKey {
@@ -43,6 +45,8 @@ export enum MessagesHelperKey {
   USERS_NOT_FOUND = 'USERS_NOT_FOUND',
   ACCESS_DENIED = 'ACCESS_DENIED',
   CART_ALREADY_EXISTS = 'CART_ALREADY_EXISTS',
+  CATEGORY_ALREADY_EXISTS = 'CATEGORY_ALREADY_EXISTS',
+  CATEGORY_NOT_FOUND = 'CATEGORY_NOT_FOUND',
 }
 
 export const getMessage = (key: MessagesHelperKey): string => {

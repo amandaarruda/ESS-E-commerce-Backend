@@ -63,7 +63,7 @@ export class CartController {
     });
   }
 
-  @Post('remove')
+  @Delete('remove')
   async removeCart(
     @Body() remCartDto: any,
     @AuthenticatedUser() currentUser: UserPayload,

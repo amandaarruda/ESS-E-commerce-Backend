@@ -15,6 +15,7 @@ import { RolesGuard } from './auth/guards/roles.guard';
 import { PrismaModule } from './database/prisma/prisma.module';
 import { AllExceptionsFilter } from './middlewares/exception.filter';
 import { CartModule } from './modules/cart/cart.module';
+import { CategoriesModule } from './modules/categories/categories.module';
 import { EmailModule } from './modules/email/email.module';
 import { UserModule } from './modules/user/user.module';
 
@@ -45,6 +46,7 @@ import { UserModule } from './modules/user/user.module';
     UserModule,
     EmailModule,
     CartModule,
+    CategoriesModule,
   ],
 })
 export class AppModule implements NestModule {
