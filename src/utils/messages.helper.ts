@@ -17,6 +17,8 @@ export const MessagesHelper = {
   EMAIL_ALREADY_EXISTS: 'Email já cadastrado no sistema',
   ACCESS_DENIED: 'Acesso negado',
   USER_ADMIN_DELETE: 'Usuário administrador não pode ser deletado',
+  CATEGORY_ALREADY_EXISTS: 'Categoria já existe no sistema',
+  CATEGORY_NOT_FOUND: 'Categoria X não encontrado!',
 };
 
 export enum MessagesHelperKey {
@@ -41,6 +43,8 @@ export enum MessagesHelperKey {
   USER_DELETE_YOURSELF = 'USER_DELETE_YOURSELF',
   USERS_NOT_FOUND = 'USERS_NOT_FOUND',
   ACCESS_DENIED = 'ACCESS_DENIED',
+  CATEGORY_ALREADY_EXISTS = 'CATEGORY_ALREADY_EXISTS',
+  CATEGORY_NOT_FOUND = 'CATEGORY_NOT_FOUND',
 }
 
 export const getMessage = (key: MessagesHelperKey): string => {
@@ -53,7 +57,7 @@ export const setMessage = (
   reason?: string,
 ): string => {
   return (
-    message.replace('X', JSON.stringify(replace)) +
+    message?.replace('X', JSON.stringify(replace)) +
     (reason ? ` - description: ${reason}` : '')
   );
 };

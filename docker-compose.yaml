@@ -1,0 +1,30 @@
+services:
+  db:
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - db:/var/lib/pgsql/data
+  backend:
+    build: .
+    depends_on:
+      - db
+    ports:
+      - 8080:8080
+    environment:
+      APP_PORT: 8080
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/database_test
+      AT_SECRET: AT_sECRET
+      RT_SECRET: RT_sECRET
+      TK_EMAIL_SECRET: EMAIL_sECRET
+      TK_EMAIL_LIFETIME: 1d
+      JWT_ACCESS_LIFETIME: 1h
+      JWT_REFRESH_LIFETIME: 7d
+      ENV: TEST
+      SENDGRID_API_KEY: ""
+      EMAIL_OPTIONS_FROM: ""
+volumes:
+  db:
