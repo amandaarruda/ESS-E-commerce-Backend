@@ -7,6 +7,9 @@ import { MessagesHelperKey, getMessage } from 'src/utils/messages.helper';
 
 @Injectable()
 export class EmailService {
+  static sendEmail(sendEmail: any) {
+    throw new Error('Method not implemented.');
+  }
   private readonly logger = new Logger(EmailService.name);
 
   constructor() {
