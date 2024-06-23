@@ -1,8 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Product } from '@prisma/client';
 import { CategoryEntity } from 'src/modules/categories/entity/category.entity';
-import { MediaEntity } from 'src/modules/itens/entity/media.entity';
+import { ProductMediaEntity } from 'src/modules/itens/entity/media.entity';
 
-export class ProductEntity {
+export class ProductEntity implements Product {
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date;
   @ApiProperty({
     type: Number,
     description: 'The unique identifier for the product',
@@ -56,10 +60,10 @@ export class ProductEntity {
   })
   description: string;
 
-  /*@ApiProperty({
-    type: [MediaEntity],
+  @ApiProperty({
+    type: [ProductMediaEntity],
     description: 'Media associated with the product',
     example: [{ id: 1, url: 'https://example.com/media/image.jpg' }],
   })
-  productMedia: MediaEntity[];*/
+  productMedia: ProductMediaEntity[];
 }

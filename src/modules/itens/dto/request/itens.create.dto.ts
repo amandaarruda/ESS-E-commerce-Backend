@@ -68,16 +68,6 @@ export class ProductCreateDto {
   @IsNumber({}, { message: 'O campo de ID da categoria deve ser um número' })
   categoryId?: number;
 
-  @ApiProperty({
-    description: 'The category of the product',
-    example: {
-      id: 1,
-      name: 'Shoes',
-      Media: { id: 1, url: 'https://example.com/media/image.jpg' },
-    },
-  })
-  category: CategoryEntity;
-
   @ApiPropertyOptional({
     example: 10,
     description: 'Quantidade em estoque do item',

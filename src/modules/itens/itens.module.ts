@@ -4,9 +4,11 @@ import { ProductController } from 'src/modules/itens/itens.controller';
 import { ProductRepository } from 'src/modules/itens/itens.repository';
 import { ProductService } from 'src/modules/itens/itens.service';
 
+import { ProductMapping } from './itens.mapping';
+
 @Module({
   controllers: [ProductController],
-  providers: [ProductService, ProductRepository],
+  providers: [ProductService, ProductRepository, ProductMapping],
   imports: [PrismaModule],
   exports: [ProductService, ProductRepository],
 })

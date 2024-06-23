@@ -1,12 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Media, ProductMedia } from '@prisma/client';
+import { MediaEntity } from 'src/modules/user/entity/media.entity';
 
-export class MediaEntity {
+export class ProductMediaEntity implements ProductMedia {
   id: number;
-
-  @ApiProperty({
-    type: String,
-    description: 'The URL of the media',
-    example: 'https://example.com/media/image.jpg',
-  })
-  url: string;
+  productId: number;
+  mediaId: number;
+  media: MediaEntity;
 }

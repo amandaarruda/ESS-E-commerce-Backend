@@ -58,4 +58,20 @@ export class ProductUpdateDto {
     typeof value === 'string' ? value.trim() : value,
   )
   imageUrl?: string;
+
+  @ApiPropertyOptional({
+    example: 1,
+    description: 'ID da categoria do item',
+  })
+  @IsOptional()
+  @IsNumber({}, { message: 'O campo de ID da categoria deve ser um número' })
+  categoryId?: number;
+
+  @ApiPropertyOptional({
+    example: 10,
+    description: 'Quantidade em estoque do item',
+  })
+  @IsOptional()
+  @IsNumber({}, { message: 'O campo de estoque deve ser um número' })
+  stock?: number;
 }

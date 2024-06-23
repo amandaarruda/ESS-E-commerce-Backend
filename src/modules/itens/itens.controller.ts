@@ -6,6 +6,8 @@ import {
   Patch,
   Res,
   Param,
+  Get,
+  Query,
   HttpStatus,
 } from '@nestjs/common';
 import {
@@ -19,11 +21,17 @@ import { PrismaClient } from '@prisma/client';
 import { RoleEnum } from '@prisma/client';
 import { Response } from 'express';
 import { Roles } from 'src/auth/decorators/roles.decorator';
+import { DefaultFilter } from 'src/filters/DefaultFilter';
 import { ProductCreateDto } from 'src/modules/itens/dto/request/itens.create.dto';
 import { ProductUpdateDto } from 'src/modules/itens/dto/request/itens.update.dto';
-import { ApiExceptionResponse } from 'src/utils/swagger-schemas/SwaggerSchema';
+import {
+  ApiExceptionResponse,
+  ApiOkResponsePaginated,
+} from 'src/utils/swagger-schemas/SwaggerSchema';
 
 import { ProductResponseDto } from './dto/response/itens.dto';
+import { ProductPaginationResponse } from './dto/response/itens.pagination.response';
+import { ProductTypeMap } from './entity/itens.type.map';
 import { ProductService } from './itens.service';
 
 @ApiBearerAuth()
@@ -67,6 +75,20 @@ export class ProductController {
     const updatedItem = await this.ProductService.updateItem(itemId, body);
 
     return response.status(HttpStatus.OK).json(updatedItem);
+  }
+
+  @ApiOperation({ summary: 'Get filtered product' })
+  @ApiOkResponsePaginated(ProductPaginationResponse)
+  @ApiExceptionResponse()
+  @Get()
+  @Roles(RoleEnum.ADMIN)
+  async getFilteredAsync(
+    @Res() response: Response,
+    @Query() filter: DefaultFilter<ProductTypeMap>,
+  ) {
+    const filteredData = await this.ProductService.findFilteredAsync(filter);
+
+    return response.status(HttpStatus.OK).json(filteredData);
   }
 
   @ApiOperation({ summary: 'Delete item by ID' })
