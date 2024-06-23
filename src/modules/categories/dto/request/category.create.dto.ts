@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, TransformFnParams } from 'class-transformer';
 import {
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   MaxLength,
@@ -37,4 +38,14 @@ export class CategoryCreateDto {
       typeof value === 'string' && value?.trim(),
   )
   imageUrl: string;
+}
+
+export class CategoryUpdateDto extends CategoryCreateDto {
+  @ApiProperty({
+    example: '1',
+    description: 'Id da categoria',
+  })
+  @IsNotEmpty({ message: 'O campo de Id deve ser preenchido' })
+  @IsNumber()
+  id: number;
 }
