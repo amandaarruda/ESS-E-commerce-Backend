@@ -7,8 +7,9 @@ import {
   IsString,
   MaxLength,
 } from 'class-validator';
+import { CategoryEntity } from 'src/modules/categories/entity/category.entity';
 
-export class ItensCreateDto {
+export class ProductCreateDto {
   @ApiProperty({
     example: 'Produto A',
     description: 'Nome do item',
@@ -58,5 +59,30 @@ export class ItensCreateDto {
     typeof value === 'string' ? value.trim() : value,
   )
   imageUrl?: string;
-  categoryId: any;
+
+  @ApiPropertyOptional({
+    example: 1,
+    description: 'ID da categoria do item',
+  })
+  @IsOptional()
+  @IsNumber({}, { message: 'O campo de ID da categoria deve ser um número' })
+  categoryId?: number;
+
+  @ApiProperty({
+    description: 'The category of the product',
+    example: {
+      id: 1,
+      name: 'Shoes',
+      Media: { id: 1, url: 'https://example.com/media/image.jpg' },
+    },
+  })
+  category: CategoryEntity;
+
+  @ApiPropertyOptional({
+    example: 10,
+    description: 'Quantidade em estoque do item',
+  })
+  @IsOptional()
+  @IsNumber({}, { message: 'O campo de estoque deve ser um número' })
+  stock?: number;
 }

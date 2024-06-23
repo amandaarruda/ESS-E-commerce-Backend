@@ -19,29 +19,29 @@ import { PrismaClient } from '@prisma/client';
 import { RoleEnum } from '@prisma/client';
 import { Response } from 'express';
 import { Roles } from 'src/auth/decorators/roles.decorator';
-import { ItensCreateDto } from 'src/modules/itens/dto/request/itens.create.dto';
-import { ItensUpdateDto } from 'src/modules/itens/dto/request/itens.update.dto';
+import { ProductCreateDto } from 'src/modules/itens/dto/request/itens.create.dto';
+import { ProductUpdateDto } from 'src/modules/itens/dto/request/itens.update.dto';
 import { ApiExceptionResponse } from 'src/utils/swagger-schemas/SwaggerSchema';
 
-import { ItensResponseDto } from './dto/response/itens.dto';
-import { ItensService } from './itens.service';
+import { ProductResponseDto } from './dto/response/itens.dto';
+import { ProductService } from './itens.service';
 
 @ApiBearerAuth()
-@Controller('itens')
-@ApiTags('Itens')
-export class ItensController {
-  constructor(protected readonly itensService: ItensService) {}
+@Controller('Product')
+@ApiTags('Product')
+export class ProductController {
+  constructor(protected readonly ProductService: ProductService) {}
 
   @ApiOperation({ summary: 'Create item' })
   @ApiResponse({
     status: HttpStatus.CREATED,
-    type: ItensResponseDto,
+    type: ProductResponseDto,
   })
   @ApiExceptionResponse()
   @Post()
   @Roles(RoleEnum.ADMIN)
-  async create(@Res() response: Response, @Body() body: ItensCreateDto) {
-    const item = await this.itensService.createItem(body);
+  async create(@Res() response: Response, @Body() body: ProductCreateDto) {
+    const item = await this.ProductService.createItem(body);
 
     return response.status(HttpStatus.CREATED).json(item);
   }
@@ -54,7 +54,7 @@ export class ItensController {
   })
   @ApiResponse({
     status: HttpStatus.OK,
-    type: ItensResponseDto,
+    type: ProductResponseDto,
   })
   @ApiExceptionResponse()
   @Patch('/:itemId')
@@ -62,9 +62,9 @@ export class ItensController {
   async update(
     @Res() response: Response,
     @Param('itemId') itemId: number,
-    @Body() body: ItensUpdateDto,
+    @Body() body: ProductUpdateDto,
   ) {
-    const updatedItem = await this.itensService.updateItem(itemId, body);
+    const updatedItem = await this.ProductService.updateItem(itemId, body);
 
     return response.status(HttpStatus.OK).json(updatedItem);
   }
@@ -83,7 +83,7 @@ export class ItensController {
   @Delete('/:itemId')
   @Roles(RoleEnum.ADMIN)
   async delete(@Res() response: Response, @Param('itemId') itemId: number) {
-    await this.itensService.deleteItem(itemId);
+    await this.ProductService.deleteItem(itemId);
 
     return response.status(HttpStatus.OK).json({
       message: 'Item successfully deleted',

@@ -1,20 +1,20 @@
 import { Prisma } from '@prisma/client';
 import { CrudTypeMap } from 'src/utils/base/ICrudTypeMap';
 
-export class ItensTypeMap implements CrudTypeMap {
-  aggregate: Prisma.ItensAggregateArgs;
-  count: Prisma.ItensCountArgs;
-  create: Prisma.ItensCreateInput;
-  createUnchecked: Prisma.ItensUncheckedCreateInput;
-  delete: Prisma.ItensDeleteArgs;
-  deleteMany: Prisma.ItensDeleteManyArgs;
-  findFirst: Prisma.ItensFindFirstArgs;
-  findMany: Prisma.ItensFindManyArgs;
-  findUnique: Prisma.ItensFindUniqueArgs;
-  update: Prisma.ItensUpdateInput;
-  updateMany: Prisma.ItensUpdateManyArgs;
-  upsert: Prisma.ItensUpsertArgs;
-  where: Prisma.ItensWhereInput;
-  select: Prisma.ItensSelect;
-  orderBy: Prisma.ItensOrderByWithRelationInput;
+export class ProductTypeMap implements CrudTypeMap {
+  aggregate: Prisma.ProductAggregateArgs;
+  count: Prisma.ProductCountArgs;
+  create: Prisma.ProductCreateInput;
+  createUnchecked: Prisma.ProductUncheckedCreateInput;
+  delete: Prisma.ProductDeleteArgs;
+  deleteMany: Prisma.ProductDeleteManyArgs;
+  findFirst: Prisma.ProductFindFirstArgs;
+  findMany: Prisma.ProductFindManyArgs;
+  findUnique: Prisma.ProductFindUniqueArgs;
+  update: Prisma.ProductUpdateInput;
+  updateMany: Prisma.ProductUpdateManyArgs;
+  upsert: Prisma.ProductUpsertArgs;
+  where: Prisma.ProductWhereInput;
+  select: Prisma.ProductSelect;
+  orderBy: Prisma.ProductOrderByWithRelationInput;
 }

@@ -1,46 +1,28 @@
-import {
-  Injectable,
-  ConflictException,
-  NotFoundException,
-} from '@nestjs/common';
-import { Itens } from '@prisma/client';
-import { ItensRepository } from 'src/modules/itens/itens.repository';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { MessagesHelperKey, getMessage } from 'src/utils/messages.helper';
 import { handleError } from 'src/utils/treat.exceptions';
 
-import { ItensCreateDto } from './dto/request/itens.create.dto';
-import { ItensEntity } from './entity/itens.entity';
+import { ProductCreateDto } from './dto/request/itens.create.dto';
+import { ProductEntity } from './entity/itens.entity';
+import { ProductRepository } from './itens.repository';
 
 @Injectable()
-export class ItensService {
-  constructor(protected readonly itensRepository: ItensRepository) {}
+export class ProductService {
+  constructor(private readonly productRepository: ProductRepository) {}
 
-  async createItem(data: ItensCreateDto): Promise<ItensEntity> {
-    const createItemData = {
-      name: data.name,
-      description: data.description,
-      price: data.price,
-      imageUrl: data.imageUrl,
-      category: {
-        connect: { id: data.categoryId },
-      },
-      Media: {
-        create: {
-          url: data.imageUrl,
-        },
-      },
-    };
-
+  async createItem(data: ProductCreateDto): Promise<ProductEntity> {
     try {
-      return await this.itensRepository.create(createItemData);
+      const createdItem = await this.productRepository.create(data);
+      return createdItem;
     } catch (error) {
       console.error('Error creating item:', error);
+      throw new Error('Failed to create item');
     }
   }
 
-  async getItemById(id: number): Promise<ItensEntity> {
+  async getItemById(id: number): Promise<ProductEntity> {
     try {
-      const item = await this.itensRepository.getById(id);
+      const item = await this.productRepository.getById(id);
       if (!item) {
         throw new NotFoundException(
           getMessage(MessagesHelperKey.ITEM_NOT_FOUND),
@@ -54,24 +36,16 @@ export class ItensService {
 
   async updateItem(
     id: number,
-    data: Partial<ItensCreateDto>,
-  ): Promise<ItensEntity> {
+    data: Partial<ProductCreateDto>,
+  ): Promise<ProductEntity> {
     try {
-      const item = await this.itensRepository.getById(id);
-      if (!item) {
+      const updatedItem = await this.productRepository.update(id, data);
+      if (!updatedItem) {
         throw new NotFoundException(
           getMessage(MessagesHelperKey.ITEM_NOT_FOUND),
         );
       }
-
-      await this.itensRepository.update(id, {
-        name: data.name || item.name,
-        description: data.description || item.description,
-        price: data.price || item.price,
-        imageUrl: data.imageUrl || item.imageUrl,
-      });
-
-      return await this.itensRepository.getById(id);
+      return updatedItem;
     } catch (error) {
       handleError(error);
     }
@@ -79,14 +53,7 @@ export class ItensService {
 
   async deleteItem(id: number): Promise<void> {
     try {
-      const item = await this.itensRepository.getById(id);
-      if (!item) {
-        throw new NotFoundException(
-          getMessage(MessagesHelperKey.ITEM_NOT_FOUND),
-        );
-      }
-
-      await this.itensRepository.delete(id);
+      await this.productRepository.delete(id);
     } catch (error) {
       handleError(error);
     }

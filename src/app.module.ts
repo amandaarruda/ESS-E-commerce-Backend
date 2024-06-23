@@ -16,8 +16,8 @@ import { PrismaModule } from './database/prisma/prisma.module';
 import { AllExceptionsFilter } from './middlewares/exception.filter';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { EmailModule } from './modules/email/email.module';
-import { ItensController } from './modules/itens/itens.controller';
-import { ItensModule } from './modules/itens/itens.module';
+import { ProductController } from './modules/itens/itens.controller';
+import { ProductModule } from './modules/itens/itens.module';
 import { UserModule } from './modules/user/user.module';
 
 @Module({
@@ -47,9 +47,9 @@ import { UserModule } from './modules/user/user.module';
     UserModule,
     EmailModule,
     CategoriesModule,
-    ItensModule,
+    ProductModule,
   ],
-  controllers: [ItensController],
+  controllers: [ProductController],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {}

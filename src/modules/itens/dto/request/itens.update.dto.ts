@@ -8,7 +8,7 @@ import {
   MaxLength,
 } from 'class-validator';
 
-export class ItensUpdateDto {
+export class ProductUpdateDto {
   @ApiPropertyOptional({
     example: 'Produto A Atualizado',
     description: 'Novo nome do item',

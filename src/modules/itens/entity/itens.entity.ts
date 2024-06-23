@@ -1,62 +1,65 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Category, Itens } from '@prisma/client';
-import { CategoryResponseDto } from 'src/modules/categories/dto/response/category.dto';
+import { ApiProperty } from '@nestjs/swagger';
 import { CategoryEntity } from 'src/modules/categories/entity/category.entity';
+import { MediaEntity } from 'src/modules/itens/entity/media.entity';
 
-export class ItensEntity implements Itens {
+export class ProductEntity {
   @ApiProperty({
     type: Number,
-    description: 'The unique identifier for the item',
-    example: 123,
+    description: 'The unique identifier for the product',
+    example: 1,
   })
   id: number;
 
   @ApiProperty({
     type: String,
-    description: 'The name of the item',
-    example: 'abc',
+    description: 'The name of the product',
+    example: 'Running Shoes',
   })
   name: string;
 
   @ApiProperty({
     type: Number,
-    description: 'The price of the item',
-    example: '4.00',
+    description: 'The price of the product',
+    example: 49.99,
   })
-  price: GLfloat;
+  price: number;
 
   @ApiProperty({
     type: Number,
-    description: 'The quantity of the item',
-    example: '4',
+    description: 'The stock quantity of the product',
+    example: 100,
   })
   stock: number;
 
   @ApiProperty({
+    type: CategoryEntity,
+    description: 'The category of the product',
+    example: {
+      id: 1,
+      name: 'Shoes',
+      Media: { id: 1, url: 'https://example.com/media/image.jpg' },
+    },
+  })
+  category: CategoryEntity;
+
+  @ApiProperty({
     type: Number,
-    description: 'The id of the category of the item',
-    example: '01',
+    example: 1,
+    description: 'ID of the category of the product',
   })
   categoryId: number;
 
   @ApiProperty({
-    type: CategoryResponseDto,
-    description: 'The category of the item',
-    example: 'tênis',
-  })
-  category: CategoryResponseDto;
-
-  @ApiProperty({
     type: String,
-    description: 'The description of the item',
-    example: 'abcde fghi',
+    description: 'The description of the product',
+    example: 'High-performance running shoes for athletes.',
   })
   description: string;
 
-  @ApiProperty({
-    type: String,
-    description: 'The URL of the image of the item',
-    example: 'www.abcde.com',
+  /*@ApiProperty({
+    type: [MediaEntity],
+    description: 'Media associated with the product',
+    example: [{ id: 1, url: 'https://example.com/media/image.jpg' }],
   })
-  imageUrl: string;
+  productMedia: MediaEntity[];*/
 }
