@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 
 @Injectable()
 export class CorreiosService {
@@ -11,22 +11,26 @@ export class CorreiosService {
         .get(`https://api.correios.com.br/${cep}`)
         .toPromise();
 
-      const prazoEntrega = response.data.prazoEntrega;
+      const prazoEntrega = response?.data?.prazoEntrega;
 
       if (!prazoEntrega) {
-        throw new BadRequestException(
+        throw new InternalServerErrorException(
           'Endereço inválido. Por favor, insira um endereço válido.',
         );
       }
 
       return parseInt(prazoEntrega);
     } catch (error) {
-      if (error.response && error.response.status === 404) {
-        throw new BadRequestException(
-          'Endereço inválido. Por favor, insira um endereço válido.',
-        );
-      }
-      throw new BadRequestException('Erro ao calcular prazo de entrega');
+      this.handleError(error);
     }
+  }
+
+  private handleError(error: any): never {
+    if (error.response && error.response.status === 404) {
+      throw new InternalServerErrorException(
+        'Endereço inválido. Por favor, insira um endereço válido.',
+      );
+    }
+    throw new InternalServerErrorException('Erro ao calcular prazo de entrega');
   }
 }
