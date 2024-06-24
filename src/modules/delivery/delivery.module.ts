@@ -9,7 +9,7 @@ import { CorreiosService } from './delivery.service';
   imports: [
     SoapModule.register({
       clientName: 'SOAP_CORREIOS',
-      uri: 'http://ws.correios.com.br/calculador/CalcPrecoPrazo.asmx?wsdl',
+      uri: process.env.API_CORREIOS_URL,
     }),
     HttpModule.register({
       timeout: 5000,
