@@ -1,4 +1,4 @@
-import { Controller, Get, Param, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 
 import { CorreiosService } from './delivery.service';
 
@@ -10,12 +10,7 @@ export class CorreiosController {
   async calcularTempoEntrega(
     @Param('cepDestino') cepDestino: string,
   ): Promise<{ tempoEntrega: number }> {
-    try {
-      const tempoEntrega =
-        await this.correiosService.calculateDeliveryTime(cepDestino);
-      return { tempoEntrega };
-    } catch (error) {
-      throw new BadRequestException(error.message);
-    }
+    const tempoEntrega = await this.correiosService.calculateDeliveryTime(cepDestino);
+    return { tempoEntrega };
   }
 }
