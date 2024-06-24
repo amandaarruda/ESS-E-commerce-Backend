@@ -1,5 +1,5 @@
 import { HttpService, HttpModule } from '@nestjs/axios';
-import { BadRequestException } from '@nestjs/common';
+import { InternalServerErrorException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { defineFeature, loadFeature } from 'jest-cucumber';
 import * as path from 'path';
@@ -14,7 +14,7 @@ const mockHttpService = {
 
 let service: CorreiosService;
 let result: number | undefined;
-let error: BadRequestException | undefined;
+let error: InternalServerErrorException | undefined;
 
 defineFeature(feature, test => {
   beforeEach(async () => {
@@ -32,20 +32,16 @@ defineFeature(feature, test => {
     service = module.get<CorreiosService>(CorreiosService);
   });
 
-  test('Calcular o tempo estimado de entrega', ({ given, when, then, and }) => {
+  test('Calcular o tempo estimado de entrega', ({ when, then, and }) => {
     when(/^o usuário cliente insere o CEP "(.*)"$/, async cep => {
       const mockResponse = {
         data: { prazoEntrega: 5 },
       };
       mockHttpService.get.mockReturnValue(of(mockResponse));
-      try {
-        result = await service.calculateDeliveryTime(cep);
-        console.log(
-          `Prazo de entrega calculado com sucesso para o CEP ${cep}: ${result} dias úteis`,
-        );
-      } catch (err) {
-        error = err;
-      }
+      result = await service.calculateDeliveryTime(cep);
+      console.log(
+        `Prazo de entrega calculado com sucesso para o CEP ${cep}: ${result} dias úteis`,
+      );
     });
 
     then(
@@ -88,7 +84,7 @@ defineFeature(feature, test => {
       /^o sistema tenta calcular o tempo de entrega para o CEP "(.*)" e não consegue encontrá-lo$/,
       cep => {
         expect(error).toBeDefined();
-        expect(error).toBeInstanceOf(BadRequestException);
+        expect(error).toBeInstanceOf(InternalServerErrorException);
         expect(error.message).toBe(
           'Endereço inválido. Por favor, insira um endereço válido.',
         );
