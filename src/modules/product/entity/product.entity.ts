@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Product } from '@prisma/client';
 import { CategoryEntity } from 'src/modules/categories/entity/category.entity';
-import { ProductMediaEntity } from 'src/modules/itens/entity/media.entity';
+import { ProductMediaEntity } from 'src/modules/product/entity/media.entity';
 
 export class ProductEntity implements Product {
   createdAt: Date;

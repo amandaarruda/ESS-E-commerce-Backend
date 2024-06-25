@@ -22,17 +22,17 @@ import { RoleEnum } from '@prisma/client';
 import { Response } from 'express';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { DefaultFilter } from 'src/filters/DefaultFilter';
-import { ProductCreateDto } from 'src/modules/itens/dto/request/itens.create.dto';
-import { ProductUpdateDto } from 'src/modules/itens/dto/request/itens.update.dto';
+import { ProductCreateDto } from 'src/modules/product/dto/request/product.create.dto';
+import { ProductUpdateDto } from 'src/modules/product/dto/request/product.update.dto';
 import {
   ApiExceptionResponse,
   ApiOkResponsePaginated,
 } from 'src/utils/swagger-schemas/SwaggerSchema';
 
-import { ProductResponseDto } from './dto/response/itens.dto';
-import { ProductPaginationResponse } from './dto/response/itens.pagination.response';
-import { ProductTypeMap } from './entity/itens.type.map';
-import { ProductService } from './itens.service';
+import { ProductResponseDto } from './dto/response/product.dto';
+import { ProductPaginationResponse } from './dto/response/product.pagination.response';
+import { ProductTypeMap } from './entity/product.type.map';
+import { ProductService } from './product.service';
 
 @ApiBearerAuth()
 @Controller('Product')

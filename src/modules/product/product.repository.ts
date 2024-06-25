@@ -6,14 +6,23 @@ import { CrudType } from 'src/utils/base/ICrudTypeMap';
 import { Paginated } from 'src/utils/base/IPaginated';
 import { Paginator } from 'src/utils/paginator';
 
-import { ProductCreateDto } from './dto/request/itens.create.dto';
-import { TProductPagination } from './dto/type/itens.pagination';
-import { ProductEntity } from './entity/itens.entity';
-import { ProductTypeMap } from './entity/itens.type.map';
+import { ProductCreateDto } from './dto/request/product.create.dto';
+import { TProductPagination } from './dto/type/product.pagination';
+import { ProductEntity } from './entity/product.entity';
+import { ProductTypeMap } from './entity/product.type.map';
 
 @Injectable()
 export class ProductRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  async exists(where: ProductTypeMap[CrudType.WHERE]) {
+    const productsCount = await this.prisma.product.count({
+      where,
+    });
+
+    return productsCount > 0;
+  }
+
   async create(data: Prisma.ProductCreateInput): Promise<ProductEntity> {
     return await this.prisma.product.create({
       data,

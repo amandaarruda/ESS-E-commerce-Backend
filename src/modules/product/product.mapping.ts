@@ -9,8 +9,8 @@ import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
 import { Injectable } from '@nestjs/common';
 import { format } from 'date-fns';
 
-import { ProductPaginationResponse } from './dto/response/itens.pagination.response';
-import { TProductPagination } from './dto/type/itens.pagination';
+import { ProductPaginationResponse } from './dto/response/product.pagination.response';
+import { TProductPagination } from './dto/type/product.pagination';
 
 @Injectable()
 export class ProductMapping extends AutomapperProfile {
