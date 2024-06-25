@@ -473,7 +473,6 @@ defineFeature(feature, test => {
     given(
       /^existe um item de nome "([^"]*)" previamente cadastrado$/,
       async name => {
-        // Simula que o item já existe
         productRepositoryMock.exists.mockResolvedValue(true);
       },
     );
@@ -495,13 +494,11 @@ defineFeature(feature, test => {
     then(
       /^a resposta deve conter a mensagem "Item already exists"$/,
       async () => {
-        // Verifica se a promessa é rejeitada com o erro esperado
         await expect(result).rejects.toThrow(BadRequestException);
       },
     );
 
     then(/^nenhum novo item será criado$/, async () => {
-      // Captura o erro para verificar a mensagem específica
       try {
         await productService.createItem({
           name: 'Tenis branco',

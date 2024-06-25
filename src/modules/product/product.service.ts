@@ -64,15 +64,13 @@ export class ProductService {
       handleError(error);
     }
   }*/
+
   async createItem(data: ProductCreateDto): Promise<ProductEntity> {
     try {
-      // Verifica se já existe um produto com o mesmo nome
       const exists = await this.productRepository.exists({ name: data.name });
       if (exists) {
         throw new BadRequestException('Item already exists');
       }
-
-      // Validação adicional dos dados
       if (data.price <= 0) {
         throw new BadRequestException(
           getMessage(MessagesHelperKey.PRICE_LESS_THAN_ZERO),
@@ -167,9 +165,9 @@ export class ProductService {
       handleError(error);
     }
   }*/
+
   async updateItem(id: number, data: ProductUpdateDto): Promise<ProductEntity> {
     try {
-      // Verificar se o produto existe
       const existingProduct = await this.productRepository.getById(id);
       if (!existingProduct) {
         throw new Error('ITEM_NOT_FOUND');
@@ -213,7 +211,6 @@ export class ProductService {
       return updatedItem;
     } catch (error) {
       handleError(error);
-      // É importante lançar novamente o erro após tratá-lo para que o chamador possa lidar com ele
       throw error;
     }
   }
