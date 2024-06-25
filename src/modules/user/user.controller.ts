@@ -64,11 +64,6 @@ export class UserController {
     type: Number,
     required: true,
   })
-  @ApiQuery({
-    name: 'version',
-    type: Number,
-    required: true,
-  })
   @ApiResponse({
     status: HttpStatus.OK,
   })

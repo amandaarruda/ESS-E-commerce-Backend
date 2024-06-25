@@ -5,8 +5,8 @@ import { IsNotEmpty } from 'class-validator';
 export class LoginDto {
   @ApiProperty({
     description: 'Email do usuário',
-    example: 'admin@gmail.com',
-    default: 'admin@gmail.com',
+    example: 'emailusuario@gmail.com',
+    default: 'emailusuario@gmail.com',
   })
   @IsNotEmpty({ message: 'Email é obrigatório' })
   @Transform(
