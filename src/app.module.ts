@@ -47,7 +47,7 @@ import { UserModule } from './modules/user/user.module';
     HttpModule,
     SoapModule.register({
       clientName: 'SOAP_CORREIOS',
-      uri: 'http://ws.correios.com.br/calculador/CalcPrecoPrazo.asmx?wsdl',
+      uri: process.env.API_CORREIOS_URL,
     }),
     AuthModule,
     PrismaModule,
