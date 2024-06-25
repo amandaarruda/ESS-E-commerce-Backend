@@ -1,11 +1,9 @@
-import {
-    Injectable,
-  } from '@nestjs/common';
-
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/database/prisma/prisma.service';
-import { CategoryTypeMap } from './entity/category.type.map';
 import { CrudType } from 'src/utils/base/ICrudTypeMap';
+
 import { CategoryEntity } from './entity/category.entity';
+import { CategoryTypeMap } from './entity/category.type.map';
 
 @Injectable()
 export class CategoriesRepository {
@@ -19,7 +17,9 @@ export class CategoriesRepository {
     return categoriesCount > 0;
   }
 
-  async create(data: CategoryTypeMap[CrudType.CREATE]): Promise<CategoryEntity> {
+  async create(
+    data: CategoryTypeMap[CrudType.CREATE],
+  ): Promise<CategoryEntity> {
     return this.prisma.category.create({
       data: {
         ...data,
@@ -46,25 +46,25 @@ export class CategoriesRepository {
     return this.prisma.category.findMany({
       include: {
         Media: true,
-      }
-    })
+      },
+    });
   }
 
   async update(id: number, data: CategoryTypeMap[CrudType.UPDATE]) {
     return this.prisma.category.update({
       where: {
         id,
-        deletedAt: null
+        deletedAt: null,
       },
-      data
-    })
+      data,
+    });
   }
 
   async delete(id: number) {
     return this.prisma.category.delete({
       where: {
         id,
-      }
-    })
+      },
+    });
   }
 }

@@ -10,7 +10,8 @@ export class CorreiosController {
   async calcularTempoEntrega(
     @Param('cepDestino') cepDestino: string,
   ): Promise<{ tempoEntrega: number }> {
-    const tempoEntrega = await this.correiosService.calculateDeliveryTime(cepDestino);
+    const tempoEntrega =
+      await this.correiosService.calculateDeliveryTime(cepDestino);
     return { tempoEntrega };
   }
 }
