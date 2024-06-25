@@ -166,7 +166,6 @@ export class AuthService {
 
     const alreadyExists = await this.userRepository.exists({
       email: dto.email,
-      ...(dto.userBeingEditedId && { id: { not: dto.userBeingEditedId } }),
     });
 
     return alreadyExists == false;

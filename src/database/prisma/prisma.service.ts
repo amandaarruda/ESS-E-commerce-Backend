@@ -32,4 +32,14 @@ export class PrismaService extends PrismaClient<
 
     this.logger.log(`Prisma v${Prisma.prismaVersion.client}`);
   }
+
+  async onModuleInit() {
+    await this.$connect();
+    this.logger.log('Connected to the database');
+  }
+
+  async onModuleDestroy() {
+    await this.$disconnect();
+    this.logger.log('Disconnected from the database');
+  }
 }

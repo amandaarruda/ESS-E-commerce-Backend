@@ -76,15 +76,6 @@ export class UserService {
         );
       }
 
-      const userExists = await this.exists({ id });
-
-      if (!userExists) {
-        this.logger.debug(`User not found`);
-        throw new NotFoundException(
-          setMessage(getMessage(MessagesHelperKey.USER_NOT_FOUND), id),
-        );
-      }
-
       const userToBeDeleted = await this.userRepository.findByIdAsync(id);
 
       if (
