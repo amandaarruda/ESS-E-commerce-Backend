@@ -22,8 +22,4 @@ export class CartEntity implements Cart {
     example: false,
   })
   locked: boolean;
-
-  // The products property will be an array of CartProduct entities
-  // You will need to create a CartProductEntity class similar to this one
-  // and use it here as the type for this property.
 }

@@ -133,6 +133,7 @@ export class UserController {
   }
 
   @Get('orders')
+  @ApiOperation({ summary: 'Listar pedidos de um usuário' })
   async searchOrders(
     @AuthenticatedUser() currentUser: UserPayload,
     @Query('targetEmail') targetEmail: string,

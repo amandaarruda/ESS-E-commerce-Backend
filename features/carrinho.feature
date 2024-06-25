@@ -1,32 +1,29 @@
-Features relacionadas ao funcionamento do carrinho na plataforma, e suas interações com produtos e criação de pedidos.
+Feature: Cart Service
 
-Scenario: Carrinho sem itens
-	Given O usuário de CPF "12312312301" está na página "Carrinho"
-	And Não há itens no carrinho
-	When O usuário de CPF "12312312301" acessa a página "Carrinho"
-	Then O usuário  de CPF "12312312301" é apresentado a mensagem "O carrinho ainda está vazio"
-	And A opção de "realizar pedido" não é exibida na página
+Scenario: Listar carrinho
+	Given O usuário de ID "1" está logado
+	When O usuário consulta seu carrinho
+	Then O usuário recebe a lista de produtos em seu carrinho
 
-Scenario: Adicionar Produto ao Carrinho
-	Given O usuário de CPF "12312312301" está na página "Produtos"
-	And O produto “Tênis vermelho” é listado na página
-	When O usuário de CPF "12312312301" adiciona o produto "Tênis vermelho" ao carrinho
-	Then O usuário de CPF "12312312301" recebe uma sinalização visual com a mensagem "Produto adicionado ao carrinho"
-	And O usuário de CPF "12312312301" visualiza o item "Tênis vermelho" na aba do carrinho
+Scenario: Adicionar produto ao carrinho
+	Given O usuário de ID "1" está logado
+	And Existe um produto de ID "1"
+	And O usuário possui um carrinho de ID "1"
+	When O usuário tenta adicionar o produto ao seu carrinho
+	Then Deve ser recebido um objeto com informações da relação entre o produto e o carrinho
 
-Scenario: Remover Produto do Carrinho
-	Given O usuário de CPF "12312312301" está na página "Carrinho"
-	And O produto “Tênis vermelho” está no carrinho do usuário
-	When O usuário de CPF "12312312301" remove o produto "Tênis vermelho" do carrinho
-	Then O carrinho do usuário de CPF "12312312301" não contém mais o item "Tênis vermelho"
+Scenario: Remover produto do carrinho
+	Given O usuário de ID "1" está logado
+	And Existe um produto de ID "1"
+	And O usuário possui um carrinho de ID "1"
+	And O usuário possui o produto especificado em seu carrinho
+	When O usuário tenta remover o produto ao seu carrinho
+	Then A relação deve ser excluída e deve ser recebido um objeto com informações da antiga relação entre o produto e o carrinho
 
-Scenario: Carrinho de compras mantém os itens
-	Given O usuário de CPF "12312312301" está na página "Carrinho"
-	And Os produtos "Sapato social" e "Tênis azul" estão no carrinho
-	When o usuário de CPF "12312312301" sai da aplicação
-	And O usuário de CPF "12312312301" acessa a página "Carrinho"
-	Then o usuário de CPF "12312312301" visualiza os itens "Sapato social", "Tênis azul" e a opção de "realizar pedido"
-
-//endline
-
-
+Scenario: Atualizar quantidade de produto no carrinho
+	Given O usuário de ID "1" está logado
+	And Existe um produto de ID "1"
+	And O usuário possui um carrinho de ID "1"
+	And O usuário possui "1" unidades do produto especificado em seu carrinho
+	When O usuário tenta aumentar em 1 a quantidade de unidades do produto em seu carrinho
+	Then Deve ser recebido um objeto com as novas informações definidas da relação entre o produto e o carrinho
