@@ -4,10 +4,12 @@ import {
   SnakeCaseNamingConvention,
 } from '@automapper/core';
 import { AutomapperModule } from '@automapper/nestjs';
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { HttpModule } from '@nestjs/axios';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
+import { SoapModule } from 'nestjs-soap';
 
 import { AuthModule } from './auth/auth.module';
 import { AtGuard } from './auth/guards';
@@ -15,7 +17,9 @@ import { RolesGuard } from './auth/guards/roles.guard';
 import { PrismaModule } from './database/prisma/prisma.module';
 import { AllExceptionsFilter } from './middlewares/exception.filter';
 import { CategoriesModule } from './modules/categories/categories.module';
+import { DeliveryModule } from './modules/delivery/delivery.module';
 import { EmailModule } from './modules/email/email.module';
+import { OrdersModule } from './modules/orders/orders.module';
 import { ProductController } from './modules/product/product.controller';
 import { ProductModule } from './modules/product/product.module';
 import { UserModule } from './modules/user/user.module';
@@ -42,12 +46,19 @@ import { UserModule } from './modules/user/user.module';
     JwtModule.register({
       secret: process.env.JWT_SECRET,
     }),
+    HttpModule,
+    SoapModule.register({
+      clientName: 'SOAP_CORREIOS',
+      uri: process.env.API_CORREIOS_URL,
+    }),
     AuthModule,
     PrismaModule,
     UserModule,
     EmailModule,
     CategoriesModule,
     ProductModule,
+    OrdersModule,
+    DeliveryModule,
   ],
 })
 export class AppModule implements NestModule {

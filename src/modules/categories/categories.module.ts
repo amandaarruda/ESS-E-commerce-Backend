@@ -7,10 +7,7 @@ import { CategoriesService } from './categories.service';
 
 @Module({
   controllers: [CategoriesController],
-  providers: [
-    CategoriesService,
-    CategoriesRepository,
-  ],
+  providers: [CategoriesService, CategoriesRepository],
   imports: [PrismaModule],
   exports: [CategoriesService, CategoriesRepository],
 })

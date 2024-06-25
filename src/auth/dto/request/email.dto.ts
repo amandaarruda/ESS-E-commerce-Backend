@@ -5,7 +5,7 @@ import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
 export class EmailDto {
   @ApiProperty({
     description: 'Email do usuário',
-    example: 'user@gmail.com',
+    example: 'emailusuario@gmail.com',
   })
   @IsNotEmpty({ message: 'Email é obrigatório' })
   @IsEmail({}, { message: 'Email inválido' })
@@ -14,11 +14,4 @@ export class EmailDto {
       typeof value === 'string' && value?.trim() && value?.toLowerCase(),
   )
   email: string;
-
-  @ApiProperty({
-    description: 'Id do usuário que está sendo editado',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  })
-  @IsOptional()
-  userBeingEditedId?: number | null;
 }

@@ -33,3 +33,13 @@ export class CategoryCreateDto {
   )
   imageUrl: string;
 }
+
+export class CategoryUpdateDto extends CategoryCreateDto {
+  @ApiProperty({
+    example: '1',
+    description: 'Id da categoria',
+  })
+  @IsNotEmpty({ message: 'O campo de Id deve ser preenchido' })
+  @IsNumber()
+  id: number;
+}

@@ -28,6 +28,9 @@ defineFeature(feature, test => {
             exists: jest.fn(),
             create: jest.fn(),
             getById: jest.fn(),
+            getAll: jest.fn(),
+            update: jest.fn(),
+            delete: jest.fn(),
           }),
         },
       ],
@@ -224,6 +227,122 @@ defineFeature(feature, test => {
               url: categoryImageURL,
             }),
           }),
+        );
+      },
+    );
+  });
+
+  test('Obter todas categorias', ({ given, when, then }) => {
+    let result: CategoryEntity[];
+    const categories: CategoryEntity[] = [
+      {
+        id: 1,
+        name: 'Tênis',
+        deletedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        Media: {
+          id: 1,
+          url: 'https://cdn-icons-png.flaticon.com/512/2589/2589903.png',
+        },
+        mediaId: 1,
+      },
+      {
+        id: 2,
+        name: 'Chinelo',
+        deletedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        Media: {
+          id: 2,
+          url: 'https://static.thenounproject.com/png/2419291-200.png',
+        },
+        mediaId: 2,
+      },
+    ];
+
+    given(/^Existem categorias no repositório de categorias$/, async () => {
+      categoriesRepositoryMock.getAll.mockResolvedValue(
+        Promise.resolve(categories),
+      );
+    });
+
+    when(
+      /^Eu chamo o método "getCategories" do "CategoriesService"$/,
+      async () => {
+        result = await categoriesService.getCategories();
+      },
+    );
+
+    then(
+      /^Eu recebo uma lista com todas categorias do repositório de categorias$/,
+      async () => {
+        expect(result).toEqual(expect.arrayContaining(categories));
+      },
+    );
+  });
+
+  test('Atualizar categoria', ({ given, when, then }) => {
+    given(
+      /^A categoria de ID "([^"]*)", nome "([^"]*)" e imagem "([^"]*)" existe no repositório de categorias$/,
+      async (id, name, image) => {
+        categoriesRepositoryMock.exists.mockResolvedValue(
+          Promise.resolve(true),
+        );
+      },
+    );
+
+    when(
+      /^Eu chamo o método "updateCategory" do "CategoriesService" com o ID "([^"]*)", nome "([^"]*)" e imagem "([^"]*)"$/,
+      async (id, name, image) => {
+        await categoriesService.updateCategory({
+          id: parseInt(id, 10),
+          name: name,
+          imageUrl: image,
+        });
+      },
+    );
+
+    then(
+      /^A categoria de ID "([^"]*)" agora possui nome "([^"]*)" e imagem "([^"]*)"$/,
+      async (id, name, image) => {
+        expect(categoriesRepositoryMock.update).toHaveBeenCalledWith(
+          parseInt(id, 10),
+          expect.objectContaining({
+            name,
+            Media: expect.objectContaining({
+              update: expect.objectContaining({
+                url: image,
+              }),
+            }),
+          }),
+        );
+      },
+    );
+  });
+
+  test('Deletar categoria', ({ given, when, then }) => {
+    given(
+      /^A categoria de ID "([^"]*)", nome "([^"]*)" e imagem "([^"]*)" existe no repositório de categorias$/,
+      async (id, name, image) => {
+        categoriesRepositoryMock.exists.mockResolvedValue(
+          Promise.resolve(true),
+        );
+      },
+    );
+
+    when(
+      /^Eu chamo o método "deleteCategory" do "CategoriesService" com o ID "([^"]*)"$/,
+      async id => {
+        await categoriesService.deleteCategory(parseInt(id, 10));
+      },
+    );
+
+    then(
+      /^A categoria de ID "([^"]*)" não existe no repositório de categorias$/,
+      async id => {
+        expect(categoriesRepositoryMock.delete).toHaveBeenCalledWith(
+          parseInt(id, 10),
         );
       },
     );

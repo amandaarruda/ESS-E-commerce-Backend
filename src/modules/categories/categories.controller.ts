@@ -13,7 +13,10 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 import { ApiExceptionResponse } from 'src/utils/swagger-schemas/SwaggerSchema';
 
 import { CategoriesService } from './categories.service';
-import { CategoryCreateDto } from './dto/request/category.create.dto';
+import {
+  CategoryCreateDto,
+  CategoryUpdateDto,
+} from './dto/request/category.create.dto';
 import { CategoryResponseDto } from './dto/response/category.dto';
 
 @ApiBearerAuth()
@@ -52,5 +55,49 @@ export class CategoriesController {
     const category = await this.service.getCategoryById(id);
 
     return response.status(HttpStatus.OK).json(category);
+  }
+
+  @ApiOperation({ summary: 'Get categories' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: [CategoryResponseDto],
+  })
+  @ApiExceptionResponse()
+  @Get()
+  async getAll(@Res() response: Response) {
+    const categories = await this.service.getCategories();
+
+    return response.status(HttpStatus.OK).json(categories);
+  }
+
+  @ApiOperation({ summary: 'Update category' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+  })
+  @ApiExceptionResponse()
+  @Put()
+  @Roles(RoleEnum.ADMIN)
+  async update(@Res() response: Response, @Body() body: CategoryUpdateDto) {
+    await this.service.updateCategory(body);
+
+    return response.status(HttpStatus.OK).send();
+  }
+
+  @ApiOperation({ summary: 'Delete category' })
+  @ApiParam({
+    name: 'id',
+    type: Number,
+    required: true,
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+  })
+  @ApiExceptionResponse()
+  @Delete('/:id')
+  @Roles(RoleEnum.ADMIN)
+  async delete(@Res() response: Response, @Param('id') id: number) {
+    await this.service.deleteCategory(id);
+
+    return response.status(HttpStatus.OK).send();
   }
 }

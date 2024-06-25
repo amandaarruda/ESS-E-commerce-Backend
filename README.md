@@ -63,6 +63,11 @@ or
 ```bash
 npm start
 ```
+- Instale as dependências para as features de order e delivery
+
+```
+npm install @nestjs/axios nestjs-soap
+```
 
 ### Como executar o projeto usando docker
 - Execute o comando `make docker-build` para fazer build das imagens do container do backend.

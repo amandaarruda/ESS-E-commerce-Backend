@@ -7,7 +7,10 @@ import { MessagesHelperKey, getMessage } from 'src/utils/messages.helper';
 import { handleError } from 'src/utils/treat.exceptions';
 
 import { CategoriesRepository } from './categories.repository';
-import { CategoryCreateDto } from './dto/request/category.create.dto';
+import {
+  CategoryCreateDto,
+  CategoryUpdateDto,
+} from './dto/request/category.create.dto';
 import { CategoryEntity } from './entity/category.entity';
 
 @Injectable()
@@ -52,6 +55,60 @@ export class CategoriesService {
       }
 
       return category;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  async getCategories(): Promise<CategoryEntity[]> {
+    try {
+      const categories = await this.categoriesRepository.getAll();
+      if (categories === null) {
+        throw new NotFoundException(
+          getMessage(MessagesHelperKey.CATEGORY_NOT_FOUND),
+        );
+      }
+
+      return categories;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  async updateCategory(data: CategoryUpdateDto) {
+    const categoryUpdateInput = {
+      name: data.name,
+      Media: {
+        update: {
+          url: data.imageUrl,
+        },
+      },
+    };
+
+    try {
+      const category = await this.categoriesRepository.getById(data.id);
+      if (category === null) {
+        throw new NotFoundException(
+          getMessage(MessagesHelperKey.CATEGORY_NOT_FOUND),
+        );
+      }
+
+      this.categoriesRepository.update(data.id, categoryUpdateInput);
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  async deleteCategory(id: number) {
+    try {
+      const category = await this.categoriesRepository.getById(id);
+      if (category === null) {
+        throw new NotFoundException(
+          getMessage(MessagesHelperKey.CATEGORY_NOT_FOUND),
+        );
+      }
+
+      await this.categoriesRepository.delete(id);
     } catch (error) {
       handleError(error);
     }
