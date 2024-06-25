@@ -78,7 +78,8 @@ export class AuthController {
 
   @ApiOperation({ summary: 'Email Availability' })
   @Post('email/availability')
-  @ApiBearerAuth()
+  @ApiBody({ type: EmailDto })
+  @IsPublic()
   @HttpCode(HttpStatus.OK)
   async checkEmailAvailability(
     @Body() dto: EmailDto,

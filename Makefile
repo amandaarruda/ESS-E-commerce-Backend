@@ -7,12 +7,11 @@ docker-start:
 .PHONY: docker-start
 
 docker-stop:
-	docker compose down
+	docker compose stop
 .PHONY: docker-stop
 
-docker-clear: docker-stop
-	docker compose rm
-	docker volume rm ess-e-commerce-backend_db
+docker-clear: 
+	docker compose down
 .PHONY: docker-clear
 
 docker-fresh-start: docker-clear docker-start
