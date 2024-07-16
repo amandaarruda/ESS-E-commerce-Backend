@@ -54,7 +54,7 @@ export class CartRepository {
           },
         },
       });
-      return {ok: "true", message: "Item removido do carrinho com sucesso"};
+      return { ok: 'true', message: 'Item removido do carrinho com sucesso' };
     } catch (error) {
       throw new ConflictException('Unable to remove product from cart');
     }

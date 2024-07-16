@@ -16,6 +16,10 @@ export class DefaultFilter<T extends CrudTypeMap> {
   search?: string;
 
   @IsOptional()
+  @ApiPropertyOptional()
+  categoryId?: number;
+
+  @IsOptional()
   @ApiPropertyOptional({
     example: {
       id: 'desc',

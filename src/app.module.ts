@@ -16,13 +16,13 @@ import { AtGuard } from './auth/guards';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { PrismaModule } from './database/prisma/prisma.module';
 import { AllExceptionsFilter } from './middlewares/exception.filter';
+import { CartModule } from './modules/cart/cart.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { DeliveryModule } from './modules/delivery/delivery.module';
 import { EmailModule } from './modules/email/email.module';
 import { OrdersModule } from './modules/orders/orders.module';
+import { ProductModule } from './modules/product/product.module';
 import { UserModule } from './modules/user/user.module';
-import { CartModule } from './modules/cart/cart.module';
-
 
 @Module({
   providers: [
@@ -56,8 +56,10 @@ import { CartModule } from './modules/cart/cart.module';
     UserModule,
     EmailModule,
     CategoriesModule,
+    ProductModule,
     OrdersModule,
     DeliveryModule,
+    CartModule,
     CartModule,
   ],
 })
