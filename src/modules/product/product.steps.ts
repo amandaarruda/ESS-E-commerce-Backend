@@ -13,7 +13,7 @@ import { ProductService } from 'src/modules/product/product.service';
 import { CategoryEntity } from '../categories/entity/category.entity';
 import { ProductEntity } from './entity/product.entity';
 
-const feature = loadFeature('features/Product.feature');
+const feature = loadFeature('features/product.feature');
 
 defineFeature(feature, test => {
   let productsService: ProductService;
