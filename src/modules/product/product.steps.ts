@@ -226,7 +226,85 @@ defineFeature(feature, test => {
     given(
       /^O produto de ID "([^"]*)", nome "([^"]*)" e preço "([^"]*)" existe no repositório de produtos$/,
       async (id, name, price) => {
-        productsRepositoryMock.exists.mockResolvedValue(Promise.resolve(true));
+        productId = parseInt(id, 10);
+        productName = name;
+        productPrice = price;
+
+        productsRepositoryMock.getById.mockResolvedValue(
+          Promise.resolve({
+            id: productId,
+            name: productName,
+            price: parseFloat(productPrice),
+            deletedAt: null,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            stock: 0,
+            category: new CategoryEntity(),
+            categoryId: 0,
+            description: '',
+            productMedia: [],
+          }),
+        );
+      },
+    );
+
+    when(
+      /^Eu chamo o método "updateProduct" do "ProductsService" com o ID "([^"]*)", nome "([^"]*)" e preço "([^"]*)"$/,
+      async (id, name, price) => {
+        productsRepositoryMock.update.mockResolvedValue(
+          Promise.resolve({
+            id: productId,
+            name: name,
+            price: parseFloat(price),
+            deletedAt: null,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            stock: 0,
+            category: new CategoryEntity(),
+            categoryId: 0,
+            description: '',
+            productMedia: [],
+          }),
+        );
+
+        result = await productsService.updateItem(parseInt(id, 10), {
+          name: name,
+          price: parseFloat(price),
+        });
+      },
+    );
+
+    then(
+      /^O produto de ID "([^"]*)" agora possui nome "([^"]*)" e preço "([^"]*)"$/,
+      async (id, name, price) => {
+        expect(result).toEqual(
+          expect.objectContaining({
+            id: parseInt(id, 10),
+            name: name,
+            price: parseFloat(price),
+          }),
+        );
+        expect(productsRepositoryMock.update).toHaveBeenCalledWith(
+          parseInt(id, 10),
+          expect.objectContaining({
+            name,
+            price: parseFloat(price),
+          }),
+        );
+      },
+    );
+  });
+
+  /*  test('Atualizar item', ({ given, when, then }) => {
+    let result: ProductEntity;
+    let productId: number;
+    let productName: string;
+    let productPrice: string;
+
+    given(
+      /^O produto de ID "([^"]*)", nome "([^"]*)" e preço "([^"]*)" existe no repositório de produtos$/,
+      async (id, name, price) => {
+        productsRepositoryMock.getById.mockResolvedValue(Promise.resolve(true));
         productId = parseInt(id, 10);
         productName = name;
         productPrice = price;
@@ -279,6 +357,7 @@ defineFeature(feature, test => {
       },
     );
   });
+ */
 
   test('Deletar item', ({ given, when, then }) => {
     let productId: number;

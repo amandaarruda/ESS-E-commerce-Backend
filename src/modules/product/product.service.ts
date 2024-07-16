@@ -170,7 +170,9 @@ export class ProductService {
     try {
       const existingProduct = await this.productRepository.getById(id);
       if (!existingProduct) {
-        throw new Error('ITEM_NOT_FOUND');
+        throw new NotFoundException(
+          getMessage(MessagesHelperKey.ITEM_NOT_FOUND),
+        );
       }
 
       const dataPrisma: Prisma.ProductUpdateInput = {};
