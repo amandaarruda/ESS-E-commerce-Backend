@@ -152,6 +152,12 @@ export class ProductRepository {
       });
     }
 
+    if (filter.categoryId) {
+      AND.push({
+        categoryId: filter.categoryId,
+      });
+    }
+
     const prismaSelect: ProductTypeMap[CrudType.SELECT] = {
       id: true,
       createdAt: true,
