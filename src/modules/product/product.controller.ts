@@ -91,6 +91,25 @@ export class ProductController {
     return response.status(HttpStatus.OK).json(filteredData);
   }
 
+  @Get('/:itemId')
+  @ApiOperation({ summary: 'Get item by ID' })
+  @ApiParam({
+    name: 'itemId',
+    type: Number,
+    required: true,
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: ProductResponseDto,
+  })
+  @ApiExceptionResponse()
+  @Roles(RoleEnum.ADMIN)
+  async getById(@Res() response: Response, @Param('itemId') itemId: number) {
+    const item = await this.ProductService.getItemById(itemId);
+
+    return response.status(HttpStatus.OK).json(item);
+  }
+
   @ApiOperation({ summary: 'Delete item by ID' })
   @ApiParam({
     name: 'itemId',

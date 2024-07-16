@@ -1,5 +1,14 @@
 import { Controller } from '@nestjs/common';
-import { Body, Post, Get, Res, Param, HttpStatus } from '@nestjs/common';
+import {
+  Body,
+  Post,
+  Get,
+  Res,
+  Param,
+  HttpStatus,
+  Delete,
+  Put,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,

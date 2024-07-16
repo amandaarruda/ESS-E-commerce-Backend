@@ -239,6 +239,14 @@ export class ProductService {
     }
   }
 
+  async getProducts(): Promise<ProductEntity[]> {
+    try {
+      const products = await this.productRepository.getAll();
+      return products;
+    } catch (error) {
+      handleError(error);
+    }
+  }
   /*async deleteItem(id: number): Promise<void> {
     try {
       await this.productRepository.delete(id);

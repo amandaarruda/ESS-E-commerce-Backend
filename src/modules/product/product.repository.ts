@@ -23,6 +23,26 @@ export class ProductRepository {
     return productsCount > 0;
   }
 
+  async getAll(): Promise<ProductEntity[]> {
+    return await this.prisma.product.findMany({
+      where: {
+        deletedAt: null,
+      },
+      include: {
+        category: {
+          include: {
+            Media: true,
+          },
+        },
+        productMedia: {
+          include: {
+            media: true,
+          },
+        },
+      },
+    });
+  }
+
   async create(data: Prisma.ProductCreateInput): Promise<ProductEntity> {
     return await this.prisma.product.create({
       data,
