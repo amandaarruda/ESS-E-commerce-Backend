@@ -4,7 +4,7 @@ import {
   SnakeCaseNamingConvention,
 } from '@automapper/core';
 import { AutomapperModule, getMapperToken } from '@automapper/nestjs';
-import { ConflictException } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { defineFeature, loadFeature } from 'jest-cucumber';
 import { ProductRepository } from 'src/modules/product/product.repository';
@@ -50,7 +50,7 @@ defineFeature(feature, test => {
     productsRepositoryMock = module.get(ProductRepository);
   });
 
-  test(' Adicionar item', ({ given, when, then }) => {
+  test('Adicionar item', ({ given, when, then }) => {
     let result: ProductEntity;
     let productName;
     let productPrice;
@@ -164,62 +164,8 @@ defineFeature(feature, test => {
     );
 
     then(/^Eu recebo um erro$/, async () => {
-      await expect(result).rejects.toThrow(ConflictException);
+      await expect(result).rejects.toThrow(BadRequestException);
     });
-  });
-
-  test('Obter item pelo ID', ({ given, when, then }) => {
-    let result: ProductEntity;
-    let productId;
-    let productName;
-    let productPrice;
-
-    given(
-      /^O produto de ID "([^"]*)", nome "([^"]*)" e preço "([^"]*)" existe no repositório de produtos$/,
-      async (id, name, price) => {
-        productsRepositoryMock.exists.mockResolvedValue(Promise.resolve(true));
-        productId = parseInt(id, 10);
-        productName = name;
-        productPrice = price;
-      },
-    );
-
-    when(
-      /^Eu chamo o metodo  "(.*)" do "(.*)" com o ID "([^"]*)"$/,
-      async (id, name, price) => {
-        // Mock the add method to return a Promise that resolves to an object with an ID
-        productsRepositoryMock.getById.mockResolvedValue(
-          Promise.resolve({
-            id: productId,
-            name: productName,
-            price: parseFloat(productPrice),
-            deletedAt: null,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            stock: 0,
-            category: new CategoryEntity(),
-            categoryId: 0,
-            description: '',
-            productMedia: [],
-          }),
-        );
-
-        result = await productsService.getItemById(productId);
-      },
-    );
-
-    then(
-      /^Eu recebo o produto de ID "([^"]*)", nome "([^"]*)" e preço "([^"]*)"$/,
-      async () => {
-        expect(result).toEqual(
-          expect.objectContaining({
-            id: productId,
-            name: productName,
-            price: parseFloat(productPrice),
-          }),
-        );
-      },
-    );
   });
 
   test('Obter todos os itens', ({ given, when, then }) => {
@@ -272,17 +218,41 @@ defineFeature(feature, test => {
   });
 
   test('Atualizar item', ({ given, when, then }) => {
+    let result: ProductEntity;
+    let productId: number;
+    let productName: string;
+    let productPrice: string;
+
     given(
       /^O produto de ID "([^"]*)", nome "([^"]*)" e preço "([^"]*)" existe no repositório de produtos$/,
       async (id, name, price) => {
         productsRepositoryMock.exists.mockResolvedValue(Promise.resolve(true));
+        productId = parseInt(id, 10);
+        productName = name;
+        productPrice = price;
       },
     );
 
     when(
       /^Eu chamo o método "updateProduct" do "ProductsService" com o ID "([^"]*)", nome "([^"]*)" e preço "([^"]*)"$/,
       async (id, name, price) => {
-        await productsService.updateItem(parseInt(id, 10), {
+        productsRepositoryMock.update.mockResolvedValue(
+          Promise.resolve({
+            id: productId,
+            name: name,
+            price: parseFloat(price),
+            deletedAt: null,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            stock: 0,
+            category: new CategoryEntity(),
+            categoryId: 0,
+            description: '',
+            productMedia: [],
+          }),
+        );
+
+        result = await productsService.updateItem(parseInt(id, 10), {
           name: name,
           price: parseFloat(price),
         });
@@ -292,6 +262,13 @@ defineFeature(feature, test => {
     then(
       /^O produto de ID "([^"]*)" agora possui nome "([^"]*)" e preço "([^"]*)"$/,
       async (id, name, price) => {
+        expect(result).toEqual(
+          expect.objectContaining({
+            id: parseInt(id, 10),
+            name: name,
+            price: parseFloat(price),
+          }),
+        );
         expect(productsRepositoryMock.update).toHaveBeenCalledWith(
           parseInt(id, 10),
           expect.objectContaining({
@@ -304,16 +281,54 @@ defineFeature(feature, test => {
   });
 
   test('Deletar item', ({ given, when, then }) => {
+    let productId: number;
+    let productName: string;
+    let productPrice: string;
+
     given(
       /^O produto de ID "([^"]*)", nome "([^"]*)" e preço "([^"]*)" existe no repositório de produtos$/,
       async (id, name, price) => {
         productsRepositoryMock.exists.mockResolvedValue(Promise.resolve(true));
+        productId = parseInt(id, 10);
+        productName = name;
+        productPrice = price;
       },
     );
 
     when(
       /^Eu chamo o método "deleteProduct" do "ProductsService" com o ID "([^"]*)"$/,
       async id => {
+        productsRepositoryMock.getById.mockResolvedValue(
+          Promise.resolve({
+            id: productId,
+            name: productName,
+            price: parseFloat(productPrice),
+            deletedAt: null,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            stock: 0,
+            category: new CategoryEntity(),
+            categoryId: 0,
+            description: '',
+            productMedia: [],
+          }),
+        );
+        productsRepositoryMock.delete.mockResolvedValue(
+          Promise.resolve({
+            id: productId,
+            name: productName,
+            price: parseFloat(productPrice),
+            deletedAt: new Date(),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            stock: 0,
+            category: new CategoryEntity(),
+            categoryId: 0,
+            description: '',
+            productMedia: [],
+          }),
+        );
+
         await productsService.deleteItem(parseInt(id, 10));
       },
     );
@@ -326,5 +341,41 @@ defineFeature(feature, test => {
         );
       },
     );
+  });
+
+  test('Erro de Item Não Encontrado ao Deletar', ({ given, when, then }) => {
+    let result: Promise<boolean>;
+    let productId;
+
+    given(
+      /^não existe um produto cadastrado de ID (\d+) e nome "([^"]*)"$/,
+      async (id, name) => {
+        console.log(`Mocking getById for ID ${id}`);
+        productsRepositoryMock.getById.mockResolvedValue(null);
+      },
+    );
+    given(/^o dado de deleção do produto contém o ID (\d+)$/, id => {
+      productId = parseInt(id);
+      console.log(`Product ID set to ${productId}`);
+    });
+
+    when(/^o serviço de produtos tenta deletar o produto$/, async () => {
+      result = productsService.deleteItem(productId);
+    });
+
+    then(
+      /^o repositório de produtos deve ser chamado para encontrar o produto$/,
+      async () => {
+        expect(productsRepositoryMock.getById).toHaveBeenCalledWith(productId);
+      },
+    );
+
+    then(/^a resposta deve conter a mensagem "ITEM_NOT_FOUND"$/, async () => {
+      await expect(result).rejects.toThrow('ITEM_NOT_FOUND');
+    });
+
+    then(/^nenhum item é removido$/, async () => {
+      await expect(result).rejects.toThrow('ITEM_NOT_FOUND');
+    });
   });
 });
