@@ -3,7 +3,7 @@ export const MessagesHelper = {
     'E-mail e/ou senha inválidos ou o usuário se encontra sem acesso ao sistema.',
   NOT_AUTHORIZED_RESOURCE: 'Usuário não autorizado a utilizar esse recurso!',
   USER_NOT_FOUND: 'Usuário X não encontrado!',
-  USER_ALREADY_REGISTERED: 'Usuário já existe no sistema',
+  USER_ALREADY_REGISTERED: 'Usuário já cadastrado no sistema',
   FAIL_SENDING_EMAIL: 'Não foi possível enviar o email',
   USER_INACTIVE_TRYING_ACCESS:
     'Usuário inativo, procure o administrador do sistema',
