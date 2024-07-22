@@ -31,7 +31,7 @@ export class CartService {
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
-  async createCart(data: CartTypeMap[CrudType.CREATE]): Promise<any> {
+  async createCart(data: { userId: number; locked: boolean }): Promise<any> {
     this.logger.log(`Create Cart`);
     try {
       if (
