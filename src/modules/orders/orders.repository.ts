@@ -30,4 +30,22 @@ export class OrdersRepository {
       },
     });
   }
+
+  async addProduct(orderId: number, productId: number, quantity: number) {
+    return await this.prisma.orderProduct.create({
+      data: {
+        orderId: orderId,
+        productId: productId,
+        quantity: quantity,
+      },
+    });
+  }
+
+  async getProducts(orderId: number) {
+    return await this.prisma.orderProduct.findMany({
+      where: {
+        orderId: orderId,
+      },
+    });
+  }
 }
