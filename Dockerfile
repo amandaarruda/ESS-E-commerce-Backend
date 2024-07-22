@@ -7,6 +7,9 @@ COPY package*.json .
 RUN npm install
 RUN npm i -g @nestjs/cli
 
+COPY prisma prisma
+RUN npx prisma generate
+
 COPY . .
 
 EXPOSE 8080
