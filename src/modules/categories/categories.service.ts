@@ -92,6 +92,15 @@ export class CategoriesService {
           getMessage(MessagesHelperKey.CATEGORY_NOT_FOUND),
         );
       }
+      if (
+        (await this.categoriesRepository.exists({
+          name: categoryUpdateInput.name.trim(),
+        })) === true
+      ) {
+        throw new ConflictException(
+          getMessage(MessagesHelperKey.CATEGORY_ALREADY_EXISTS),
+        );
+      }
 
       this.categoriesRepository.update(data.id, categoryUpdateInput);
     } catch (error) {
