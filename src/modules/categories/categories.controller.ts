@@ -3,11 +3,11 @@ import {
   Body,
   Post,
   Get,
-  Delete,
-  Put,
   Res,
   Param,
   HttpStatus,
+  Delete,
+  Put,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -27,6 +27,7 @@ import {
   CategoryUpdateDto,
 } from './dto/request/category.create.dto';
 import { CategoryResponseDto } from './dto/response/category.dto';
+import { IsPublic } from 'src/auth/decorators/is-public.decorator';
 
 @ApiBearerAuth()
 @Controller('categories')
@@ -48,6 +49,7 @@ export class CategoriesController {
     return response.status(HttpStatus.CREATED).json(category);
   }
 
+  @IsPublic()
   @ApiOperation({ summary: 'Get category by ID' })
   @ApiParam({
     name: 'id',
@@ -66,6 +68,7 @@ export class CategoriesController {
     return response.status(HttpStatus.OK).json(category);
   }
 
+  @IsPublic()
   @ApiOperation({ summary: 'Get categories' })
   @ApiResponse({
     status: HttpStatus.OK,

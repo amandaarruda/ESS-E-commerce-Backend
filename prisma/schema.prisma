@@ -39,6 +39,7 @@ model User {
   Media                 Media?        @relation(fields: [mediaId], references: [id], onDelete: SetNull)
   orders                Order[]
   CartProduct           CartProduct[]
+  Cart                  Cart?
 
   @@map("TB_USER")
 }
@@ -94,6 +95,7 @@ model Product {
   deletedAt     DateTime?      @db.Timestamptz(3)
   categoryId    Int            @db.Integer
   category      Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  description   String         @db.Text
   orderProducts OrderProduct[]
   productMedia  ProductMedia[]
   CartProduct   CartProduct[]
@@ -135,9 +137,11 @@ model Media {
 }
 
 model Cart {
-  id       Int           @id @default(autoincrement())
-  userId   Int           @unique
-  locked   Boolean       @db.Boolean
+  id     Int     @id @default(autoincrement())
+  userId Int     @unique
+  locked Boolean @db.Boolean
+
+  User     User          @relation(fields: [userId], references: [id])
   products CartProduct[]
 
   @@map("TB_CART")

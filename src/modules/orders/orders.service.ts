@@ -3,29 +3,23 @@ import { OrderStatus } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma/prisma.service';
 import { EmailService } from '../email/email.service';
+import { createOrderDTO } from './order-type';
+import { OrdersRepository } from './orders.repository';
 
 @Injectable()
 export class OrdersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly emailService: EmailService,
+    private readonly orderRepository: OrdersRepository,
   ) {}
 
-  async createOrder(orderData: any) {
-    const { userId, code, price, estimatedDelivery } = orderData;
-
-    const order = await this.prisma.order.create({
-      data: {
-        userId: userId,
-        code: code,
-        price: price,
-        estimatedDelivery: estimatedDelivery,
-        status: 'PROCESSING',
-      },
-    });
+  async createOrder(orderData: createOrderDTO) {
+    const order = await this.orderRepository.create(orderData);
 
     const emailMarkup = `<h1>Eba! Seu pedido foi confirmado. Agradecemos a preferência pelo seu pedido!</h1>
                          <p>Seu pedido com código ${order.code} foi recebido e está sendo processado.</p>`;
+
     await this.emailService.sendEmail(
       emailMarkup,
       'Confirmação de Pedido',
@@ -40,14 +34,7 @@ export class OrdersService {
       throw new BadRequestException('Id não enviado');
     }
 
-    await this.prisma.order.update({
-      where: {
-        id,
-      },
-      data: {
-        status: OrderStatus.CANCELED,
-      },
-    });
+    await this.orderRepository.cancelOrder(id);
 
     return id;
   }

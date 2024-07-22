@@ -2,10 +2,10 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, TransformFnParams } from 'class-transformer';
 import {
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsString,
   MaxLength,
+  IsNumber,
 } from 'class-validator';
 
 export class CategoryCreateDto {

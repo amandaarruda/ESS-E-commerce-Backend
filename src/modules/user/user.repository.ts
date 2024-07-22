@@ -61,7 +61,7 @@ export class UserRepository {
 
     return await Paginator.applyPagination(this.prisma.user, {
       ...filter,
-      where: { AND: filter.query },
+      where: { AND },
       select: prismaSelect,
     });
   }

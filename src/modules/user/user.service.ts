@@ -10,7 +10,6 @@ import {
 } from '@nestjs/common';
 import { Prisma, RoleEnum, StatusEnum } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import { UserRegisteredResponse } from 'src/auth/dto/response/UserToken';
 import { UserPayload } from 'src/auth/models/UserPayload';
 import { DefaultFilter } from 'src/filters/DefaultFilter';
 import { CrudType } from 'src/utils/base/ICrudTypeMap';

@@ -31,7 +31,7 @@ export class CartService {
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
-  async createCart(data: CartTypeMap[CrudType.CREATE]): Promise<any> {
+  async createCart(data: { userId: number; locked: boolean }): Promise<any> {
     this.logger.log(`Create Cart`);
     try {
       if (
@@ -59,7 +59,7 @@ export class CartService {
         throw new NotFoundException('Fetch not authorize the specified cart');
       }
     } catch (error) {
-      throw new NotFoundException('Cart not found or not authorized');
+      throw new NotFoundException('Cart not found');
     }
   }
 
@@ -84,7 +84,7 @@ export class CartService {
         );
       }
     } catch (error) {
-      throw new NotFoundException('Cart not found or not authorized');
+      throw new NotFoundException('Cart not found');
     }
   }
 
@@ -109,7 +109,7 @@ export class CartService {
         );
       }
     } catch (error) {
-      throw new NotFoundException('Cart not found or not authorized');
+      throw new NotFoundException('Cart not found');
     }
   }
 
@@ -134,7 +134,7 @@ export class CartService {
         );
       }
     } catch (error) {
-      throw new NotFoundException('Cart not found or not authorized');
+      throw new NotFoundException('Cart not found');
     }
   }
 }

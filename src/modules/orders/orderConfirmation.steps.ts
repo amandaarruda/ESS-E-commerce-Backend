@@ -2,15 +2,16 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaClient } from '@prisma/client';
 import { defineFeature, loadFeature } from 'jest-cucumber';
 
-import { PrismaService } from '../../../database/prisma/prisma.service';
-import { EmailService } from '../../email/email.service';
-import { OrdersService } from '../orders.service';
+import { PrismaService } from '../../database/prisma/prisma.service';
+import { EmailService } from '../email/email.service';
+import { OrdersRepository } from './orders.repository';
+import { OrdersService } from './orders.service';
 
 const feature = loadFeature('features/orderConfirmation.feature');
 
 let ordersService: OrdersService;
-let prismaService: PrismaService;
 let emailService: EmailService;
+let ordersRepository: jest.Mocked<OrdersRepository>;
 let orderData: any;
 let error: Error | null = null;
 
@@ -19,6 +20,13 @@ defineFeature(feature, test => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         OrdersService,
+        {
+          provide: OrdersRepository,
+          useFactory: () => ({
+            create: jest.fn(),
+            cancelOrder: jest.fn(),
+          }),
+        },
         PrismaService,
         {
           provide: EmailService,
@@ -30,18 +38,13 @@ defineFeature(feature, test => {
     }).compile();
 
     ordersService = module.get<OrdersService>(OrdersService);
-    prismaService = module.get<PrismaService>(PrismaService);
+    ordersRepository = module.get(OrdersRepository);
     emailService = module.get<EmailService>(EmailService);
   });
 
   beforeEach(async () => {
-    await clearDatabase();
     jest.clearAllMocks();
   });
-
-  async function clearDatabase() {
-    await prismaService.user.deleteMany();
-  }
 
   test('Envio de email de confirmação após criação de um pedido', ({
     given,
@@ -51,23 +54,15 @@ defineFeature(feature, test => {
     given(
       'que um novo pedido é criado com o email "test@example.com"',
       async () => {
-        const user = await prismaService.user.create({
-          data: {
-            email: 'test@example.com',
-            name: 'Test User',
-            password: 'password',
-            role: 'CUSTOMER',
-          },
-        });
-
         orderData = {
           email: 'test@example.com',
           code: 'order123',
           price: 100.0,
-          userId: user.id,
           deliveryAddressId: null,
           estimatedDelivery: new Date(),
         };
+
+        ordersRepository.create.mockResolvedValue(orderData);
       },
     );
 
@@ -82,6 +77,7 @@ defineFeature(feature, test => {
     then(
       'um email deve ser enviado para "test@example.com" com o assunto "Confirmação de Pedido"',
       async () => {
+        (emailService.sendEmail as jest.Mock).mockResolvedValue(true);
         expect(emailService.sendEmail).toHaveBeenCalledWith(
           expect.stringContaining('<h1>Eba! Seu pedido foi confirmado.'),
           'Confirmação de Pedido',
@@ -99,23 +95,15 @@ defineFeature(feature, test => {
     given(
       'que um novo pedido é criado com o email "test@example.com"',
       async () => {
-        const user = await prismaService.user.create({
-          data: {
-            email: 'test@example.com',
-            name: 'Test User',
-            password: 'password',
-            role: 'CUSTOMER',
-          },
-        });
-
         orderData = {
           email: 'test@example.com',
           code: 'order123',
           price: 100.0,
-          userId: user.id,
           deliveryAddressId: null,
           estimatedDelivery: new Date(),
         };
+
+        ordersRepository.create.mockResolvedValue(orderData);
       },
     );
 

@@ -54,7 +54,7 @@ export class CartRepository {
           },
         },
       });
-      return {ok: "true", message: "Item removido do carrinho com sucesso"};
+      return { ok: 'true', message: 'Item removido do carrinho com sucesso' };
     } catch (error) {
       throw new ConflictException('Unable to remove product from cart');
     }
@@ -90,7 +90,10 @@ export class CartRepository {
     return cart > 0;
   }
 
-  async createCart(data: CartTypeMap[CrudType.CREATE]): Promise<CartEntity> {
+  async createCart(data: {
+    userId: number;
+    locked: boolean;
+  }): Promise<CartEntity> {
     try {
       return await this.prisma.cart.create({
         data: {
