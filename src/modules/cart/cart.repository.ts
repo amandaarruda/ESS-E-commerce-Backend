@@ -90,7 +90,10 @@ export class CartRepository {
     return cart > 0;
   }
 
-  async createCart(data: CartTypeMap[CrudType.CREATE]): Promise<CartEntity> {
+  async createCart(data: {
+    userId: number;
+    locked: boolean;
+  }): Promise<CartEntity> {
     try {
       return await this.prisma.cart.create({
         data: {
