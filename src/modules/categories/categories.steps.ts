@@ -282,13 +282,24 @@ defineFeature(feature, test => {
     );
   });
 
-  test('Atualizar categoria', ({ given, when, then }) => {
+  test('Atualizar nome da categoria', ({ given, when, then }) => {
     given(
       /^A categoria de ID "([^"]*)", nome "([^"]*)" e imagem "([^"]*)" existe no repositório de categorias$/,
       async (id, name, image) => {
-        categoriesRepositoryMock.exists.mockResolvedValue(
-          Promise.resolve(true),
-        );
+        const category: CategoryEntity = { 
+          id, 
+          name,
+          mediaId: 1,
+          Media: { 
+            id: 1,
+            url: image 
+          },
+          createdAt: null,
+          updatedAt: null,
+          deletedAt: null,
+        };
+        categoriesRepositoryMock.getById.mockResolvedValue(Promise.resolve(category));
+        categoriesRepositoryMock.exists.mockResolvedValue(Promise.resolve(false));
       },
     );
 

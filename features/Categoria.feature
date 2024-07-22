@@ -21,7 +21,7 @@ Feature: Categorias
         When Eu chamo o método "getCategories" do "CategoriesService"
         Then Eu recebo uma lista com todas categorias do repositório de categorias
 
-    Scenario: Atualizar categoria
+    Scenario: Atualizar nome da categoria
         Given A categoria de ID "1", nome "Tenis" e imagem "https://cdn-icons-png.flaticon.com/512/2589/2589903.png" existe no repositório de categorias
         When Eu chamo o método "updateCategory" do "CategoriesService" com o ID "1", nome "Tênis" e imagem "https://png.pngtree.com/png-vector/20230407/ourmid/pngtree-sneakers-line-icon-vector-png-image_6693268.png"
         Then A categoria de ID "1" agora possui nome "Tênis" e imagem "https://png.pngtree.com/png-vector/20230407/ourmid/pngtree-sneakers-line-icon-vector-png-image_6693268.png"
