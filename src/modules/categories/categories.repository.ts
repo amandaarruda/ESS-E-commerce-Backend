@@ -31,7 +31,7 @@ export class CategoriesRepository {
   }
 
   async getById(id: number): Promise<CategoryEntity> {
-    return this.prisma.category.findUnique({
+    return await this.prisma.category.findUnique({
       where: {
         id,
         deletedAt: null,

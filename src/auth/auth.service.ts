@@ -310,7 +310,7 @@ export class AuthService {
       );
     }
 
-    const link = `${process.env.FRONTEND_RECOVER_PASSWORD_URL}?token=${token}`;
+    const link = `${process.env.FRONTEND_RECOVER_PASSWORD_URL}?recovery_token=${token}`;
 
     const templateBody = recoverTemplateDataBind(templateHtml, {
       name: userDb.name,
