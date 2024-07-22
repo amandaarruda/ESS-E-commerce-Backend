@@ -92,11 +92,10 @@ export class CategoriesService {
           getMessage(MessagesHelperKey.CATEGORY_NOT_FOUND),
         );
       }
-      if (
-        (await this.categoriesRepository.exists({
-          name: categoryUpdateInput.name.trim(),
-        })) === true
-      ) {
+      const categoryExistsWithName = await this.categoriesRepository.exists({
+        name: categoryUpdateInput.name.trim(),
+      })
+      if ( category.name !== categoryUpdateInput.name && categoryExistsWithName ) {
         throw new ConflictException(
           getMessage(MessagesHelperKey.CATEGORY_ALREADY_EXISTS),
         );
