@@ -118,6 +118,11 @@ export class AuthService {
         name: registerDto.name,
         email: registerDto.email,
         password: hash,
+        Cart: {
+          create: {
+            locked: false,
+          },
+        },
         status: StatusEnum.ACTIVE,
         ...(registerDto.image && {
           Media: {
