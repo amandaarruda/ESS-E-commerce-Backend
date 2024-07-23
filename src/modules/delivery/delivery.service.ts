@@ -1,28 +1,25 @@
-import { HttpService } from '@nestjs/axios';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 
 @Injectable()
 export class CorreiosService {
-  constructor(private readonly httpService: HttpService) {}
-
   async calculateDeliveryTime(cep: string): Promise<number> {
     try {
-      const response = await this.httpService
-        .get(`https://api.correios.com.br/${cep}`)
-        .toPromise();
-
-      const prazoEntrega = response?.data?.prazoEntrega;
-
-      if (!prazoEntrega) {
+      if (!this.isValidCep(cep)) {
         throw new InternalServerErrorException(
           'Endereço inválido. Por favor, insira um endereço válido.',
         );
       }
 
-      return parseInt(prazoEntrega);
+      const tempoEntrega = Math.floor(Math.random() * 6) + 3;
+      return tempoEntrega;
     } catch (error) {
       this.handleError(error);
     }
+  }
+
+  private isValidCep(cep: string): boolean {
+    const cepRegex = /^[0-9]{5}-[0-9]{3}$/;
+    return cepRegex.test(cep);
   }
 
   private handleError(error: any): never {
