@@ -6,7 +6,7 @@ import { OrdersService } from './orders.service';
 
 @Controller('orders')
 @ApiBearerAuth()
-@ApiTags('User')
+@ApiTags('Order')
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
