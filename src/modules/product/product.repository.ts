@@ -158,6 +158,25 @@ export class ProductRepository {
       });
     }
 
+    // const prismaSelect: ProductTypeMap[CrudType.SELECT] = {
+    //   id: true,
+    //   createdAt: true,
+    //   updatedAt: true,
+    //   price: true,
+    //   description: true,
+    //   name: true,
+    //   productMedia: {
+    //     take: 2,
+    //     select: {
+    //       media: {
+    //         select: {
+    //           url: true,
+    //         },
+    //       },
+    //     },
+    //   },
+    // };
+
     const prismaSelect: ProductTypeMap[CrudType.SELECT] = {
       id: true,
       createdAt: true,
@@ -166,7 +185,10 @@ export class ProductRepository {
       description: true,
       name: true,
       productMedia: {
-        take: 1,
+        orderBy: {
+          id: 'desc', // Assuming you have a createdAt field to order by
+        },
+        take: 1, // Take only the last item
         select: {
           media: {
             select: {

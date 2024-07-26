@@ -67,7 +67,10 @@ export class ProductService {
 
   async createItem(data: ProductCreateDto): Promise<ProductEntity> {
     try {
-      const exists = await this.productRepository.exists({ name: data.name });
+      const exists = await this.productRepository.exists({
+        name: data.name,
+        deletedAt: null,
+      });
       if (exists) {
         throw new BadRequestException('Item already exists');
       }
@@ -86,7 +89,7 @@ export class ProductService {
         name: data.name,
         description: data.description,
         price: data.price,
-        stock: data.stock || 0,
+        stock: data.stock,
         productMedia: {
           create: [
             {

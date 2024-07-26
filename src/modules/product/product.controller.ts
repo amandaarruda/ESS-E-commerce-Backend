@@ -81,7 +81,6 @@ export class ProductController {
   @ApiOkResponsePaginated(ProductPaginationResponse)
   @ApiExceptionResponse()
   @Get()
-  @Roles(RoleEnum.ADMIN)
   async getFilteredAsync(
     @Res() response: Response,
     @Query() filter: DefaultFilter<ProductTypeMap>,
@@ -103,7 +102,6 @@ export class ProductController {
     type: ProductResponseDto,
   })
   @ApiExceptionResponse()
-  @Roles(RoleEnum.ADMIN)
   async getById(@Res() response: Response, @Param('itemId') itemId: number) {
     const item = await this.ProductService.getItemById(itemId);
 
