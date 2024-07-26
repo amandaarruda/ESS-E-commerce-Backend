@@ -30,41 +30,6 @@ export class ProductService {
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
-  /*async createItem(data: ProductCreateDto): Promise<ProductEntity> {
-    try {
-      if (data.price <= 0)
-        throw new BadRequestException(
-          getMessage(MessagesHelperKey.PRICE_LESS_THAN_ZERO),
-        );
-      if (data.stock < 0)
-        throw new BadRequestException(
-          getMessage(MessagesHelperKey.STOCK_LESS_THAN_ZERO),
-        );
-      const productData: Prisma.ProductCreateInput = {
-        name: data.name,
-        description: data.description,
-        price: data.price,
-        stock: data.stock || 0,
-        productMedia: {
-          create: [
-            {
-              media: {
-                create: { url: data.imageUrl },
-              },
-            },
-          ],
-        },
-        category: {
-          connect: { id: data.categoryId },
-        },
-      };
-      const createdItem = await this.productRepository.create(productData);
-      return createdItem;
-    } catch (error) {
-      handleError(error);
-    }
-  }*/
-
   async createItem(data: ProductCreateDto): Promise<ProductEntity> {
     try {
       const exists = await this.productRepository.exists({
@@ -72,7 +37,7 @@ export class ProductService {
         deletedAt: null,
       });
       if (exists) {
-        throw new BadRequestException('Item already exists');
+        throw new BadRequestException('Item já existente');
       }
       if (data.price <= 0) {
         throw new BadRequestException(

@@ -158,25 +158,6 @@ export class ProductRepository {
       });
     }
 
-    // const prismaSelect: ProductTypeMap[CrudType.SELECT] = {
-    //   id: true,
-    //   createdAt: true,
-    //   updatedAt: true,
-    //   price: true,
-    //   description: true,
-    //   name: true,
-    //   productMedia: {
-    //     take: 2,
-    //     select: {
-    //       media: {
-    //         select: {
-    //           url: true,
-    //         },
-    //       },
-    //     },
-    //   },
-    // };
-
     const prismaSelect: ProductTypeMap[CrudType.SELECT] = {
       id: true,
       createdAt: true,
