@@ -20,6 +20,7 @@ import {
 import { PrismaClient } from '@prisma/client';
 import { RoleEnum } from '@prisma/client';
 import { Response } from 'express';
+import { IsPublic } from 'src/auth/decorators/is-public.decorator';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { DefaultFilter } from 'src/filters/DefaultFilter';
 import { ProductCreateDto } from 'src/modules/product/dto/request/product.create.dto';
@@ -77,6 +78,7 @@ export class ProductController {
     return response.status(HttpStatus.OK).json(updatedItem);
   }
 
+  @IsPublic()
   @ApiOperation({ summary: 'Get filtered product' })
   @ApiOkResponsePaginated(ProductPaginationResponse)
   @ApiExceptionResponse()
@@ -90,6 +92,7 @@ export class ProductController {
     return response.status(HttpStatus.OK).json(filteredData);
   }
 
+  @IsPublic()
   @Get('/:itemId')
   @ApiOperation({ summary: 'Get item by ID' })
   @ApiParam({

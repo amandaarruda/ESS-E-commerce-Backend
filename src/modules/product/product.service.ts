@@ -188,7 +188,7 @@ export class ProductService {
           );
         dataPrisma.price = data.price;
       }
-      if (data.stock) {
+      if (data.stock != null) {
         if (data.stock < 0)
           throw new BadRequestException(
             getMessage(MessagesHelperKey.STOCK_LESS_THAN_ZERO),
