@@ -166,7 +166,10 @@ export class ProductRepository {
       description: true,
       name: true,
       productMedia: {
-        take: 1,
+        orderBy: {
+          id: 'desc', // Assuming you have a createdAt field to order by
+        },
+        take: 1, // Take only the last item
         select: {
           media: {
             select: {
