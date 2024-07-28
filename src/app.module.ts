@@ -20,6 +20,7 @@ import { CartModule } from './modules/cart/cart.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { DeliveryModule } from './modules/delivery/delivery.module';
 import { EmailModule } from './modules/email/email.module';
+import { HealthModule } from './modules/health/health.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { ProductModule } from './modules/product/product.module';
 import { UserModule } from './modules/user/user.module';
@@ -53,6 +54,7 @@ import { UserModule } from './modules/user/user.module';
     }),
     AuthModule,
     PrismaModule,
+    HealthModule,
     UserModule,
     EmailModule,
     CategoriesModule,

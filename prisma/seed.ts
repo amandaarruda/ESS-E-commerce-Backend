@@ -165,6 +165,40 @@ const seedUser = async (prisma: PrismaClient): Promise<void> => {
   //
 };
 
+const seedCustomer = async (prisma: PrismaClient): Promise<void> => {
+  console.log('Seeding customer');
+
+  const alreadyHasCustomer =
+    (await prisma.user.count({
+      where: {
+        role: RoleEnum.CUSTOMER,
+      },
+    })) > 0;
+
+  if (!alreadyHasCustomer) {
+    console.log('Creating customer user');
+
+    await prisma.user.create({
+      data: {
+        email: 'teste@gmail.com',
+        name: 'Customer User',
+        Media: {
+          create: {
+            url: 'https://example.com/image.jpg',
+          },
+        },
+        password: await bcrypt.hash('@Teste123', 10),
+        status: StatusEnum.ACTIVE,
+        recoveryPasswordToken: null,
+        refreshToken: null,
+        deletedAt: null,
+        role: RoleEnum.CUSTOMER,
+      },
+    });
+  }
+};
+
 (async () => {
   await seedUser(prisma);
+  await seedCustomer(prisma);
 })();
