@@ -4,6 +4,7 @@ import * as bcrypt from 'bcrypt';
 export const ADMIN_EMAIL = 'admin@gmail.com';
 export const ADMIN_PASSWORD = 'admin';
 
+export const TEST_USER_NAME = 'Teste';
 export const TEST_USER_EMAIL = 'teste@gmail.com';
 export const TEST_USER_PASSWORD = '@Teste123';
 
@@ -70,14 +71,14 @@ const seedCustomer = async (prisma: PrismaClient): Promise<void> => {
 
     await prisma.user.create({
       data: {
-        email: 'teste@gmail.com',
-        name: 'Teste',
+        email: TEST_USER_EMAIL,
+        name: TEST_USER_NAME,
         Media: {
           create: {
             url: 'https://example.com/image.jpg',
           },
         },
-        password: await bcrypt.hash('@Teste123', 10),
+        password: await bcrypt.hash(TEST_USER_PASSWORD, 10),
         status: StatusEnum.ACTIVE,
         recoveryPasswordToken: null,
         refreshToken: null,
