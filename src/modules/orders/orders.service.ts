@@ -1,5 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { OrderStatus } from '@prisma/client';
+import { OperationCanceledException } from 'typescript';
 
 import { PrismaService } from '../../database/prisma/prisma.service';
 import { EmailService } from '../email/email.service';
@@ -37,5 +38,31 @@ export class OrdersService {
     await this.orderRepository.cancelOrder(id);
 
     return id;
+  }
+
+  async addProductOrder(orderId: number, productId: number, quantity: number) {
+    if (!orderId || !productId) {
+      throw new BadRequestException('Informações não suficientes');
+    }
+    const existingRelationship = this.prisma.orderProduct.findMany({
+      where: {
+        productId: productId,
+        orderId: orderId,
+      },
+    });
+
+    if ((await existingRelationship).length > 0) {
+      throw new BadRequestException('Relação já existente');
+    }
+
+    return this.orderRepository.addProduct(orderId, productId, quantity);
+  }
+
+  async getOrderProducts(orderId: number) {
+    if (!orderId) {
+      throw new BadRequestException('Informações não suficientes');
+    }
+
+    return this.orderRepository.getProducts(orderId);
   }
 }

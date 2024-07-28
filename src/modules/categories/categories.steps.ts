@@ -49,6 +49,10 @@ defineFeature(feature, test => {
     categoriesRepositoryMock = module.get(CategoriesRepository);
   });
 
+  beforeEach(async () => {
+    jest.clearAllMocks();
+  });
+
   test('Adicionar categoria', ({ given, when, then }) => {
     let result: CategoryEntity;
     let categoryName;
@@ -282,13 +286,24 @@ defineFeature(feature, test => {
     );
   });
 
-  test('Atualizar categoria', ({ given, when, then }) => {
+  test('Atualizar nome da categoria', ({ given, when, then }) => {
     given(
       /^A categoria de ID "([^"]*)", nome "([^"]*)" e imagem "([^"]*)" existe no repositório de categorias$/,
       async (id, name, image) => {
-        categoriesRepositoryMock.exists.mockResolvedValue(
-          Promise.resolve(true),
-        );
+        const category: CategoryEntity = { 
+          id, 
+          name,
+          mediaId: 1,
+          Media: { 
+            id: 1,
+            url: image 
+          },
+          createdAt: null,
+          updatedAt: null,
+          deletedAt: null,
+        };
+        categoriesRepositoryMock.getById.mockResolvedValue(Promise.resolve(category));
+        categoriesRepositoryMock.exists.mockResolvedValue(Promise.resolve(false));
       },
     );
 
@@ -317,6 +332,109 @@ defineFeature(feature, test => {
             }),
           }),
         );
+      },
+    );
+  });
+
+  test('Atualizar imagem da categoria', ({ given, when, then }) => {
+    given(
+      /^A categoria de ID "([^"]*)", nome "([^"]*)" e imagem "([^"]*)" existe no repositório de categorias$/,
+      async (id, name, image) => {
+        const category: CategoryEntity = { 
+          id, 
+          name,
+          mediaId: 1,
+          Media: { 
+            id: 1,
+            url: image 
+          },
+          createdAt: null,
+          updatedAt: null,
+          deletedAt: null,
+        };
+        categoriesRepositoryMock.getById.mockResolvedValue(Promise.resolve(category));
+        categoriesRepositoryMock.exists.mockResolvedValue(Promise.resolve(true));
+      },
+    );
+
+    when(
+      /^Eu chamo o método "updateCategory" do "CategoriesService" com o ID "([^"]*)", nome "([^"]*)" e imagem "([^"]*)"$/,
+      async (id, name, image) => {
+        await categoriesService.updateCategory({
+          id: parseInt(id, 10),
+          name: name,
+          imageUrl: image,
+        });
+      },
+    );
+
+    then(
+      /^A categoria de ID "([^"]*)" agora possui nome "([^"]*)" e imagem "([^"]*)"$/,
+      async (id, name, image) => {
+        expect(categoriesRepositoryMock.update).toHaveBeenCalledWith(
+          parseInt(id, 10),
+          expect.objectContaining({
+            name,
+            Media: expect.objectContaining({
+              update: expect.objectContaining({
+                url: image,
+              }),
+            }),
+          }),
+        );
+      },
+    );
+  });
+
+  test('Atualizar nome da categoria com um nome já existente', ({ given, when, then }) => {
+    let updateCategoryError;
+
+    given(
+      /^A categoria de ID "([^"]*)", nome "([^"]*)" e imagem "([^"]*)" existe no repositório de categorias$/,
+      async (id, name, image) => {
+        const category: CategoryEntity = { 
+          id, 
+          name,
+          mediaId: 1,
+          Media: { 
+            id: 1,
+            url: image 
+          },
+          createdAt: null,
+          updatedAt: null,
+          deletedAt: null,
+        };
+        categoriesRepositoryMock.getById.mockResolvedValue(Promise.resolve(category));
+      },
+    );
+
+    given(
+      /^A categoria de nome "([^"]*)" existe no repositório de categorias$/,
+      async (name) => {
+        categoriesRepositoryMock.exists.mockResolvedValue(Promise.resolve(true));
+      },
+    );
+
+    when(
+      /^Eu chamo o método "updateCategory" do "CategoriesService" com o ID "([^"]*)", nome "([^"]*)" e imagem "([^"]*)"$/,
+      async (id, name, image) => {
+        try {
+          await categoriesService.updateCategory({
+            id: parseInt(id, 10),
+            name: name,
+            imageUrl: image,
+          });
+        } catch (err) {
+          updateCategoryError = err
+        }
+      },
+    );
+
+    then(
+      /^Um erro de conflito é retornado$/,
+      async () => {
+        expect(updateCategoryError instanceof ConflictException)
+        expect(categoriesRepositoryMock.update).not.toHaveBeenCalled()
       },
     );
   });
