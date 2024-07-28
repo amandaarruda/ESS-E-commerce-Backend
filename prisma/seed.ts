@@ -53,116 +53,128 @@ const seedUser = async (prisma: PrismaClient): Promise<void> => {
       },
     });
   }
+};
 
-  // Utils Carrinho & Histórico de Pedidos
-  console.log('Seeding Test User');
+const seedCustomer = async (prisma: PrismaClient): Promise<void> => {
+  console.log('Seeding Test Customer');
 
-  await prisma.user.create({
-    data: {
-      email: TEST_USER_EMAIL,
-      name: 'Teste',
-      Media: {
-        create: {
-          url: 'https://example.com/image.jpg',
-        },
+  const alreadyHasCustomer =
+    (await prisma.user.count({
+      where: {
+        role: RoleEnum.CUSTOMER,
       },
-      password: await bcrypt.hash(TEST_USER_PASSWORD, 10),
-      status: StatusEnum.ACTIVE,
-      recoveryPasswordToken: null,
-      refreshToken: null,
-      deletedAt: null,
-      role: RoleEnum.CUSTOMER,
-    },
-  });
+    })) > 0;
 
-  const TestUser = await prisma.user.findFirst({
-    where: {
-      name: 'Teste',
-    },
-  });
+  if (!alreadyHasCustomer) {
+    console.log('Creating customer user');
 
-  console.log('Seeding Tênis category');
+    await prisma.user.create({
+      data: {
+        email: 'teste@gmail.com',
+        name: 'Teste',
+        Media: {
+          create: {
+            url: 'https://example.com/image.jpg',
+          },
+        },
+        password: await bcrypt.hash('@Teste123', 10),
+        status: StatusEnum.ACTIVE,
+        recoveryPasswordToken: null,
+        refreshToken: null,
+        deletedAt: null,
+        role: RoleEnum.CUSTOMER,
+      },
+    });
 
-  await prisma.category.create({
-    data: {
-      name: 'Tênis',
-    },
-  });
+    // Utils Carrinho & Histórico de Pedidos
 
-  const TenisCategory = await prisma.category.findUnique({
-    where: {
-      name: 'Tênis',
-    },
-  });
+    const TestUser = await prisma.user.findFirst({
+      where: {
+        name: 'Teste',
+      },
+    });
 
-  console.log('Seeding Produto A product');
+    console.log('Seeding Tênis category');
 
-  await prisma.product.create({
-    data: {
-      name: 'Produto A',
-      price: 50.5,
-      stock: 50,
-      categoryId: TenisCategory.id,
-      description: 'Produto A description',
-    },
-  });
+    await prisma.category.create({
+      data: {
+        name: 'Tênis',
+      },
+    });
 
-  const newProduct = await prisma.product.findFirst({
-    where: {
-      name: 'Produto A',
-    },
-  });
+    const TenisCategory = await prisma.category.findUnique({
+      where: {
+        name: 'Tênis',
+      },
+    });
 
-  console.log('Seeding Test User cart');
+    console.log('Seeding Produto A product');
 
-  await prisma.cart.create({
-    data: {
-      userId: TestUser.id,
-      locked: false,
-    },
-  });
+    await prisma.product.create({
+      data: {
+        name: 'Produto A',
+        price: 50.5,
+        stock: 50,
+        categoryId: TenisCategory.id,
+        description: 'Produto A description',
+      },
+    });
 
-  const newCart = await prisma.cart.findUnique({
-    where: {
-      userId: TestUser.id,
-    },
-  });
+    const newProduct = await prisma.product.findFirst({
+      where: {
+        name: 'Produto A',
+      },
+    });
 
-  await prisma.cartProduct.create({
-    data: {
-      cartId: newCart.id,
-      productId: newProduct.id,
-      userId: TestUser.id,
-      quantity: 1,
-    },
-  });
+    console.log('Seeding Test User cart');
 
-  console.log('Seeding Test User sample order');
+    await prisma.cart.create({
+      data: {
+        userId: TestUser.id,
+        locked: false,
+      },
+    });
 
-  await prisma.order.create({
-    data: {
-      code: '#testOrder#123',
-      price: 50.5,
-      userId: TestUser.id,
-      estimatedDelivery: new Date('2024-08-01T00:00:00Z'), // Data de entrega estimada
-    },
-  });
+    const newCart = await prisma.cart.findUnique({
+      where: {
+        userId: TestUser.id,
+      },
+    });
 
-  const newOrder = await prisma.order.findUnique({
-    where: {
-      code: '#testOrder#123',
-    },
-  });
+    await prisma.cartProduct.create({
+      data: {
+        cartId: newCart.id,
+        productId: newProduct.id,
+        userId: TestUser.id,
+        quantity: 1,
+      },
+    });
 
-  await prisma.orderProduct.create({
-    data: {
-      orderId: newOrder.id,
-      productId: newProduct.id,
-      quantity: 1,
-    },
-  });
+    console.log('Seeding Test User sample order');
 
-  //
+    await prisma.order.create({
+      data: {
+        code: '#testOrder#123',
+        price: 50.5,
+        userId: TestUser.id,
+        estimatedDelivery: new Date('2024-08-01T00:00:00Z'), // Data de entrega estimada
+      },
+    });
+
+    const newOrder = await prisma.order.findUnique({
+      where: {
+        code: '#testOrder#123',
+      },
+    });
+
+    await prisma.orderProduct.create({
+      data: {
+        orderId: newOrder.id,
+        productId: newProduct.id,
+        quantity: 1,
+      },
+    });
+  }
 };
 
 const seedCustomer = async (prisma: PrismaClient): Promise<void> => {
