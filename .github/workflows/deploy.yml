@@ -48,27 +48,30 @@ jobs:
           docker push $FULL_IMAGE_NAME
           echo "Image published $FULL_IMAGE_NAME"
 
+      - name: Generate container configuration JSON from template
+        run: |
+          sed -e "s|IMAGE_PLACEHOLDER|${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:latest|g" \
+              -e "s|DATABASE_URL_PLACEHOLDER|${{ secrets.DATABASE_URL }}|g" \
+              -e "s|SENDGRID_API_KEY_PLACEHOLDER|${{ secrets.SENDGRID_API_KEY }}|g" \
+              -e "s|EMAIL_OPTIONS_FROM_PLACEHOLDER|${{ secrets.EMAIL_OPTIONS_FROM }}|g" \
+              -e "s|AT_SECRET_PLACEHOLDER|${{ secrets.AT_SECRET }}|g" \
+              -e "s|RT_SECRET_PLACEHOLDER|${{ secrets.RT_SECRET }}|g" \
+              -e "s|TK_EMAIL_SECRET_PLACEHOLDER|${{ secrets.TK_EMAIL_SECRET }}|g" \
+              -e "s|TK_EMAIL_LIFETIME_PLACEHOLDER|${{ vars.TK_EMAIL_LIFETIME }}|g" \
+              -e "s|JWT_ACCESS_LIFETIME_PLACEHOLDER|${{ vars.JWT_ACCESS_LIFETIME }}|g" \
+              -e "s|JWT_REFRESH_LIFETIME_PLACEHOLDER|${{ vars.JWT_REFRESH_LIFETIME }}|g" \
+              -e "s|FRONTEND_RECOVER_PASSWORD_URL_PLACEHOLDER|${{ vars.FRONTEND_RECOVER_PASSWORD_URL }}|g" \
+              -e "s|FRONT_END_URL_PLACEHOLDER|${{ vars.FRONT_END_URL }}|g" \
+              -e "s|API_CORREIOS_URL_PLACEHOLDER|${{ vars.API_CORREIOS_URL }}|g" \
+              -e "s|ENV_PLACEHOLDER|${{ vars.ENV }}|g" \
+              -e "s|APP_PORT_PLACEHOLDER|${{ vars.APP_PORT }}|g" \
+              container-config-template.json > container-config.json
+
       - name: Deploy to Lightsail
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: "us-east-1"
           LIGHTSAIL_SERVICE_NAME: ${{ secrets.LIGHTSAIL_SERVICE_NAME }}
-          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
-          EMAIL_OPTIONS_FROM: ${{ secrets.EMAIL_OPTIONS_FROM }}
-          AT_SECRET: ${{ secrets.AT_SECRET }}
-          RT_SECRET: ${{ secrets.RT_SECRET }}
-          TK_EMAIL_SECRET: ${{ secrets.TK_EMAIL_SECRET }}
-          TK_EMAIL_LIFETIME: ${{ vars.TK_EMAIL_LIFETIME }}
-          JWT_ACCESS_LIFETIME: ${{ vars.JWT_ACCESS_LIFETIME }}
-          JWT_REFRESH_LIFETIME: ${{ vars.JWT_REFRESH_LIFETIME }}
-          FRONTEND_RECOVER_PASSWORD_URL: ${{ vars.FRONTEND_RECOVER_PASSWORD_URL }}
-          FRONT_END_URL: ${{ vars.FRONT_END_URL }}
-          API_CORREIOS_URL: ${{ vars.API_CORREIOS_URL }}
-          ENV: ${{ vars.ENV }}
-          IMAGE_TAG: ${{ vars.IMAGE_TAG }}
-          APP_PORT: ${{ vars.APP_PORT }}
         run: |
-          aws lightsail update-container-service --service-name $LIGHTSAIL_SERVICE_NAME --containers serviceContainer={\"image\":\"$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG\",\"command\":[\"npm\",\"run\",\"prisma:start:deploy\"],\"environment\":{\"DATABASE_URL\":\"${DATABASE_URL}\",\"SENDGRID_API_KEY\":\"${SENDGRID_API_KEY}\",\"EMAIL_OPTIONS_FROM\":\"${EMAIL_OPTIONS_FROM}\",\"AT_SECRET\":\"${AT_SECRET}\",\"RT_SECRET\":\"${RT_SECRET}\",\"TK_EMAIL_SECRET\":\"${TK_EMAIL_SECRET}\",\"TK_EMAIL_LIFETIME\":\"${TK_EMAIL_LIFETIME}\",\"JWT_ACCESS_LIFETIME\":\"${JWT_ACCESS_LIFETIME}\",\"JWT_REFRESH_LIFETIME\":\"${JWT_REFRESH_LIFETIME}\",\"FRONTEND_RECOVER_PASSWORD_URL\":\"${FRONTEND_RECOVER_PASSWORD_URL}\",\"FRONT_END_URL\":\"${FRONT_END_URL}\",\"API_CORREIOS_URL\":\"${API_CORREIOS_URL}\",\"ENV\":\"${ENV}\",\"APP_PORT\":\"${APP_PORT}\"}} --public-endpoint containerName=serviceContainer,containerPort=3333,healthCheckPath=\"/api/health\"
+          aws lightsail update-container-service --service-name $LIGHTSAIL_SERVICE_NAME --containers file://container-config.json --public-endpoint containerName=serviceContainer,containerPort=3333,healthCheckPath="/api/health"
