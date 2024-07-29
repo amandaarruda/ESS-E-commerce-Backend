@@ -1,17 +1,18 @@
-FROM node:20
+FROM node:20-alpine
 
 WORKDIR /app
 
-COPY package*.json .
+COPY dist/ ./dist
+COPY package.json ./
+COPY tsconfig.json ./
+COPY prisma/ ./prisma
+
+# Templates HTML
+COPY src/utils/templates/recover-password.html /app/src/utils/templates/
+COPY src/utils/templates/registration.html /app/src/utils/templates/
 
 RUN npm install
-RUN npm i -g @nestjs/cli
 
-COPY prisma prisma
-RUN npx prisma generate
+EXPOSE 3333
 
-COPY . .
-
-EXPOSE 8080
-
-CMD /bin/sh -c "npm run prisma:migrate && npm run prisma:seed && npm run start"
+CMD ["npm", "run", "prisma:start:deploy"]

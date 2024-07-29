@@ -13,6 +13,7 @@
     "start:prod": "node dist/src/main",
     "pre-commit-husky": "lint-staged",
     "test:all": "jest",
+    "prisma:start:deploy": "prisma migrate deploy && prisma db seed && node dist/src/main.js",
     "prisma:migrate": "prisma migrate deploy",
     "prisma:seed": "prisma db seed",
     "start": "nest start",
