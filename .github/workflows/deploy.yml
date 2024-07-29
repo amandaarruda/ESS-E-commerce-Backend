@@ -1,0 +1,55 @@
+name: Deploy to Lightsail
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push Docker image to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+          IMAGE_TAG: latest
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Deploy to Lightsail
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          LIGHTSAIL_SERVICE_NAME: ${{ secrets.LIGHTSAIL_SERVICE_NAME }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          EMAIL_OPTIONS_FROM: ${{ secrets.EMAIL_OPTIONS_FROM }}
+          AT_SECRET: ${{ secrets.AT_SECRET }}
+          RT_SECRET: ${{ secrets.RT_SECRET }}
+          TK_EMAIL_SECRET: ${{ secrets.TK_EMAIL_SECRET }}
+          TK_EMAIL_LIFETIME: ${{ vars.TK_EMAIL_LIFETIME }}
+          JWT_ACCESS_LIFETIME: ${{ vars.JWT_ACCESS_LIFETIME }}
+          JWT_REFRESH_LIFETIME: ${{ vars.JWT_REFRESH_LIFETIME }}
+          FRONTEND_RECOVER_PASSWORD_URL: ${{ vars.FRONTEND_RECOVER_PASSWORD_URL }}
+          FRONT_END_URL: ${{ vars.FRONT_END_URL }}
+          API_CORREIOS_URL: ${{ vars.API_CORREIOS_URL }}
+          ENV: ${{ vars.ENV }}
+          IMAGE_TAG: ${{ vars.IMAGE_TAG }}
+          APP_PORT: ${{ vars.APP_PORT }}
+        run: |
+          aws lightsail update-container-service --service-name $LIGHTSAIL_SERVICE_NAME --containers serviceContainer={image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG,command=["npm","run","prisma:start:deploy"],environment={"DATABASE_URL":"${DATABASE_URL}","SENDGRID_API_KEY":"${SENDGRID_API_KEY}","EMAIL_OPTIONS_FROM":"${EMAIL_OPTIONS_FROM}","AT_SECRET":"${AT_SECRET}","RT_SECRET":"${RT_SECRET}","TK_EMAIL_SECRET":"${TK_EMAIL_SECRET}","TK_EMAIL_LIFETIME":"${TK_EMAIL_LIFETIME}","JWT_ACCESS_LIFETIME":"${JWT_ACCESS_LIFETIME}","JWT_REFRESH_LIFETIME":"${JWT_REFRESH_LIFETIME}","FRONTEND_RECOVER_PASSWORD_URL":"${FRONTEND_RECOVER_PASSWORD_URL}","FRONT_END_URL":"${FRONT_END_URL}","API_CORREIOS_URL":"${API_CORREIOS_URL}","ENV":"${ENV}","APP_PORT":"${APP_PORT}"}} --public-endpoint containerName=serviceContainer,containerPort=3333,healthCheckPath="/api/health"
