@@ -4,6 +4,10 @@
 ### Flow of validation
 ![diagram-export-28-07-2024-22_08_59](https://github.com/user-attachments/assets/0aa807fc-4d69-48b5-ac7d-4c12f5e4e501)
 
+### Production 
+
+URL: https://backend-nestjs.vctljts147ohu.us-east-1.cs.amazonlightsail.com/api/health
+
 ### Technologies Used
 - **Node.js**: Version 20.11.0
 - **NestJS**: A progressive Node.js framework for building efficient and scalable server-side applications.
