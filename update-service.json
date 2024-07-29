@@ -1,44 +1,43 @@
 {
-  "serviceName": "LIGHTSAIL_SERVICE_NAME",
-  "containers": {
-    "serviceContainer": {
-      "image": "IMAGEM_DO_CONTAINER",
-      "command": ["npm", "run", "prisma:start:deploy"],
-      "environment": {
-        "AT_SECRET": "AT_SECRET",
-        "AWS_ACCESS_KEY_ID": "AWS_ACCESS_KEY_ID",
-        "AWS_REGION": "AWS_REGION",
-        "AWS_SECRET_ACCESS_KEY": "AWS_SECRET_ACCESS_KEY",
-        "DATABASE_URL": "DATABASE_URL",
-        "ECR_REPOSITORY": "ECR_REPOSITORY",
-        "EMAIL_OPTIONS_FROM": "EMAIL_OPTIONS_FROM",
-        "RT_SECRET": "RT_SECRET",
-        "SENDGRID_API_KEY": "SENDGRID_API_KEY",
-        "TK_EMAIL_SECRET": "TK_EMAIL_SECRET",
-        "API_CORREIOS_URL": "API_CORREIOS_URL",
-        "APP_PORT": "APP_PORT",
-        "ENV": "ENV",
-        "FRONTEND_RECOVER_PASSWORD_URL": "FRONTEND_RECOVER_PASSWORD_URL",
-        "FRONT_END_URL": "FRONT_END_URL",
-        "IMAGE_TAG": "IMAGE_TAG",
-        "JWT_ACCESS_LIFETIME": "JWT_ACCESS_LIFETIME",
-        "JWT_REFRESH_LIFETIME": "JWT_REFRESH_LIFETIME",
-        "TK_EMAIL_LIFETIME": "TK_EMAIL_LIFETIME"
-      },
-      "ports": {
-        "80": "HTTP"
+  "service": {
+    "name": "LIGHTSAIL_SERVICE_NAME",
+    "containers": {
+      "IMAGEM_DO_CONTAINER": {
+        "image": "IMAGE_PLACEHOLDER",
+        "command": ["npm", "run", "prisma:start:deploy"],
+        "environment": {
+          "AT_SECRET": "AT_SECRET",
+          "AWS_ACCESS_KEY_ID": "AWS_ACCESS_KEY_ID",
+          "AWS_REGION": "AWS_REGION",
+          "AWS_SECRET_ACCESS_KEY": "AWS_SECRET_ACCESS_KEY",
+          "DATABASE_URL": "DATABASE_URL",
+          "ECR_REPOSITORY": "ECR_REPOSITORY",
+          "EMAIL_OPTIONS_FROM": "EMAIL_OPTIONS_FROM",
+          "RT_SECRET": "RT_SECRET",
+          "SENDGRID_API_KEY": "SENDGRID_API_KEY",
+          "TK_EMAIL_SECRET": "TK_EMAIL_SECRET",
+          "API_CORREIOS_URL": "API_CORREIOS_URL",
+          "APP_PORT": "APP_PORT",
+          "ENV": "ENV",
+          "FRONTEND_RECOVER_PASSWORD_URL": "FRONTEND_RECOVER_PASSWORD_URL",
+          "FRONT_END_URL": "FRONT_END_URL",
+          "IMAGE_TAG": "IMAGE_TAG",
+          "JWT_ACCESS_LIFETIME": "JWT_ACCESS_LIFETIME",
+          "JWT_REFRESH_LIFETIME": "JWT_REFRESH_LIFETIME",
+          "TK_EMAIL_LIFETIME": "TK_EMAIL_LIFETIME"
+        }
       }
-    }
-  },
-  "publicEndpoint": {
-    "containerName": "serviceContainer",
-    "containerPort": 3333,
-    "healthCheck": {
-      "healthyThreshold": 2,
-      "unhealthyThreshold": 2,
-      "timeoutSeconds": 2,
-      "intervalSeconds": 5,
-      "path": "/api/health"
+    },
+    "publicEndpoint": {
+      "containerName": "IMAGEM_DO_CONTAINER",
+      "containerPort": 80,
+      "healthCheck": {
+        "healthyThreshold": 2,
+        "unhealthyThreshold": 2,
+        "timeoutSeconds": 2,
+        "intervalSeconds": 5,
+        "path": "/api/health"
+      }
     }
   }
 }
