@@ -52,6 +52,24 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
           IMAGE_TAG: ${{ vars.IMAGE_TAG }}
+          AT_SECRET: ${{ secrets.AT_SECRET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          EMAIL_OPTIONS_FROM: ${{ secrets.EMAIL_OPTIONS_FROM }}
+          LIGHTSAIL_SERVICE_NAME: ${{ secrets.LIGHTSAIL_SERVICE_NAME }}
+          RT_SECRET: ${{ secrets.RT_SECRET }}
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          TK_EMAIL_SECRET: ${{ secrets.TK_EMAIL_SECRET }}
+          API_CORREIOS_URL: ${{ vars.API_CORREIOS_URL }}
+          APP_PORT: ${{ vars.APP_PORT }}
+          ENV: ${{ vars.ENV }}
+          FRONTEND_RECOVER_PASSWORD_URL: ${{ vars.FRONTEND_RECOVER_PASSWORD_URL }}
+          FRONT_END_URL: ${{ vars.FRONT_END_URL }}
+          JWT_ACCESS_LIFETIME: ${{ vars.JWT_ACCESS_LIFETIME }}
+          JWT_REFRESH_LIFETIME: ${{ vars.JWT_REFRESH_LIFETIME }}
+          TK_EMAIL_LIFETIME: ${{ vars.TK_EMAIL_LIFETIME }}
         run: |
           export CONFIG_FILE=update-service.json
           export FULL_IMAGE_NAME=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
