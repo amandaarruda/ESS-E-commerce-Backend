@@ -43,9 +43,8 @@ jobs:
           IMAGE_TAG: ${{ vars.IMAGE_TAG }}
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          FULL_IMAGE_NAME=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          docker push $FULL_IMAGE_NAME
-          echo "Image published $FULL_IMAGE_NAME"
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "Image published $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
       - name: Generate container configuration JSON from template
         env:
@@ -75,6 +74,7 @@ jobs:
           export FULL_IMAGE_NAME=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           chmod +x replace-vars.sh
           ./replace-vars.sh
+          cat $CONFIG_FILE
 
       - name: Update Lightsail container service
         env:
