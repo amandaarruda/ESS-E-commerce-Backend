@@ -3,7 +3,6 @@
   "containers": {
     "IMAGEM_DO_CONTAINER": {
       "image": "IMAGEM_DO_CONTAINER",
-      "command": ["npm", "run", "prisma:start:deploy"],
       "environment": {
         "AT_SECRET": "ENV_AT_SECRET",
         "DATABASE_URL": "ENV_DATABASE_URL",
