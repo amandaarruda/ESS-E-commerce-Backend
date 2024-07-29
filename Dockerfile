@@ -13,6 +13,6 @@ COPY src/utils/templates/registration.html /app/src/utils/templates/
 
 RUN npm install
 
-EXPOSE 3333
+EXPOSE 80
 
 CMD ["npm", "run", "prisma:start:deploy"]

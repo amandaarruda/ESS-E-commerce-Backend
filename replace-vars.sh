@@ -23,6 +23,8 @@ export JWT_ACCESS_LIFETIME=${{ vars.JWT_ACCESS_LIFETIME }}
 export JWT_REFRESH_LIFETIME=${{ vars.JWT_REFRESH_LIFETIME }}
 export TK_EMAIL_LIFETIME=${{ vars.TK_EMAIL_LIFETIME }}
 
+export IMAGEM_DO_CONTAINER=$FULL_IMAGE_NAME
+
 escape_sed() {
     echo "$1" | sed -e 's/[\/&]/\\&/g'
 }
@@ -48,6 +50,7 @@ KEYS=(
     "JWT_ACCESS_LIFETIME"
     "JWT_REFRESH_LIFETIME"
     "TK_EMAIL_LIFETIME"
+    "IMAGEM_DO_CONTAINER"
 )
 
 for KEY in "${KEYS[@]}"; do
