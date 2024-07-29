@@ -58,10 +58,10 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           EMAIL_OPTIONS_FROM: ${{ secrets.EMAIL_OPTIONS_FROM }}
-          LIGHTSAIL_SERVICE_NAME: ${{ secrets.LIGHTSAIL_SERVICE_NAME }}
           RT_SECRET: ${{ secrets.RT_SECRET }}
           SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
           TK_EMAIL_SECRET: ${{ secrets.TK_EMAIL_SECRET }}
+          LIGHTSAIL_SERVICE_NAME: ${{ vars.LIGHTSAIL_SERVICE_NAME }}
           API_CORREIOS_URL: ${{ vars.API_CORREIOS_URL }}
           APP_PORT: ${{ vars.APP_PORT }}
           ENV: ${{ vars.ENV }}
