@@ -60,4 +60,4 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
           LIGHTSAIL_SERVICE_NAME: ${{ secrets.LIGHTSAIL_SERVICE_NAME }}
         run: |
-          aws lightsail create-container-service-deployment --service-name $LIGHTSAIL_SERVICE_NAME --containers file://$CONFIG_FILE
+          aws lightsail create-container-service-deployment --service-name $LIGHTSAIL_SERVICE_NAME --containers file://update-service.json
