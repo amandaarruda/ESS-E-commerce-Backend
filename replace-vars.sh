@@ -52,7 +52,6 @@ KEYS=(
 
 for KEY in "${KEYS[@]}"; do
     VALUE=$(escape_sed "${!KEY}")
-    echo "Substituindo $KEY por $VALUE no $CONFIG_FILE"
     
     awk -v key="$KEY" -v value="$VALUE" '{ gsub(key, value); print }' $CONFIG_FILE > temp.json && mv temp.json $CONFIG_FILE
 done
