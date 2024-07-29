@@ -60,7 +60,7 @@ jobs:
           RT_SECRET: ${{ secrets.RT_SECRET }}
           SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
           TK_EMAIL_SECRET: ${{ secrets.TK_EMAIL_SECRET }}
-          LIGHTSAIL_SERVICE_NAME: ${{ vars.LIGHTSAIL_SERVICE_NAME }}
+          LIGHTSAIL_SERVICE_NAME: ${{ secrets.LIGHTSAIL_SERVICE_NAME }}
           API_CORREIOS_URL: ${{ vars.API_CORREIOS_URL }}
           APP_PORT: ${{ vars.APP_PORT }}
           ENV: ${{ vars.ENV }}
