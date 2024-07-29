@@ -48,22 +48,22 @@ jobs:
 
       - name: Generate container configuration JSON from template
         run: |
-          sed -e "s|IMAGE_PLACEHOLDER|${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:latest|g" \
-              -e "s|DATABASE_URL_PLACEHOLDER|${{ secrets.DATABASE_URL }}|g" \
-              -e "s|SENDGRID_API_KEY_PLACEHOLDER|${{ secrets.SENDGRID_API_KEY }}|g" \
-              -e "s|EMAIL_OPTIONS_FROM_PLACEHOLDER|${{ secrets.EMAIL_OPTIONS_FROM }}|g" \
-              -e "s|AT_SECRET_PLACEHOLDER|${{ secrets.AT_SECRET }}|g" \
-              -e "s|RT_SECRET_PLACEHOLDER|${{ secrets.RT_SECRET }}|g" \
-              -e "s|TK_EMAIL_SECRET_PLACEHOLDER|${{ secrets.TK_EMAIL_SECRET }}|g" \
-              -e "s|TK_EMAIL_LIFETIME_PLACEHOLDER|${{ vars.TK_EMAIL_LIFETIME }}|g" \
-              -e "s|JWT_ACCESS_LIFETIME_PLACEHOLDER|${{ vars.JWT_ACCESS_LIFETIME }}|g" \
-              -e "s|JWT_REFRESH_LIFETIME_PLACEHOLDER|${{ vars.JWT_REFRESH_LIFETIME }}|g" \
-              -e "s|FRONTEND_RECOVER_PASSWORD_URL_PLACEHOLDER|${{ vars.FRONTEND_RECOVER_PASSWORD_URL }}|g" \
-              -e "s|FRONT_END_URL_PLACEHOLDER|${{ vars.FRONT_END_URL }}|g" \
-              -e "s|API_CORREIOS_URL_PLACEHOLDER|${{ vars.API_CORREIOS_URL }}|g" \
-              -e "s|ENV_PLACEHOLDER|${{ vars.ENV }}|g" \
-              -e "s|APP_PORT_PLACEHOLDER|${{ vars.APP_PORT }}|g" \
-              container-config-template.json > container-config.json
+          sed -e "s|IMAGE_PLACEHOLDER|${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:latest|g" container-config-template.json > container-config-temp.json
+          sed -e "s|DATABASE_URL_PLACEHOLDER|${{ secrets.DATABASE_URL }}|g" container-config-temp.json > container-config-temp2.json
+          sed -e "s|SENDGRID_API_KEY_PLACEHOLDER|${{ secrets.SENDGRID_API_KEY }}|g" container-config-temp2.json > container-config-temp3.json
+          sed -e "s|EMAIL_OPTIONS_FROM_PLACEHOLDER|${{ secrets.EMAIL_OPTIONS_FROM }}|g" container-config-temp3.json > container-config-temp4.json
+          sed -e "s|AT_SECRET_PLACEHOLDER|${{ secrets.AT_SECRET }}|g" container-config-temp4.json > container-config-temp5.json
+          sed -e "s|RT_SECRET_PLACEHOLDER|${{ secrets.RT_SECRET }}|g" container-config-temp5.json > container-config-temp6.json
+          sed -e "s|TK_EMAIL_SECRET_PLACEHOLDER|${{ secrets.TK_EMAIL_SECRET }}|g" container-config-temp6.json > container-config-temp7.json
+          sed -e "s|TK_EMAIL_LIFETIME_PLACEHOLDER|${{ vars.TK_EMAIL_LIFETIME }}|g" container-config-temp7.json > container-config-temp8.json
+          sed -e "s|JWT_ACCESS_LIFETIME_PLACEHOLDER|${{ vars.JWT_ACCESS_LIFETIME }}|g" container-config-temp8.json > container-config-temp9.json
+          sed -e "s|JWT_REFRESH_LIFETIME_PLACEHOLDER|${{ vars.JWT_REFRESH_LIFETIME }}|g" container-config-temp9.json > container-config-temp10.json
+          sed -e "s|FRONTEND_RECOVER_PASSWORD_URL_PLACEHOLDER|${{ vars.FRONTEND_RECOVER_PASSWORD_URL }}|g" container-config-temp10.json > container-config-temp11.json
+          sed -e "s|FRONT_END_URL_PLACEHOLDER|${{ vars.FRONT_END_URL }}|g" container-config-temp11.json > container-config-temp12.json
+          sed -e "s|API_CORREIOS_URL_PLACEHOLDER|${{ vars.API_CORREIOS_URL }}|g" container-config-temp12.json > container-config-temp13.json
+          sed -e "s|ENV_PLACEHOLDER|${{ vars.ENV }}|g" container-config-temp13.json > container-config-temp14.json
+          sed -e "s|APP_PORT_PLACEHOLDER|${{ vars.APP_PORT }}|g" container-config-temp14.json > container-config.json
+          rm container-config-temp*.json
 
       - name: Deploy to Lightsail
         env:
