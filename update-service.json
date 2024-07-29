@@ -1,7 +1,7 @@
 {
   "serviceName": "LIGHTSAIL_SERVICE_NAME",
   "containers": {
-    "IMAGEM_DO_CONTAINER": {
+    "NOME_CONTAINER": {
       "image": "IMAGEM_DO_CONTAINER",
       "environment": {
         "AT_SECRET": "ENV_AT_SECRET",
@@ -25,7 +25,7 @@
     }
   },
   "publicEndpoint": {
-    "containerName": "IMAGEM_DO_CONTAINER",
+    "containerName": "NOME_CONTAINER",
     "containerPort": 3333,
     "healthCheck": {
       "healthyThreshold": 2,

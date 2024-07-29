@@ -24,6 +24,7 @@ export ENV_TK_EMAIL_LIFETIME=${TK_EMAIL_LIFETIME}
 
 export LIGHTSAIL_SERVICE_NAME=${LIGHTSAIL_SERVICE_NAME}
 export IMAGEM_DO_CONTAINER=${FULL_IMAGE_NAME}
+export NOME_CONTAINER=ess-lightsail
 
 escape_sed() {
     echo "$1" | sed -e 's/[\/&]/\\&/g'
