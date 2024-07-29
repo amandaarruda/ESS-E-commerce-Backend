@@ -24,12 +24,15 @@
         "JWT_ACCESS_LIFETIME": "JWT_ACCESS_LIFETIME",
         "JWT_REFRESH_LIFETIME": "JWT_REFRESH_LIFETIME",
         "TK_EMAIL_LIFETIME": "TK_EMAIL_LIFETIME"
+      },
+      "ports": {
+        "3333": "HTTP"
       }
     }
   },
   "publicEndpoint": {
     "containerName": "IMAGEM_DO_CONTAINER",
-    "containerPort": 80,
+    "containerPort": 3333,
     "healthCheck": {
       "healthyThreshold": 2,
       "unhealthyThreshold": 2,
