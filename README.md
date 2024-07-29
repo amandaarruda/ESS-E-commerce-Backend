@@ -1,3 +1,9 @@
+### Architecture
+![diagram-export-28-07-2024-21_44_35](https://github.com/user-attachments/assets/28e2af4d-d4d8-4eea-9d5d-c370ac2d7536)
+
+### Flow of validation
+![diagram-export-28-07-2024-22_08_59](https://github.com/user-attachments/assets/0aa807fc-4d69-48b5-ac7d-4c12f5e4e501)
+
 ### Technologies Used
 - **Node.js**: Version 20.11.0
 - **NestJS**: A progressive Node.js framework for building efficient and scalable server-side applications.
