@@ -19,9 +19,9 @@ services:
       db:
         condition: service_healthy
     ports:
-      - 8080:8080
+      - 3333:3333
     environment:
-      APP_PORT: 8080
+      APP_PORT: 3333
       DATABASE_URL: postgresql://postgres:postgres@db:5432/database_test
       AT_SECRET: AT_sECRET
       RT_SECRET: RT_sECRET
