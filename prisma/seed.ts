@@ -100,6 +100,11 @@ const seedCustomer = async (prisma: PrismaClient): Promise<void> => {
     await prisma.category.create({
       data: {
         name: 'Tênis',
+        Media: {
+          create: {
+            url: "https://cdn-icons-png.flaticon.com/512/500/500225.png"
+          }
+        }
       },
     });
 
